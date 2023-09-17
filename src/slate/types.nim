@@ -1,6 +1,6 @@
 #:______________________________________________________
 #  *slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-when not defined(cnimble) : include ../../ndk/confy/src/confy/nims
-else                      : include confy/nims
-confy()
+type Lang * = object
+  name *:string
+  pfx  *:string
