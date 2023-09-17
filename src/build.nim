@@ -1,6 +1,6 @@
-#:____________________________________________________
-#  cmin  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
-#:____________________________________________________
+#:______________________________________________________
+#  *slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#:______________________________________________________
 # std dependencies
 import std/os except `/`
 # confy dependencies
@@ -9,6 +9,10 @@ when not defined(nimble):
 else:
   import confy
 
-var tester = Program.new(cfg.srcDir/"cmin.nim", "cmin")
-os.removeFile( cfg.binDir/tester.trg )
-tester.build( @["all"], run=true, force=true )
+var cminGen = Program.new(cfg.srcDir/"slate"/"gen"/"cmin.nim", "cminGen")
+os.removeFile( cfg.binDir/cminGen.trg )
+cminGen.build( @[cminGen.trg.string], run=true, force=true )
+
+var cmin = Program.new(cfg.srcDir/"slate"/"cmin.nim", "cmin")
+os.removeFile( cfg.binDir/cmin.trg )
+cmin.build( @[cmin.trg.string], run=true, force=true )
