@@ -5,7 +5,7 @@
 packageName   = "slate"
 version       = "0.0.0"
 author        = "sOkam"
-description   = "*slate | Translate Nim into Other Langs"
+description   = "*Slate | StoS Compiler for Nim"
 license       = "MIT"
 srcDir        = "src"
 skipFiles     = @["build.nim", "nim.cfg"]
