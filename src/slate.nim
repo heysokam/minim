@@ -1,5 +1,5 @@
 #:______________________________________________________
-#  *slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#  *Slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 import ./slate/types    ; export types    # Slate types
 import ./slate/elements ; export elements # Slate elements
