@@ -30,5 +30,5 @@ echo "\ntreeRepr__________________________________________________"
 echo code.getAST().treeRepr
 echo "\ntoCmin____________________________________________________"
 var res = convert.toCmin(code)
-discard res
+echo res
 
