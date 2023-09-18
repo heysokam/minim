@@ -5,35 +5,45 @@
 import std/strformat
 import std/paths
 # *Slate dependencies
+import ../format
 import ../element/procdef
 # cmin dependencies
 include ./fwdecl
 
+const Tab = "  "
 
 proc report (code :PNode) :void=  debugEcho code.renderTree
 
 # Generator Template
-const ProcDefTmpl    * = "{procdef.getRetT(code)} {procdef.getName(code)} ({cminProcDefGetArgs(code)}) {{ {body} }}"
+const ProcDefTmpl    * = "{procdef.getRetT(code)} {procdef.getName(code)} ({cminProcDefGetArgs(code)}) {{{cminProcDefGetBody(code)}}}"
 const ProcDefArgTmpl * = "{procdef.getArgT(arg.node)} {procdef.getArgName(arg.node)}{sep}"
 
-func cminProcDefGetArgs *(node :PNode) :string=
+proc cminProcDefGetArgs *(node :PNode) :string=
+  ## Returns the code for all arguments of the given ProcDef node.
   assert node.kind == nkProcDef
-  let params = node[procdef.Elem.Params]
+  let params = node[procdef.Elem.Args]
   assert params.kind == nkFormalParams
   for arg in node.args:
-    let sep = if not arg.last: "," else: ""
+    let sep = if not arg.last: ", " else: ""
     result.add( fmt ProcDefArgTmpl )
 
-proc cminProcDef (code :PNode) :string=
+proc cminProcDefGetBody *(node :PNode; ident :int= 1) :string=
+  ## Returns the code for the body of the given ProcDef node.
+  result.add "\n"
+  result.add Cmin(node[procdef.Elem.Body], ident)
+
+proc cminProcDef (code :PNode; ident :int= 0) :string=
   ## TODO : Converts a nkProcDef into the Min C Language
   assert code.kind == nkProcDef
-  var body = ""
   code.report()
   result = fmt ProcDefTmpl
 
+proc cminReturnStmt (code :PNode; ident :int= 1) :string=
+  assert code.kind == nkReturnStmt
+  result.add &"{ident*Tab}return {code[0].strValue};\n"
 
 # TODO
-proc Cmin (code :PNode) :string=
+proc Cmin (code :PNode; ident :int= 0) :string=
   ## Node selector function. Sends the node into the relevant codegen function.
   # Base Cases
   if code == nil: return
@@ -42,7 +52,8 @@ proc Cmin (code :PNode) :string=
   of nkEmpty            : result = cminEmpty(code)
 
   # Process this node
-  of nkProcDef          : result = cminProcDef(code)
+  of nkProcDef          : result = cminProcDef(code, ident)
+  of nkReturnStmt       : assert ident != 0; result = cminReturnStmt(code, ident)
 
   # TODO cases
   of nkIdent            : result = cminIdent(code)
@@ -151,7 +162,6 @@ proc Cmin (code :PNode) :string=
   of nkTryStmt          : result = cminTryStmt(code)
   of nkFinally          : result = cminFinally(code)
   of nkRaiseStmt        : result = cminRaiseStmt(code)
-  of nkReturnStmt       : result = cminReturnStmt(code)
   of nkBreakStmt        : result = cminBreakStmt(code)
   of nkContinueStmt     : result = cminContinueStmt(code)
   of nkBlockStmt        : result = cminBlockStmt(code)
@@ -209,7 +219,7 @@ proc Cmin (code :PNode) :string=
 
   # Recursive Cases
   of nkStmtList:
-    for child in code: result.add Cmin( child )
+    for child in code: result.add Cmin( child, ident )
 
 
 proc toCmin *(code :string|Path) :string=

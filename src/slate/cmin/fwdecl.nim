@@ -4,6 +4,11 @@ template todo (code :PNode) :void=
   raise newException(IOError, &"Interpreting {code.kind} is currently not supported for Min C. Its code is:\n{code.renderTree}\n")
 
 ## Generator Cases for Min C
+# Process
+proc cminProcDef          (code :PNode; ident :int= 0) :string
+proc cminReturnStmt       (code :PNode; ident :int= 1) :string
+
+# TODO
 proc cminNone             (code :PNode) :string=  assert code.kind == nkNone             ; todo(code)  ## TODO : Converts a nkNone into the Min C Language
 proc cminEmpty            (code :PNode) :string=  assert code.kind == nkEmpty            ; todo(code)  ## TODO : Converts a nkEmpty into the Min C Language
 proc cminIdent            (code :PNode) :string=  assert code.kind == nkIdent            ; todo(code)  ## TODO : Converts a nkIdent into the Min C Language
@@ -84,7 +89,6 @@ proc cminFormalParams     (code :PNode) :string=  assert code.kind == nkFormalPa
 proc cminOfInherit        (code :PNode) :string=  assert code.kind == nkOfInherit        ; todo(code)  ## TODO : Converts a nkOfInherit into the Min C Language
 proc cminImportAs         (code :PNode) :string=  assert code.kind == nkImportAs         ; todo(code)  ## TODO : Converts a nkImportAs into the Min C Language
 
-proc cminProcDef          (code :PNode) :string
 proc cminMethodDef        (code :PNode) :string=  assert code.kind == nkMethodDef        ; todo(code)  ## TODO : Converts a nkMethodDef into the Min C Language
 proc cminConverterDef     (code :PNode) :string=  assert code.kind == nkConverterDef     ; todo(code)  ## TODO : Converts a nkConverterDef into the Min C Language
 proc cminMacroDef         (code :PNode) :string=  assert code.kind == nkMacroDef         ; todo(code)  ## TODO : Converts a nkMacroDef into the Min C Language
@@ -115,13 +119,12 @@ proc cminDefer            (code :PNode) :string=  assert code.kind == nkDefer   
 proc cminTryStmt          (code :PNode) :string=  assert code.kind == nkTryStmt          ; todo(code)  ## TODO : Converts a nkTryStmt into the Min C Language
 proc cminFinally          (code :PNode) :string=  assert code.kind == nkFinally          ; todo(code)  ## TODO : Converts a nkFinally into the Min C Language
 proc cminRaiseStmt        (code :PNode) :string=  assert code.kind == nkRaiseStmt        ; todo(code)  ## TODO : Converts a nkRaiseStmt into the Min C Language
-proc cminReturnStmt       (code :PNode) :string=  assert code.kind == nkReturnStmt       ; todo(code)  ## TODO : Converts a nkReturnStmt into the Min C Language
+
 proc cminBreakStmt        (code :PNode) :string=  assert code.kind == nkBreakStmt        ; todo(code)  ## TODO : Converts a nkBreakStmt into the Min C Language
 proc cminContinueStmt     (code :PNode) :string=  assert code.kind == nkContinueStmt     ; todo(code)  ## TODO : Converts a nkContinueStmt into the Min C Language
 proc cminBlockStmt        (code :PNode) :string=  assert code.kind == nkBlockStmt        ; todo(code)  ## TODO : Converts a nkBlockStmt into the Min C Language
 proc cminStaticStmt       (code :PNode) :string=  assert code.kind == nkStaticStmt       ; todo(code)  ## TODO : Converts a nkStaticStmt into the Min C Language
 proc cminDiscardStmt      (code :PNode) :string=  assert code.kind == nkDiscardStmt      ; todo(code)  ## TODO : Converts a nkDiscardStmt into the Min C Language
-proc cminStmtList         (code :PNode) :string=  assert code.kind == nkStmtList         ; todo(code)  ## TODO : Converts a nkStmtList into the Min C Language
 proc cminImportStmt       (code :PNode) :string=  assert code.kind == nkImportStmt       ; todo(code)  ## TODO : Converts a nkImportStmt into the Min C Language
 proc cminImportExceptStmt (code :PNode) :string=  assert code.kind == nkImportExceptStmt ; todo(code)  ## TODO : Converts a nkImportExceptStmt into the Min C Language
 proc cminExportStmt       (code :PNode) :string=  assert code.kind == nkExportStmt       ; todo(code)  ## TODO : Converts a nkExportStmt into the Min C Language
@@ -147,6 +150,7 @@ proc cminStaticTy         (code :PNode) :string=  assert code.kind == nkStaticTy
 proc cminRecList          (code :PNode) :string=  assert code.kind == nkRecList          ; todo(code)  ## TODO : Converts a nkRecList into the Min C Language
 proc cminRecCase          (code :PNode) :string=  assert code.kind == nkRecCase          ; todo(code)  ## TODO : Converts a nkRecCase into the Min C Language
 proc cminRecWhen          (code :PNode) :string=  assert code.kind == nkRecWhen          ; todo(code)  ## TODO : Converts a nkRecWhen into the Min C Language
+
 proc cminRefTy            (code :PNode) :string=  assert code.kind == nkRefTy            ; todo(code)  ## TODO : Converts a nkRefTy into the Min C Language
 proc cminPtrTy            (code :PNode) :string=  assert code.kind == nkPtrTy            ; todo(code)  ## TODO : Converts a nkPtrTy into the Min C Language
 proc cminVarTy            (code :PNode) :string=  assert code.kind == nkVarTy            ; todo(code)  ## TODO : Converts a nkVarTy into the Min C Language
@@ -158,6 +162,7 @@ proc cminIteratorTy       (code :PNode) :string=  assert code.kind == nkIterator
 proc cminSinkAsgn         (code :PNode) :string=  assert code.kind == nkSinkAsgn         ; todo(code)  ## TODO : Converts a nkSinkAsgn into the Min C Language
 proc cminEnumTy           (code :PNode) :string=  assert code.kind == nkEnumTy           ; todo(code)  ## TODO : Converts a nkEnumTy into the Min C Language
 proc cminEnumFieldDef     (code :PNode) :string=  assert code.kind == nkEnumFieldDef     ; todo(code)  ## TODO : Converts a nkEnumFieldDef into the Min C Language
+
 proc cminArgList          (code :PNode) :string=  assert code.kind == nkArgList          ; todo(code)  ## TODO : Converts a nkArgList into the Min C Language
 proc cminPattern          (code :PNode) :string=  assert code.kind == nkPattern          ; todo(code)  ## TODO : Converts a nkPattern into the Min C Language
 proc cminHiddenTryStmt    (code :PNode) :string=  assert code.kind == nkHiddenTryStmt    ; todo(code)  ## TODO : Converts a nkHiddenTryStmt into the Min C Language
@@ -171,6 +176,9 @@ proc cminError            (code :PNode) :string=  assert code.kind == nkError   
 proc cminModuleRef        (code :PNode) :string=  assert code.kind == nkModuleRef        ; todo(code)  ## TODO : Converts a nkModuleRef into the Min C Language
 proc cminReplayAction     (code :PNode) :string=  assert code.kind == nkReplayAction     ; todo(code)  ## TODO : Converts a nkReplayAction into the Min C Language
 proc cminNilRodNode       (code :PNode) :string=  assert code.kind == nkNilRodNode       ; todo(code)  ## TODO : Converts a nkNilRodNode into the Min C Language
+# Recursive
+# proc cminStmtList         (code :PNode) :string=  assert code.kind == nkStmtList         ; todo(code)  ## TODO : Converts a nkStmtList into the Min C Language
 
-
+# Main Code Generator
+proc Cmin (code :PNode; ident :int= 0) :string
 
