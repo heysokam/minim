@@ -21,7 +21,7 @@ import ./nimc
 
 
 import ./cmin/convert
-const code = "proc main*(count:int):int= return 0"
+const code = "proc main*(count:int; argc:int32):int= return 42"
 echo "\nrepr______________________________________________________"
 echo code.getAST().repr
 echo "\nrenderTree________________________________________________"

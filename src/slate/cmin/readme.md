@@ -9,6 +9,7 @@ It does not (and never will) support the feature-set of Nim:
 Strong-typed
 Modules
 # Explicitly avoided by design
+No ctypes. Types are translated verbatim. (aka no cint/cchar/cuint,cfloat,etc)
 No Garbage Collector
 No Exceptions
 No Meta-programming
