@@ -11,7 +11,7 @@ Modules
 # Explicitly avoided by design
 No Garbage Collector
 No Exceptions
-Meta-programming
+No Meta-programming
 ```
 
 ## Compiler

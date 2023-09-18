@@ -2,9 +2,7 @@
 #  *slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # std dependencies
-import std/macros
 # *slate dependencies
-import ./cmin/convert{.all.}
 import ./types
 
 const Ccode * = """
@@ -19,12 +17,18 @@ const cmin * = Lang(
   pfx  : "cmin",
   )
 
-const tst1 = convert.toCmin( main )
-static:echo tst1,"\n"
+import ./nimc
 
 
-##[ TODO : Broken ]#
-const Ncode = astToStr(main)
-const tst2  = Ncode.parseExpr().bindSym().Cmin()
-static:echo tst2,"\n"
-]##
+import ./cmin/convert
+const code = "proc main*(count:int):int= return 0"
+echo "\nrepr______________________________________________________"
+echo code.getAST().repr
+echo "\nrenderTree________________________________________________"
+echo code.getAST().renderTree
+echo "\ntreeRepr__________________________________________________"
+echo code.getAST().treeRepr
+echo "\ntoCmin____________________________________________________"
+var res = convert.toCmin(code)
+discard res
+
