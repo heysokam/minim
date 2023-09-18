@@ -10,17 +10,16 @@ import ../element/procdef
 include ./fwdecl
 
 
-proc report (code :PNode) :void=
-  debugEcho "\n_______________"
-  debugEcho code.renderTree
-  debugEcho "_______________"
+proc report (code :PNode) :void=  debugEcho code.renderTree
 
 # Generator Template
 const ProcDefTmpl    * = "{procdef.getRetT(code)} {procdef.getName(code)} ({cminProcDefGetArgs(code)}) {{ {body} }}"
 const ProcDefArgTmpl * = "{procdef.getArgT(arg.node)} {procdef.getArgName(arg.node)}{sep}"
 
 func cminProcDefGetArgs *(node :PNode) :string=
-  assert node.kind == nkProcDef and node[ProcDef.Params].kind == nkFormalParams
+  assert node.kind == nkProcDef
+  let params = node[procdef.Elem.Params]
+  assert params.kind == nkFormalParams
   for arg in node.args:
     let sep = if not arg.last: "," else: ""
     result.add( fmt ProcDefArgTmpl )
@@ -36,11 +35,16 @@ proc cminProcDef (code :PNode) :string=
 # TODO
 proc Cmin (code :PNode) :string=
   ## Node selector function. Sends the node into the relevant codegen function.
+  # Base Cases
+  if code == nil: return
   case code.kind
-  of nkProcDef          : result = cminProcDef(code)
-
   of nkNone             : result = cminNone(code)
   of nkEmpty            : result = cminEmpty(code)
+
+  # Process this node
+  of nkProcDef          : result = cminProcDef(code)
+
+  # TODO cases
   of nkIdent            : result = cminIdent(code)
   of nkSym              : result = cminSym(code)
   of nkType             : result = cminType(code)
@@ -153,7 +157,6 @@ proc Cmin (code :PNode) :string=
   of nkBlockStmt        : result = cminBlockStmt(code)
   of nkStaticStmt       : result = cminStaticStmt(code)
   of nkDiscardStmt      : result = cminDiscardStmt(code)
-  of nkStmtList         : result = cminStmtList(code)
   of nkImportStmt       : result = cminImportStmt(code)
   of nkImportExceptStmt : result = cminImportExceptStmt(code)
   of nkExportStmt       : result = cminExportStmt(code)
@@ -203,6 +206,11 @@ proc Cmin (code :PNode) :string=
   of nkModuleRef        : result = cminModuleRef(code)      # for .rod file support: A (moduleId, itemId) pair
   of nkReplayAction     : result = cminReplayAction(code)   # for .rod file support: A replay action
   of nkNilRodNode       : result = cminNilRodNode(code)     # for .rod file support: a 'nil' PNode
+
+  # Recursive Cases
+  of nkStmtList:
+    for child in code: result.add Cmin( child )
+
 
 proc toCmin *(code :string|Path) :string=
   ## Converts a block of Nim code into the Min C Language
