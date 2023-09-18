@@ -1,10 +1,10 @@
 #:______________________________________________________
-#  *slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#  *Slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # std dependencies
 import std/strformat
 import std/macros
-# *slate dependencies
+# *Slate dependencies
 import ../element/procdef
 # cmin dependencies
 include ./fwdecl

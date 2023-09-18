@@ -1,12 +1,12 @@
 #:______________________________________________________
-#  *slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#  *Slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # std dependencies
 import std/paths
 # nimc dependencies
 import "$nim"/compiler/[ ast, parser, idents, options, lineinfos, msgs, pathutils, syntaxes ]
 from   "$nim"/compiler/renderer import renderTree
-# *slate dependencies
+# *Slate dependencies
 import ./format
 
 

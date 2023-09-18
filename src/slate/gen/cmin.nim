@@ -1,9 +1,9 @@
 #:______________________________________________________
-#  *slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#  *Slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # std dependencies
 import std/paths
-# *slate dependencies
+# *Slate dependencies
 import ./proto
 
 # Write the generator prototype code
