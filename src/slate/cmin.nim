@@ -15,7 +15,7 @@ proc main*(argc :int; argv :ptr string; argv2 :seq[string]; argv3 :array[3,cstri
 
 # Describe the language
 const cmin * = Lang(
-  name : "Min C",
+  name : "CMin",
   pfx  : "cmin",
   )
 

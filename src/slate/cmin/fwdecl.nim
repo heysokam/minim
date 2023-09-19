@@ -1,14 +1,19 @@
 import ../nimc
 
+type TODO = object of CatchableError
 template todo (code :PNode) :void=
-  raise newException(IOError, &"Interpreting {code.kind} is currently not supported for Min C. Its code is:\n{code.renderTree}\n")
+  raise newException(TODO, &"\nInterpreting {code.kind} is currently not supported for CMin.\n\nIts tree is:\n{code.treeRepr}\nIts code is:\n{code.renderTree}\n\n")
 
 ## Generator Cases for Min C
 # Process
-proc cminProcDef          (code :PNode; ident :int= 0) :string
-proc cminReturnStmt       (code :PNode; ident :int= 1) :string
+proc cminProcDef          (code :PNode; indent :int= 0) :string
+proc cminReturnStmt       (code :PNode; indent :int= 1) :string
+proc cminConstSection     (code :PNode; indent :int= 0) :string
+proc cminLetSection       (code :PNode; indent :int= 0) :string
 
 # TODO
+proc cminVarSection       (code :PNode) :string=  assert code.kind == nkVarSection       ; todo(code)  ## TODO : Converts a nkVarSection into the Min C Language
+
 proc cminNone             (code :PNode) :string=  assert code.kind == nkNone             ; todo(code)  ## TODO : Converts a nkNone into the Min C Language
 proc cminEmpty            (code :PNode) :string=  assert code.kind == nkEmpty            ; todo(code)  ## TODO : Converts a nkEmpty into the Min C Language
 proc cminIdent            (code :PNode) :string=  assert code.kind == nkIdent            ; todo(code)  ## TODO : Converts a nkIdent into the Min C Language
@@ -109,9 +114,7 @@ proc cminParForStmt       (code :PNode) :string=  assert code.kind == nkParForSt
 proc cminWhileStmt        (code :PNode) :string=  assert code.kind == nkWhileStmt        ; todo(code)  ## TODO : Converts a nkWhileStmt into the Min C Language
 proc cminCaseStmt         (code :PNode) :string=  assert code.kind == nkCaseStmt         ; todo(code)  ## TODO : Converts a nkCaseStmt into the Min C Language
 proc cminTypeSection      (code :PNode) :string=  assert code.kind == nkTypeSection      ; todo(code)  ## TODO : Converts a nkTypeSection into the Min C Language
-proc cminVarSection       (code :PNode) :string=  assert code.kind == nkVarSection       ; todo(code)  ## TODO : Converts a nkVarSection into the Min C Language
-proc cminLetSection       (code :PNode) :string=  assert code.kind == nkLetSection       ; todo(code)  ## TODO : Converts a nkLetSection into the Min C Language
-proc cminConstSection     (code :PNode) :string=  assert code.kind == nkConstSection     ; todo(code)  ## TODO : Converts a nkConstSection into the Min C Language
+
 proc cminConstDef         (code :PNode) :string=  assert code.kind == nkConstDef         ; todo(code)  ## TODO : Converts a nkConstDef into the Min C Language
 proc cminTypeDef          (code :PNode) :string=  assert code.kind == nkTypeDef          ; todo(code)  ## TODO : Converts a nkTypeDef into the Min C Language
 proc cminYieldStmt        (code :PNode) :string=  assert code.kind == nkYieldStmt        ; todo(code)  ## TODO : Converts a nkYieldStmt into the Min C Language
@@ -180,5 +183,5 @@ proc cminNilRodNode       (code :PNode) :string=  assert code.kind == nkNilRodNo
 # proc cminStmtList         (code :PNode) :string=  assert code.kind == nkStmtList         ; todo(code)  ## TODO : Converts a nkStmtList into the Min C Language
 
 # Main Code Generator
-proc Cmin (code :PNode; ident :int= 0) :string
+proc Cmin (code :PNode; indent :int= 0) :string
 

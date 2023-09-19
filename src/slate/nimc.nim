@@ -23,6 +23,7 @@ export renderTree
 # proc debugAST *(node :ast.PNode) :string=  debug(node)
 #______________________________________________________
 # AST formatting
+func treeRepr *(node :PNode; ident :int= 0) :string # fw declare for strvalue
 func strValue *(node :PNode) :string=
   if node == nil: return
   case node.kind
@@ -31,7 +32,7 @@ func strValue *(node :PNode) :string=
   of nkCharLit..nkUInt64Lit    : result = $node.intVal
   of nkFloatLit..nkFloat128Lit : result = $node.floatVal
   of nkStrLit..nkTripleStrLit  : result = node.strVal
-  else:raise newException(ASTError, &"Tried to get the strValue of a node that doesn't have one.\n  {$node.kind}\n")
+  else:raise newException(ASTError, &"Tried to get the strValue of a node that doesn't have one.\n  {$node.kind}\n{node.treeRepr}\n")
 #_____________________________
 func treeRepr *(node :PNode; ident :int= 0) :string=
   ## Returns the treeRepr of the given AST.
