@@ -12,7 +12,7 @@ include ./fwdecl
 
 const Tab = "  "
 
-proc report (code :PNode) :void=  debugEcho code.renderTree
+proc report *(code :PNode) :void=  debugEcho code.renderTree
 
 # Generator Template
 const ProcDefTmpl    * = "{procdef.getRetT(code)} {procdef.getName(code)} ({cminProcDefGetArgs(code)}) {{{cminProcDefGetBody(code)}}}"
@@ -23,6 +23,7 @@ proc cminProcDefGetArgs *(node :PNode) :string=
   assert node.kind == nkProcDef
   let params = node[procdef.Elem.Args]
   assert params.kind == nkFormalParams
+  if node.getArgCount() == 0: return "void"
   for arg in node.args:
     let sep = if not arg.last: ", " else: ""
     result.add( fmt ProcDefArgTmpl )
@@ -35,7 +36,6 @@ proc cminProcDefGetBody *(node :PNode; ident :int= 1) :string=
 proc cminProcDef (code :PNode; ident :int= 0) :string=
   ## TODO : Converts a nkProcDef into the Min C Language
   assert code.kind == nkProcDef
-  code.report()
   result = fmt ProcDefTmpl
 
 proc cminReturnStmt (code :PNode; ident :int= 1) :string=
@@ -224,6 +224,6 @@ proc Cmin (code :PNode; ident :int= 0) :string=
 
 proc toCmin *(code :string|Path) :string=
   ## Converts a block of Nim code into the Min C Language
-  when code is Path: Cmin( code.readAST() )
-  else:              Cmin( code.getAST()  )
+  when code is Path: Cmin( code.readAST() ) & "\n"
+  else:              Cmin( code.getAST()  ) & "\n"
 
