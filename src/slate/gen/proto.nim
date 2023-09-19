@@ -20,7 +20,9 @@ import "$nim"/compiler/ast
 
 """
 const GenTodoTempl = """
-template todo (code :PNode) :void=  raise newException(IOError, &"Interpreting {{code.kind}} is currently not supported for {lang.name}. Its Nim code is:\n{{code.toStrLit}}\n")
+type TODO = object of CatchableError
+template todo (code :PNode) :void=
+  raise newException(TODO, &"\nInterpreting {{code.kind}} is currently not supported for {lang.name}.\n\nIts tree is:\n{code.treeRepr}\nIts code is:\n{code.renderTree}\n\n")
 
 """
 const GenCaseFuncTempl = """

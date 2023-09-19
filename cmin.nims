@@ -17,8 +17,8 @@ const cminTestsDir = testsDir/"cmin"
 #_________________________________________________
 # Target to Build
 #_____________________________
-const trg   = "hello42"
-const src   = "t001"/trg&".cm"
+const trg   = "helloconst"
+const src   = "t002"/trg&".cm"
 const flags = ""
 const verb  = on
 const run   = off
@@ -28,7 +28,7 @@ const run   = off
 # Compiler Manager
 const ss           = binDir/"cmin"   # StoS compiler command
 const cc           = "zig cc"        # C Compiler command
-const CminFlags    = "-Weverything"  # C Compiler flags
+const CminFlags    = "-Weverything -Werror -pedantic -pedantic-errors"  # C Compiler flags
 const CminValidExt = [".cm", ".nim"] # Valid extensions for the Cmin language
 #_______________________________________
 type CminCompileError = object of CatchableError
