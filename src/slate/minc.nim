@@ -5,7 +5,7 @@
 import std/cmdline
 # *Slate dependencies
 import ./types
-import ./cmin/convert
+import ./minc/convert
 
 const Ccode * = """
 int main(int argc) {return 0;}"""
@@ -15,8 +15,8 @@ proc main*(argc :int; argv :ptr string; argv2 :seq[string]; argv3 :array[3,cstri
 
 # Describe the language
 const cmin * = Lang(
-  name : "CMin",
-  pfx  : "cmin",
+  name : "MinC",
+  pfx  : "minc",
   )
 
 
@@ -29,8 +29,8 @@ echo "\nrenderTree________________________________________________"
 echo nimc.getAST(code).renderTree
 echo "\ntreeRepr__________________________________________________"
 echo nimc.getAST(code).treeRepr
-echo "\ntoCmin____________________________________________________"
-var res = convert.toCmin(code)
+echo "\ntoMinC____________________________________________________"
+var res = convert.toMinC(code)
 echo res
 ]#
 
@@ -38,4 +38,4 @@ when isMainModule:
   let cli = commandLineParams()
   let src = cli[0].readFile()
   let trg = cli[1]
-  trg.writeFile(convert.toCmin(src))
+  trg.writeFile(convert.toMinC(src))
