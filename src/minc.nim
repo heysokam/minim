@@ -1,11 +1,12 @@
 #:______________________________________________________
-#  *Slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # std dependencies
 import std/cmdline
 # *Slate dependencies
-import ./types
-import ./minc/convert
+import slate/types
+import slate/minc/convert
+# MinC dependencies
 
 const Ccode * = """
 int main(int argc) {return 0;}"""

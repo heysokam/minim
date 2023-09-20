@@ -1,6 +1,4 @@
 #:______________________________________________________
-#  *Slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-type Lang * = object
-  name *:string
-  pfx  *:string
+# TODO : Auto translate C to MinC/Nim
