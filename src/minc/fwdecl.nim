@@ -1,7 +1,7 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-import ../nimc
+import slate/nimc
 
 type TODO = object of CatchableError
 template todo (code :PNode) :void=

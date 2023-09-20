@@ -10,7 +10,6 @@ const thisDir      = currentSourcePath().parentDir()
 const binDir       = thisDir/"bin"
 const testsDir     = thisDir/"tests"
 const cacheDir     = binDir/"cmcache"
-const mincTestsDir = testsDir/"minc"
 #_________________________________________________
 
 
@@ -48,7 +47,7 @@ proc compile (src,trg,flags :string; verbose=false; cache=cacheDir) :void=
 
 #_________________________________________________
 # Current Test buildsystem
-let srcTest = mincTestsDir/src
+let srcTest = testsDir/src
 let trgTest = binDir/trg
 buildMinC()
 compile srcTest, trgTest, flags, verb
