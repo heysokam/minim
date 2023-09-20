@@ -2,7 +2,7 @@
 Strong typing
 - Proper bool type
 Replace #ifdef -> When
-Replace Macros:
+Replace C Macros:
 - Generics
 - Typed Templates
 ```

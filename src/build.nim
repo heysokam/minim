@@ -9,10 +9,10 @@ when not defined(nimble):
 else:
   import confy
 
-var cminGen = Program.new(cfg.srcDir/"slate"/"gen"/"cmin.nim", "cminGen")
-os.removeFile( cfg.binDir/cminGen.trg )
-cminGen.build( @[cminGen.trg.string], run=true, force=true )
+var mincGen = Program.new(cfg.srcDir/"slate"/"gen"/"minc.nim", "mincGen")
+os.removeFile( cfg.binDir/mincGen.trg )
+mincGen.build( @[mincGen.trg.string], run=true, force=true )
 
-var cmin = Program.new(cfg.srcDir/"slate"/"cmin.nim", "cmin")
-os.removeFile( cfg.binDir/cmin.trg )
-cmin.build( @["all", cmin.trg.string], run=false, force=false )
+var minc = Program.new(cfg.srcDir/"slate"/"minc.nim", "minc")
+os.removeFile( cfg.binDir/minc.trg )
+minc.build( @["all", minc.trg.string], run=false, force=false )

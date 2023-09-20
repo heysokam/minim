@@ -1,0 +1,4 @@
+include "<stdio.h>"
+proc main *() :int=
+  printf("Hello World %d %d %d\n", 42,31,20)
+  return 0

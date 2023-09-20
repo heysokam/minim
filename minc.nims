@@ -10,15 +10,15 @@ const thisDir      = currentSourcePath().parentDir()
 const binDir       = thisDir/"bin"
 const testsDir     = thisDir/"tests"
 const cacheDir     = binDir/"cmcache"
-const cminTestsDir = testsDir/"cmin"
+const mincTestsDir = testsDir/"minc"
 #_________________________________________________
 
 
 #_________________________________________________
 # Target to Build
 #_____________________________
-const trg   = "helloinclude"
-const src   = "t003"/trg&".cm"
+const trg   = "helloworld"
+const src   = "t004"/trg&".cm"
 const flags = ""
 const verb  = on
 const run   = off
@@ -26,31 +26,31 @@ const run   = off
 
 #_________________________________________________
 # Compiler Manager
-const ss           = binDir/"cmin"   # StoS compiler command
+const ss           = binDir/"minc"   # StoS compiler command
 const cc           = "zig cc"        # C Compiler command
-const CminFlags    = "-Weverything -Werror -pedantic -pedantic-errors"  # C Compiler flags
-const CminValidExt = [".cm", ".nim"] # Valid extensions for the Cmin language
+const MinCFlags    = "-Weverything -Werror -pedantic -pedantic-errors"  # C Compiler flags
+const MinCValidExt = [".cm", ".nim"] # Valid extensions for the MinC language
 #_______________________________________
-type CminCompileError = object of CatchableError
-proc buildCmin () :void=  exec "nim confy.nims cmin"
+type MinCCompileError = object of CatchableError
+proc buildMinC () :void=  exec "nim confy.nims minc"
 #_______________________________________
 proc sh (cmd :string; verbose=false) :void=
   if verbose: echo cmd
   exec cmd
 proc compile (src,trg,flags :string; verbose=false; cache=cacheDir) :void=
-  if src.splitFile.ext notin CminValidExt: raise newException(CminCompileError, &"Tried to compile a Cmin source file that has an unknown extension.\n  {src}")
+  if src.splitFile.ext notin MinCValidExt: raise newException(MinCCompileError, &"Tried to compile a MinC source file that has an unknown extension.\n  {src}")
   if not cacheDir.dirExists(): mkDir cacheDir
   let ir = cacheDir/src.changeFileExt("c").lastPathPart
   sh &"{ss} {src} {ir}"
-  sh &"{cc} {CminFlags} {flags} -o {trg} {ir}"
+  sh &"{cc} {MinCFlags} {flags} -o {trg} {ir}"
 #_________________________________________________
 
 
 #_________________________________________________
 # Current Test buildsystem
-let srcTest = cminTestsDir/src
+let srcTest = mincTestsDir/src
 let trgTest = binDir/trg
-buildCmin()
+buildMinC()
 compile srcTest, trgTest, flags, verb
 when run: sh trgTest
 #_________________________________________________
