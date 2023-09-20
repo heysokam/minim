@@ -6,12 +6,12 @@ import std/paths
 import std/strformat
 import std/strutils
 # *Slate dependencies
-import ../format
-import ../element/error
-import ../element/procdef
-import ../element/vars
-import ../element/incldef
-import ../element/calls
+import slate/format
+import slate/element/error
+import slate/element/procdef
+import slate/element/vars
+import slate/element/incldef
+import slate/element/calls
 # minc dependencies
 include ./fwdecl
 

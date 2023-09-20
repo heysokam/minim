@@ -5,8 +5,8 @@
 import std/cmdline
 # *Slate dependencies
 import slate/types
-import slate/minc/convert
 # MinC dependencies
+import ./minc/convert
 
 const Ccode * = """
 int main(int argc) {return 0;}"""
