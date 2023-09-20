@@ -1,12 +1,12 @@
 #:______________________________________________________
-#  *Slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # std dependencies
 import std/paths
 # *Slate dependencies
-import ./proto
+import slate/gen/proto
 
 # Write the generator prototype code
-import ../cmin
-const cminFile = Path"cmin.nim"
-cminFile.writeGenProto(cmin)
+import ../minc
+const mincFile = Path"minc.nim"
+mincFile.writeGenProto(minc)

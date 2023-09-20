@@ -1,5 +1,5 @@
 #:______________________________________________________
-#  *Slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # std dependencies
 import std/os

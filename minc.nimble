@@ -1,11 +1,11 @@
 #:______________________________________________________
-#  *Slate  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # Package
-packageName   = "slate"
-version       = "0.0.5"
+packageName   = "minc"
+version       = "0.0.6"
 author        = "sOkam"
-description   = "*Slate | StoS Compiler for Nim"
+description   = "ᛟ minc | Minimalistic C Language"
 license       = "MIT"
 srcDir        = "src"
 skipFiles     = @["build.nim", "nim.cfg"]
