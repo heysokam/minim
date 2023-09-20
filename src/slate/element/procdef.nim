@@ -7,13 +7,11 @@ import std/strformat
 import ../nimc
 # Element dependencies
 import ./base
+import ./error
 
 # Elements
 type Elem *{.pure.}= enum Symbol, Unused1, Generic, Args #[nkFormalParams]#, Pragma, Reserved1, Body #[nkStatements]#
 converter toInt *(d :Elem) :int= d.ord
-
-# Validation
-type ProcDefError = object of CatchableError
 
 #_________________________________________________
 # General

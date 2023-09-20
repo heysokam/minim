@@ -17,8 +17,8 @@ const cminTestsDir = testsDir/"cmin"
 #_________________________________________________
 # Target to Build
 #_____________________________
-const trg   = "helloconst"
-const src   = "t002"/trg&".cm"
+const trg   = "helloinclude"
+const src   = "t003"/trg&".cm"
 const flags = ""
 const verb  = on
 const run   = off

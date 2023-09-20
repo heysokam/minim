@@ -6,13 +6,11 @@ import std/strformat
 # nimc dependencies
 import ../nimc
 import ./base
+import ./error
 
 # Elements
 type Elem *{.pure.}= enum Name, Type, Value
 converter toInt *(d :Elem) :int= d.ord
-
-# Validation
-type VarDefError = object of CatchableError
 
 #_________________________________________________
 # General

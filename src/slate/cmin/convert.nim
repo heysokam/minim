@@ -6,8 +6,10 @@ import std/strformat
 import std/paths
 # *Slate dependencies
 import ../format
+import ../element/error
 import ../element/procdef
 import ../element/vardef
+import ../element/incldef
 # cmin dependencies
 include ./fwdecl
 
@@ -36,6 +38,9 @@ proc cminProcDefGetBody *(code :PNode; indent :int= 1) :string=
   result.add "\n"
   result.add Cmin(code[procdef.Elem.Body], indent)
 
+proc cminFuncDef (code :PNode; indent :int= 0) :string=
+  assert false, "proc and func are identical in C"  # TODO : Sideffects error checking
+
 proc cminProcDef (code :PNode; indent :int= 0) :string=
   ## TODO : Converts a nkProcDef into the Min C Language
   assert code.kind == nkProcDef
@@ -56,6 +61,10 @@ proc cminConstSection (code :PNode; indent :int= 0) :string=
 proc cminLetSection (code :PNode; indent :int= 0) :string=
   assert false, "Let and Const are identical in C"
 
+proc cminIncludeStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkIncludeStmt
+  if indent > 0: raise newException(IncludeError, &"Include statements are only allowed at the top level.\nThe incorrect code is:\n{code.renderTree}\n")
+  result.add &"#include {incldef.getModule(code)}\n"
 
 # TODO
 proc Cmin (code :PNode; indent :int= 0) :string=
@@ -68,9 +77,11 @@ proc Cmin (code :PNode; indent :int= 0) :string=
 
   # Process this node
   of nkProcDef          : result = cminProcDef(code, indent)
+  of nkFuncDef          : result = cminProcDef(code, indent)
   of nkReturnStmt       : assert indent != 0; result = cminReturnStmt(code, indent)
   of nkConstSection     : result = cminConstSection(code, indent)
   of nkLetSection       : result = cminConstSection(code, indent)
+  of nkIncludeStmt      : result = cminIncludeStmt(code, indent)
 
 
   # TODO cases
@@ -79,37 +90,19 @@ proc Cmin (code :PNode; indent :int= 0) :string=
   of nkIdent            : result = cminIdent(code)
   of nkSym              : result = cminSym(code)
   of nkType             : result = cminType(code)
-  of nkCharLit          : result = cminCharLit(code)
-  of nkIntLit           : result = cminIntLit(code)
-  of nkInt8Lit          : result = cminInt8Lit(code)
-  of nkInt16Lit         : result = cminInt16Lit(code)
-  of nkInt32Lit         : result = cminInt32Lit(code)
-  of nkInt64Lit         : result = cminInt64Lit(code)
-  of nkUIntLit          : result = cminUIntLit(code)
-  of nkUInt8Lit         : result = cminUInt8Lit(code)
-  of nkUInt16Lit        : result = cminUInt16Lit(code)
-  of nkUInt32Lit        : result = cminUInt32Lit(code)
-  of nkUInt64Lit        : result = cminUInt64Lit(code)
-  of nkFloatLit         : result = cminFloatLit(code)
-  of nkFloat32Lit       : result = cminFloat32Lit(code)
-  of nkFloat64Lit       : result = cminFloat64Lit(code)
-  of nkFloat128Lit      : result = cminFloat128Lit(code)
-  of nkStrLit           : result = cminStrLit(code)
-  of nkRStrLit          : result = cminRStrLit(code)
-  of nkTripleStrLit     : result = cminTripleStrLit(code)
-  of nkNilLit           : result = cminNilLit(code)
   of nkComesFrom        : result = cminComesFrom(code)
+
   of nkDotCall          : result = cminDotCall(code)
   of nkCommand          : result = cminCommand(code)
   of nkCall             : result = cminCall(code)
   of nkCallStrLit       : result = cminCallStrLit(code)
+
   of nkInfix            : result = cminInfix(code)
   of nkPrefix           : result = cminPrefix(code)
   of nkPostfix          : result = cminPostfix(code)
   of nkHiddenCallConv   : result = cminHiddenCallConv(code)
   of nkExprEqExpr       : result = cminExprEqExpr(code)
   of nkExprColonExpr    : result = cminExprColonExpr(code)
-  of nkIdentDefs        : result = cminIdentDefs(code)
   of nkVarTuple         : result = cminVarTuple(code)
   of nkPar              : result = cminPar(code)
   of nkObjConstr        : result = cminObjConstr(code)
@@ -172,9 +165,8 @@ proc Cmin (code :PNode; indent :int= 0) :string=
   of nkWhileStmt        : result = cminWhileStmt(code)
   of nkCaseStmt         : result = cminCaseStmt(code)
   of nkTypeSection      : result = cminTypeSection(code)
-
-  of nkConstDef         : result = cminConstDef(code)
   of nkTypeDef          : result = cminTypeDef(code)
+
   of nkYieldStmt        : result = cminYieldStmt(code)
   of nkDefer            : result = cminDefer(code)
   of nkTryStmt          : result = cminTryStmt(code)
@@ -185,12 +177,13 @@ proc Cmin (code :PNode; indent :int= 0) :string=
   of nkBlockStmt        : result = cminBlockStmt(code)
   of nkStaticStmt       : result = cminStaticStmt(code)
   of nkDiscardStmt      : result = cminDiscardStmt(code)
+
   of nkImportStmt       : result = cminImportStmt(code)
   of nkImportExceptStmt : result = cminImportExceptStmt(code)
   of nkExportStmt       : result = cminExportStmt(code)
   of nkExportExceptStmt : result = cminExportExceptStmt(code)
   of nkFromStmt         : result = cminFromStmt(code)
-  of nkIncludeStmt      : result = cminIncludeStmt(code)
+
   of nkBindStmt         : result = cminBindStmt(code)
   of nkMixinStmt        : result = cminMixinStmt(code)
   of nkUsingStmt        : result = cminUsingStmt(code)
@@ -228,12 +221,34 @@ proc Cmin (code :PNode; indent :int= 0) :string=
   of nkGotoState        : result = cminGotoState(code)
   of nkState            : result = cminState(code)
   of nkBreakState       : result = cminBreakState(code)
-  of nkFuncDef          : result = cminFuncDef(code)
   of nkTupleConstr      : result = cminTupleConstr(code)
   of nkError            : result = cminError(code)
   of nkModuleRef        : result = cminModuleRef(code)      # for .rod file support: A (moduleId, itemId) pair
   of nkReplayAction     : result = cminReplayAction(code)   # for .rod file support: A replay action
   of nkNilRodNode       : result = cminNilRodNode(code)     # for .rod file support: a 'nil' PNode
+
+  # Unreachable
+  of nkConstDef         : result = cminConstDef(code)   # Accessed by nkConstSection
+  of nkIdentDefs        : result = cminIdentDefs(code)  # Accessed by nkLetSection and nkVarSection
+  of nkCharLit          : result = cminCharLit(code)
+  of nkIntLit           : result = cminIntLit(code)
+  of nkInt8Lit          : result = cminInt8Lit(code)
+  of nkInt16Lit         : result = cminInt16Lit(code)
+  of nkInt32Lit         : result = cminInt32Lit(code)
+  of nkInt64Lit         : result = cminInt64Lit(code)
+  of nkUIntLit          : result = cminUIntLit(code)
+  of nkUInt8Lit         : result = cminUInt8Lit(code)
+  of nkUInt16Lit        : result = cminUInt16Lit(code)
+  of nkUInt32Lit        : result = cminUInt32Lit(code)
+  of nkUInt64Lit        : result = cminUInt64Lit(code)
+  of nkFloatLit         : result = cminFloatLit(code)
+  of nkFloat32Lit       : result = cminFloat32Lit(code)
+  of nkFloat64Lit       : result = cminFloat64Lit(code)
+  of nkFloat128Lit      : result = cminFloat128Lit(code)
+  of nkStrLit           : result = cminStrLit(code)
+  of nkRStrLit          : result = cminRStrLit(code)
+  of nkTripleStrLit     : result = cminTripleStrLit(code)
+  of nkNilLit           : result = cminNilLit(code)
 
   # Recursive Cases
   of nkStmtList:
