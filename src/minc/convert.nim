@@ -12,30 +12,28 @@ import slate/element/procdef
 import slate/element/vars
 import slate/element/incldef
 import slate/element/calls
+import slate/element/loops
 # minc dependencies
 include ./fwdecl
 
 const Tab = "  "
 
-proc report *(code :PNode) :void=
-  debugEcho code.treeRepr
-  debugEcho code.renderTree,"\n"
-
 
 #______________________________________________________
 # Procedure Definition
 #_____________________________
-const ProcDefTmpl    * = "{priv}{procdef.getRetT(code)} {procdef.getName(code)} ({mincProcDefGetArgs(code)}) {{{mincProcDefGetBody(code)}}}"
-const ProcDefArgTmpl * = "{procdef.getArgT(arg.node)} {procdef.getArgName(arg.node)}{sep}"
-
+const ProcDefArgTmpl = "{typ} {arg.name}{sep}"
 proc mincProcDefGetArgs *(code :PNode) :string=
   ## Returns the code for all arguments of the given ProcDef node.
   assert code.kind == nkProcDef
   let params = code[procdef.Elem.Args]
   assert params.kind == nkFormalParams
-  if procdef.getArgCount(code) == 0: return "void"
-  for arg in procdef.args(code):
-    let sep = if not arg.last: ", " else: ""
+  let argc = procdef.getArgCount(code)
+  if argc == 0: return "void"  # Explicit fill with void for no arguments
+  # Find all arguments
+  for arg in procdef.args(code): # For every individual argument -> args can be single or grouped arguments. this expands them
+    let typ  = if arg.typ.isPtr: &"{arg.typ.name}*" else: arg.typ.name
+    let sep  = if arg.last: "" else: ", "
     result.add( fmt ProcDefArgTmpl )
 
 proc mincProcDefGetBody *(code :PNode; indent :int= 1) :string=
@@ -44,10 +42,11 @@ proc mincProcDefGetBody *(code :PNode; indent :int= 1) :string=
   result.add MinC(code[procdef.Elem.Body], indent)
 
 proc mincFuncDef (code :PNode; indent :int= 0) :string=
-  assert false, "proc and func are identical in C"  # TODO : Sideffects error checking
+  assert false, "proc and func are identical in C"  # TODO : Sideffects checks
 
+const ProcDefTmpl = "{priv}{procdef.getRetT(code)} {procdef.getName(code)} ({mincProcDefGetArgs(code)}) {{{mincProcDefGetBody(code)}}}\n"
 proc mincProcDef (code :PNode; indent :int= 0) :string=
-  ## TODO : Converts a nkProcDef into the Min C Language
+  ## Converts a nkProcDef into the Min C Language
   assert code.kind == nkProcDef
   let priv = if procdef.isPrivate(code, indent): "static " else: ""
   result = fmt ProcDefTmpl
@@ -57,24 +56,44 @@ proc mincProcDef (code :PNode; indent :int= 0) :string=
 # Return Statement
 #_____________________________
 proc mincReturnStmt (code :PNode; indent :int= 1) :string=
-  assert indent != 0
   assert code.kind == nkReturnStmt
+  assert indent != 0, "Return statements cannot exist at the top level in C.\n" & code.renderTree
   result.add &"{indent*Tab}return {code[0].strValue};\n"
 
 
 #______________________________________________________
 # Variables
 #_____________________________
+proc mincVariable (entry :PNode; indent :int; mutable :bool) :string=
+  assert entry.kind in [nkConstDef, nkIdentDefs], entry.treeRepr
+  let priv = if vars.isPrivate(entry,indent): "static " else: ""
+  let mut  = if not mutable: "const " else: ""
+  let typ  = vars.getType(entry)
+  let T    = if typ.isPtr: &"{typ.name}*" else: typ.name  # T = Type Name
+  let name = vars.getName(entry)
+  let val  =
+    if entry[^1].kind == nkCall : mincCallRaw( entry[^1] )
+    else                        : vars.getValue(entry)
+  if not vars.isPrivate(entry,indent) and indent == 0:
+    result.add &"{indent*Tab}extern {mut}{T} {name};\n"
+  result.add &"{indent*Tab}{priv}{mut}{T} {name} = {val};\n"
+
 proc mincConstSection (code :PNode; indent :int= 0) :string=
-  assert code.kind in [nkConstSection, nkLetSection] # Let and Const are identical in C
-  for entry in code.sons:
-    let priv = if vars.isPrivate(entry,indent): "static " else: ""
-    if not vars.isPrivate(entry,indent): result.add &"{indent*Tab}extern const {vars.getType(entry)} {vars.getName(entry)};\n"
-    result.add &"{indent*Tab}{priv}const {vars.getType(entry)} {vars.getName(entry)} = {vars.getValue(entry)};\n"
+  assert code.kind == nkConstSection # Let and Const are identical in C
+  for entry in code.sons: result.add mincVariable(entry,indent, mutable=false)
 
 proc mincLetSection (code :PNode; indent :int= 0) :string=
-  assert false, "Let and Const are identical in C"
+  assert code.kind == nkLetSection # Let and Const are identical in C
+  for entry in code.sons: result.add mincVariable(entry,indent, mutable=false)
 
+proc mincVarSection (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkVarSection
+  for entry in code.sons: result.add mincVariable(entry,indent, mutable=true)
+
+
+#______________________________________________________
+# Modules
+#_____________________________
 proc mincIncludeStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkIncludeStmt
   if indent > 0: raise newException(IncludeError, &"Include statements are only allowed at the top level.\nThe incorrect code is:\n{code.renderTree}\n")
@@ -90,18 +109,59 @@ proc mincCallGetArgs *(code :PNode) :string=
   assert code.kind in [nkCall, nkCommand]
   if calls.getArgCount(code) == 0: return
   for arg in calls.args(code):
-    let str = arg.node.strValue.replace("\n", "\\n")
-    if arg.node.kind in nkStrLit..nkTripleStrLit: result.add &"\"{str}\""
+    if arg.node.kind in nkStrLit..nkTripleStrLit:
+      let str = arg.node.strValue.replace("\n", "\\n")
+      result.add &"\"{str}\""
+    elif arg.node.kind == nkNilLit: result.add "NULL"
     else: result.add arg.node.strValue
+    ##[
+    elif arg.len > 1:  # Arguments grouped by type
+      for entry in arg.node:
+        result.add entry.strValue
+        result.add( if entry == arg.node[^1]: "" else: ", " )
+    ]##
     result.add( if arg.last: "" else: ", " )
+
+proc mincCallRaw (code :PNode) :string=
+  assert code.kind in [nkCall, nkCommand]
+  result = &"{calls.getName(code,0)}({mincCallGetArgs(code)})"
 
 proc mincCall (code :PNode; indent :int= 0) :string=
   assert code.kind in [nkCall, nkCommand]
-  result.add &"{indent*Tab}{calls.getName(code, indent)}({mincCallGetArgs(code)});\n"
+  result.add &"{indent*Tab}{mincCallRaw(code)};\n"
 
 proc mincCommand (code :PNode; indent :int= 0) :string=
   assert false, "Command and Call are identical in C"
 
+#______________________________________________________
+# Comments
+#_____________________________
+proc mincCommentStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkCommentStmt
+  result.add &"{indent*Tab}/// {code.strValue}\n"
+
+#______________________________________________________
+# Discard
+#_____________________________
+proc mincDiscardStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkDiscardStmt
+  for arg in code: result.add &"{indent*Tab}(void){arg.strValue}; //discard\n"
+
+#______________________________________________________
+# While Loops
+#_____________________________
+proc mincWhileStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkWhileStmt
+  # TODO: Unconfuse this total mess. Remove hardcoded numbers. Should be names and a loop.
+  var condition :string
+  if code[0].kind == nkPrefix:
+    condition.add code[0][0].strValue.replace("not","!")
+    if code[0][1].kind == nkCall: condition.add mincCallRaw( code[0][1] )
+    else:                         condition.add code[0][1].strValue
+  # Return the code
+  result.add &"{indent*Tab}while ({condition}) {{\n"
+  result.add MinC( code[^1], indent+1 )
+  result.add &"{indent*Tab}}}\n"
 
 #______________________________________________________
 # Source-to-Source Generator
@@ -119,14 +179,17 @@ proc MinC (code :PNode; indent :int= 0) :string=
   of nkFuncDef          : result = mincProcDef(code, indent)
   of nkReturnStmt       : result = mincReturnStmt(code, indent)
   of nkConstSection     : result = mincConstSection(code, indent)
-  of nkLetSection       : result = mincConstSection(code, indent)
+  of nkLetSection       : result = mincLetSection(code, indent)
   of nkIncludeStmt      : result = mincIncludeStmt(code, indent)
   of nkCommand          : result = mincCommand(code, indent)
   of nkCall             : result = mincCall(code, indent)
+  of nkCommentStmt      : result = mincCommentStmt(code, indent)
+  of nkDiscardStmt      : result = mincDiscardStmt(code, indent)
+  of nkVarSection       : result = mincVarSection(code, indent)
+  of nkWhileStmt        : result = mincWhileStmt(code, indent)
 
   #____________________________________________________
   # TODO cases
-  of nkVarSection       : result = mincVarSection(code)
 
   of nkIdent            : result = mincIdent(code)
   of nkSym              : result = mincSym(code)
@@ -190,19 +253,21 @@ proc MinC (code :PNode; indent :int= 0) :string=
   of nkMacroDef         : result = mincMacroDef(code)
   of nkTemplateDef      : result = mincTemplateDef(code)
   of nkIteratorDef      : result = mincIteratorDef(code)
-  of nkOfBranch         : result = mincOfBranch(code)
-  of nkElifBranch       : result = mincElifBranch(code)
   of nkExceptBranch     : result = mincExceptBranch(code)
-  of nkElse             : result = mincElse(code)
   of nkAsmStmt          : result = mincAsmStmt(code)
   of nkPragma           : result = mincPragma(code)
   of nkPragmaBlock      : result = mincPragmaBlock(code)
+
   of nkIfStmt           : result = mincIfStmt(code)
   of nkWhenStmt         : result = mincWhenStmt(code)
+  of nkCaseStmt         : result = mincCaseStmt(code)
+  of nkOfBranch         : result = mincOfBranch(code)
+  of nkElifBranch       : result = mincElifBranch(code)
+  of nkElse             : result = mincElse(code)
+
   of nkForStmt          : result = mincForStmt(code)
   of nkParForStmt       : result = mincParForStmt(code)
-  of nkWhileStmt        : result = mincWhileStmt(code)
-  of nkCaseStmt         : result = mincCaseStmt(code)
+
   of nkTypeSection      : result = mincTypeSection(code)
   of nkTypeDef          : result = mincTypeDef(code)
 
@@ -215,7 +280,6 @@ proc MinC (code :PNode; indent :int= 0) :string=
   of nkContinueStmt     : result = mincContinueStmt(code)
   of nkBlockStmt        : result = mincBlockStmt(code)
   of nkStaticStmt       : result = mincStaticStmt(code)
-  of nkDiscardStmt      : result = mincDiscardStmt(code)
 
   of nkImportStmt       : result = mincImportStmt(code)
   of nkImportExceptStmt : result = mincImportExceptStmt(code)
@@ -226,7 +290,6 @@ proc MinC (code :PNode; indent :int= 0) :string=
   of nkBindStmt         : result = mincBindStmt(code)
   of nkMixinStmt        : result = mincMixinStmt(code)
   of nkUsingStmt        : result = mincUsingStmt(code)
-  of nkCommentStmt      : result = mincCommentStmt(code)
   of nkStmtListExpr     : result = mincStmtListExpr(code)
   of nkBlockExpr        : result = mincBlockExpr(code)
   of nkStmtListType     : result = mincStmtListType(code)

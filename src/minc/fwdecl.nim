@@ -17,10 +17,14 @@ proc mincLetSection       (code :PNode; indent :int= 0) :string
 proc mincIncludeStmt      (code :PNode; indent :int= 0) :string
 proc mincCommand          (code :PNode; indent :int= 0) :string
 proc mincCall             (code :PNode; indent :int= 0) :string
+proc mincCallRaw          (code :PNode) :string # Format-less version of an nkCall. Used for arguments
+proc mincCommentStmt      (code :PNode; indent :int= 0) :string
+proc mincDiscardStmt      (code :PNode; indent :int= 0) :string
+proc mincVarSection       (code :PNode; indent :int= 0) :string
+proc mincWhileStmt        (code :PNode; indent :int= 0) :string
+
 
 # TODO
-proc mincVarSection       (code :PNode) :string=  assert code.kind == nkVarSection       ; todo(code)  ## TODO : Converts a nkVarSection into the Min C Language
-
 proc mincNone             (code :PNode) :string=  assert code.kind == nkNone             ; todo(code)  ## TODO : Converts a nkNone into the Min C Language
 proc mincEmpty            (code :PNode) :string=  assert code.kind == nkEmpty            ; todo(code)  ## TODO : Converts a nkEmpty into the Min C Language
 proc mincIdent            (code :PNode) :string=  assert code.kind == nkIdent            ; todo(code)  ## TODO : Converts a nkIdent into the Min C Language
@@ -107,26 +111,28 @@ proc mincMacroDef         (code :PNode) :string=  assert code.kind == nkMacroDef
 proc mincTemplateDef      (code :PNode) :string=  assert code.kind == nkTemplateDef      ; todo(code)  ## TODO : Converts a nkTemplateDef into the Min C Language
 proc mincIteratorDef      (code :PNode) :string=  assert code.kind == nkIteratorDef      ; todo(code)  ## TODO : Converts a nkIteratorDef into the Min C Language
 
-proc mincOfBranch         (code :PNode) :string=  assert code.kind == nkOfBranch         ; todo(code)  ## TODO : Converts a nkOfBranch into the Min C Language
-proc mincElifBranch       (code :PNode) :string=  assert code.kind == nkElifBranch       ; todo(code)  ## TODO : Converts a nkElifBranch into the Min C Language
-proc mincExceptBranch     (code :PNode) :string=  assert code.kind == nkExceptBranch     ; todo(code)  ## TODO : Converts a nkExceptBranch into the Min C Language
-proc mincElse             (code :PNode) :string=  assert code.kind == nkElse             ; todo(code)  ## TODO : Converts a nkElse into the Min C Language
 proc mincAsmStmt          (code :PNode) :string=  assert code.kind == nkAsmStmt          ; todo(code)  ## TODO : Converts a nkAsmStmt into the Min C Language
 proc mincPragma           (code :PNode) :string=  assert code.kind == nkPragma           ; todo(code)  ## TODO : Converts a nkPragma into the Min C Language
 proc mincPragmaBlock      (code :PNode) :string=  assert code.kind == nkPragmaBlock      ; todo(code)  ## TODO : Converts a nkPragmaBlock into the Min C Language
 proc mincIfStmt           (code :PNode) :string=  assert code.kind == nkIfStmt           ; todo(code)  ## TODO : Converts a nkIfStmt into the Min C Language
 proc mincWhenStmt         (code :PNode) :string=  assert code.kind == nkWhenStmt         ; todo(code)  ## TODO : Converts a nkWhenStmt into the Min C Language
+proc mincCaseStmt         (code :PNode) :string=  assert code.kind == nkCaseStmt         ; todo(code)  ## TODO : Converts a nkCaseStmt into the Min C Language
+proc mincOfBranch         (code :PNode) :string=  assert code.kind == nkOfBranch         ; todo(code)  ## TODO : Converts a nkOfBranch into the Min C Language
+proc mincElifBranch       (code :PNode) :string=  assert code.kind == nkElifBranch       ; todo(code)  ## TODO : Converts a nkElifBranch into the Min C Language
+proc mincElse             (code :PNode) :string=  assert code.kind == nkElse             ; todo(code)  ## TODO : Converts a nkElse into the Min C Language
+
 proc mincForStmt          (code :PNode) :string=  assert code.kind == nkForStmt          ; todo(code)  ## TODO : Converts a nkForStmt into the Min C Language
 proc mincParForStmt       (code :PNode) :string=  assert code.kind == nkParForStmt       ; todo(code)  ## TODO : Converts a nkParForStmt into the Min C Language
-proc mincWhileStmt        (code :PNode) :string=  assert code.kind == nkWhileStmt        ; todo(code)  ## TODO : Converts a nkWhileStmt into the Min C Language
-proc mincCaseStmt         (code :PNode) :string=  assert code.kind == nkCaseStmt         ; todo(code)  ## TODO : Converts a nkCaseStmt into the Min C Language
+
 proc mincTypeSection      (code :PNode) :string=  assert code.kind == nkTypeSection      ; todo(code)  ## TODO : Converts a nkTypeSection into the Min C Language
 
 proc mincConstDef         (code :PNode) :string=  assert code.kind == nkConstDef         ; todo(code)  ## TODO : Converts a nkConstDef into the Min C Language
 proc mincTypeDef          (code :PNode) :string=  assert code.kind == nkTypeDef          ; todo(code)  ## TODO : Converts a nkTypeDef into the Min C Language
+
 proc mincYieldStmt        (code :PNode) :string=  assert code.kind == nkYieldStmt        ; todo(code)  ## TODO : Converts a nkYieldStmt into the Min C Language
 proc mincDefer            (code :PNode) :string=  assert code.kind == nkDefer            ; todo(code)  ## TODO : Converts a nkDefer into the Min C Language
 proc mincTryStmt          (code :PNode) :string=  assert code.kind == nkTryStmt          ; todo(code)  ## TODO : Converts a nkTryStmt into the Min C Language
+proc mincExceptBranch     (code :PNode) :string=  assert code.kind == nkExceptBranch     ; todo(code)  ## TODO : Converts a nkExceptBranch into the Min C Language
 proc mincFinally          (code :PNode) :string=  assert code.kind == nkFinally          ; todo(code)  ## TODO : Converts a nkFinally into the Min C Language
 proc mincRaiseStmt        (code :PNode) :string=  assert code.kind == nkRaiseStmt        ; todo(code)  ## TODO : Converts a nkRaiseStmt into the Min C Language
 
@@ -134,7 +140,6 @@ proc mincBreakStmt        (code :PNode) :string=  assert code.kind == nkBreakStm
 proc mincContinueStmt     (code :PNode) :string=  assert code.kind == nkContinueStmt     ; todo(code)  ## TODO : Converts a nkContinueStmt into the Min C Language
 proc mincBlockStmt        (code :PNode) :string=  assert code.kind == nkBlockStmt        ; todo(code)  ## TODO : Converts a nkBlockStmt into the Min C Language
 proc mincStaticStmt       (code :PNode) :string=  assert code.kind == nkStaticStmt       ; todo(code)  ## TODO : Converts a nkStaticStmt into the Min C Language
-proc mincDiscardStmt      (code :PNode) :string=  assert code.kind == nkDiscardStmt      ; todo(code)  ## TODO : Converts a nkDiscardStmt into the Min C Language
 
 proc mincImportStmt       (code :PNode) :string=  assert code.kind == nkImportStmt       ; todo(code)  ## TODO : Converts a nkImportStmt into the Min C Language
 proc mincImportExceptStmt (code :PNode) :string=  assert code.kind == nkImportExceptStmt ; todo(code)  ## TODO : Converts a nkImportExceptStmt into the Min C Language
@@ -145,7 +150,6 @@ proc mincFromStmt         (code :PNode) :string=  assert code.kind == nkFromStmt
 proc mincBindStmt         (code :PNode) :string=  assert code.kind == nkBindStmt         ; todo(code)  ## TODO : Converts a nkBindStmt into the Min C Language
 proc mincMixinStmt        (code :PNode) :string=  assert code.kind == nkMixinStmt        ; todo(code)  ## TODO : Converts a nkMixinStmt into the Min C Language
 proc mincUsingStmt        (code :PNode) :string=  assert code.kind == nkUsingStmt        ; todo(code)  ## TODO : Converts a nkUsingStmt into the Min C Language
-proc mincCommentStmt      (code :PNode) :string=  assert code.kind == nkCommentStmt      ; todo(code)  ## TODO : Converts a nkCommentStmt into the Min C Language
 proc mincStmtListExpr     (code :PNode) :string=  assert code.kind == nkStmtListExpr     ; todo(code)  ## TODO : Converts a nkStmtListExpr into the Min C Language
 proc mincBlockExpr        (code :PNode) :string=  assert code.kind == nkBlockExpr        ; todo(code)  ## TODO : Converts a nkBlockExpr into the Min C Language
 proc mincStmtListType     (code :PNode) :string=  assert code.kind == nkStmtListType     ; todo(code)  ## TODO : Converts a nkStmtListType into the Min C Language
