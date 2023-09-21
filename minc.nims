@@ -20,14 +20,17 @@ const trg   = "helloworld"
 const src   = "t004"/trg&".cm"
 const flags = ""
 const verb  = on
-const run   = off
+const run   = on
 
 
 #_________________________________________________
 # Compiler Manager
 const ss           = binDir/"minc"   # StoS compiler command
 const cc           = "zig cc"        # C Compiler command
-const MinCFlags    = "-Weverything -Werror -pedantic -pedantic-errors"  # C Compiler flags
+const NoErr        = [
+  "-Wno-declaration-after-statement", # Useless for >= C99
+  ] # Flags to remove from -Weverything
+const MinCFlags    = &"-Weverything -Werror -pedantic -pedantic-errors {NoErr}"  # C Compiler flags
 const MinCValidExt = [".cm", ".nim"] # Valid extensions for the MinC language
 #_______________________________________
 type MinCCompileError = object of CatchableError
