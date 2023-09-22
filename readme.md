@@ -6,6 +6,7 @@ It does not try to be feature-full, its only goal is to write Pure C.
 ## MinC is C
 MinC is a different version of C that uses nim syntax.  
 If a type does not exist in C, the C compiler will error. Because MinC is not nim, its C.  
+MinC can use C libraries without wrappers, because the compiler outputs human-readable C.
 
 ## MinC is NOT nim
 MinC does **not** use the Nim's c backend or compiler pipeline.  
@@ -63,4 +64,10 @@ MinC can be used to create C libraries, because the output is normal C code.
 ᛟ minc
 Min < C > niM
 Min> C <niM
+```
+```md
+# Notes
+https://stackoverflow.com/questions/1472138/c-default-arguments
+https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html
+-std=c?? | https://en.wikipedia.org/wiki/C99 | https://en.wikipedia.org/wiki/C17 https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2244.htm
 ```
