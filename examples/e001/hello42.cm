@@ -1,0 +1,10 @@
+# Simplest program possible
+# Creates the main function, and returns a hardcoded value
+
+proc main *() :int= return 42    # int main(void) { return 42; }
+
+# Note:
+# Rules for `main`:
+# - Must always be marked as public with `*`,
+#   Otherwise it would become `static int main(void)` which is illegal in C
+# - There can only be one `main` in all modules

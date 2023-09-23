@@ -1,1 +1,1 @@
-import ./minc/t001
+import ./t001/test.nim

@@ -1,0 +1,8 @@
+# Variables must ALWAYS be used, unless explicitely marked with discard
+# Discarding a variable counts as an explicit use
+
+proc main *() :int=
+  let one :int= 1
+  discard one          # Ok. Will be:   (void)one; //discard
+  # let two :int= 2    # <--- this would error, because its not used anywhere
+  return 42

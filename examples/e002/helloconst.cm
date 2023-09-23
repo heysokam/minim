@@ -1,0 +1,48 @@
+#_________________________________________
+# This module introduces two concepts:
+# Visibility and Mutability
+#_________________________________________
+
+const forty2 :int= 40  # static const int forty2 = 42;
+let   one   *:int=  1  # extern const int one; const int one = 1;
+proc main *() :int=
+  let two :int= 2      # const int two = 2;
+  return forty2
+
+#_________________________________________
+# Visibility:
+#___________________
+# All symbols nim MinC are marked as private to the module by default,
+# unless the user explicitly specifies they should be public
+# This is in stark contrast with C, where everything is public by default
+# const one  :int= 1   -> static const int one = 1;
+# const one *:int= 1   -> extern const int one; const int one = 1;
+#___________________
+# Exception: Local Symbols
+# Symbols inside a block are never marked with `static`,
+# even if they are not marked as public with `*`
+
+#_________________________________________
+# Mutability:
+#___________________
+# const/let variables cannot be modified (immutable)
+# Their C output will have `const` added to their type.
+#
+# const forty2 :int= 42    -> static const int forty2 = 42;
+# let   forty2 :int= 42    -> static const int forty2 = 42;
+
+
+
+#_________________________________________
+# Note:
+#___________________
+# Nim differentiates `const` from `let`:
+# const -> compile-time decided value
+# let   ->     run-time decided value
+#
+# We cannot do that, because C does not have such a concept.
+# So these are equivalent in MinC.
+# const forty2 :int= 42   ->  const int forty2 = 42;
+# let   forty2 :int= 42   ->  const int forty2 = 42;
+# ...                       ^
+# (static keyword omitted, but they both would have it)

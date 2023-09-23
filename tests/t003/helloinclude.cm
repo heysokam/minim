@@ -1,3 +1,0 @@
-include "<stdint.h>"
-include "<GLFW/glfw3.h>"
-proc main *() :int32_t= return 42

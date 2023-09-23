@@ -1,3 +1,0 @@
-const forty2 :int= 42
-let two *:int= 2
-proc main *() :int= return forty2

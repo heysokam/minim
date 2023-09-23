@@ -1,0 +1,14 @@
+# While loops work exactly like they do in C
+include "<stdio.h>"
+proc main *() :int=
+  while true:         # Run forever
+    printf "Hello "   # print `Hello ` to stdout ...
+    # ... Resulting in `Hello Hello Hello ...` forever, until forced to stop
+  return 0            # <-- Will never be reached
+
+# int main(void) {
+#   while (true) {
+#     printf("Hello ");
+#   }
+#   return 0;
+# }
