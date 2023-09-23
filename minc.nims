@@ -28,7 +28,7 @@ const run   = on
 const ss           = binDir/"minc"   # StoS compiler command
 const cc           = "zig cc"        # C Compiler command
 const NoErr        = [
-  "-Wno-declaration-after-statement", # Useless for >= C99
+  "-Wno-declaration-after-statement", # Explicitly allow asignment on definition. Useless warning for >= C99
   ] # Flags to remove from -Weverything
 const MinCFlags    = &"-Weverything -Werror -pedantic -pedantic-errors {NoErr}"  # C Compiler flags
 const MinCValidExt = [".cm", ".nim"] # Valid extensions for the MinC language

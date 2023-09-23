@@ -1,0 +1,9 @@
+# C libraries can be included as they are
+# Remember: MinC does not need C bindings, because MinC is C
+include "<stdint.h>"   #->    #include <stdint.h>
+
+# stdint introduces a new type, called `int32_t`
+# So now we can use it literally, because its a valid C symbol
+proc main *() :int32_t=
+  return 42
+# int32_t main(void) { return 42; }

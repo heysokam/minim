@@ -1,0 +1,16 @@
+# Continuing the trend of C libraries:
+# The whole C stdlib can be used natively
+include "<stdio.h>"  # Introduces  printf()
+proc main *() :int=
+  printf("Hello Call Function Syntax %d %d %d\n", 42,31,20)
+  printf "Hello Command Function Syntax %d %d %d\n", 42,31,20
+  return 0
+
+# Function Syntax types introduced in this example:
+# Call Syntax and Command Syntax
+# printf(1,2,3)    ->  printf(1,2,3);   # Call Syntax
+# printf 1,2,3     ->  printf(1,2,3);   # Command Syntax   (no parenthesis)
+
+# In C, Calls and Commands are equivalent
+# So they become the exact same code
+# But MinC syntax allows for the cleaner Command version without parenthesis

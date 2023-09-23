@@ -1,0 +1,5 @@
+# This is a comment that is meant to be added to the resulting file as `//`
+
+# ^ Empty lines are also meant to be preserved as they are
+proc main *() :int= return 42
+  ## This is a Doc-Comment that will be added as `///`
