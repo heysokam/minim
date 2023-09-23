@@ -1,0 +1,10 @@
+include "<stdio.h>"
+
+# if/elif/else branches work exactly like they do in C
+proc main *() :int=
+  if   true  : printf "true"
+  elif false : printf "false"
+  elif 0     : printf "zero"
+  elif 1     : printf "one"
+  else       : discard
+  return 0
