@@ -48,7 +48,7 @@ int thing = 1;
 
 ### No Nim ctypes
 `cint` is not a valid C type. It's a Nim type.  
-If you write `cint` or `int32` and you didn't define those symbols, the code won't compile in C because its not nim, its C.  
+If you write `cint` or `int32` and you didn't define those symbols, the code won't compile in C.  
 If you want to use `int32` as a type, you need to define it yourself before using it.  
 
 ## Compiler
@@ -144,9 +144,12 @@ MinC can be used to create C libraries, because the output is normal C code.
 - [ ] range[A..B] : Range limited numbers
 - [ ] For loops: Range based
 - [ ] int div vs /
-- [ ] CERT C compliance (clang-tidy automated pass)
+- [ ] CERT C compliance (clang-tidy automated pass  +  -Weverything -Werror)
 - [ ] ?maybe? Member functions? (very undecided, feels like too much handholding)
-- [ ] C function aliases for modules    proc funcName {.alias: "glfwFuncName".}
+- [ ] C function aliases for modules
+      https://developers.redhat.com/blog/2020/06/03/the-joys-and-perils-of-aliasing-in-c-and-c-part-2
+      proc funcName {.alias: "glfwFuncName".}
+      alias funcName = glfwFuncName
 - [ ] Zig-like Error!Result
 # Problems
 - [ ] Preserve non-doc comments
