@@ -1,13 +1,22 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
+# std dependencies
+import std/strformat
+# *Slate dependencies
 import slate/nimc
+import slate/format
+# minc dependencies
+import ./base
 
-type TODO = object of CatchableError
-template todo (code :PNode) :void=
-  raise newException(TODO, &"\nInterpreting {code.kind} is currently not supported for MinC.\n\nIts tree is:\n{code.treeRepr}\nIts code is:\n{code.renderTree}\n\n")
+#_______________________________________
+# Main Code Generator
+#_____________________________
+proc MinC *(code :PNode; indent :int= 0) :string
 
-## Generator Cases for MinC
+#_______________________________________
+# Generator Cases for MinC
+#_____________________________
 # Process
 proc mincProcDef          (code :PNode; indent :int= 0) :string
 proc mincFuncDef          (code :PNode; indent :int= 0) :string
@@ -191,7 +200,3 @@ proc mincReplayAction     (code :PNode) :string=  assert code.kind == nkReplayAc
 proc mincNilRodNode       (code :PNode) :string=  assert code.kind == nkNilRodNode       ; todo(code)  ## TODO : Converts a nkNilRodNode into the Min C Language
 # Recursive
 # proc mincStmtList         (code :PNode) :string=  assert code.kind == nkStmtList         ; todo(code)  ## TODO : Converts a nkStmtList into the Min C Language
-
-# Main Code Generator
-proc MinC (code :PNode; indent :int= 0) :string
-
