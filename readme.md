@@ -161,13 +161,13 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] C11  {.noreturn_C11.}   <- _Noreturn
   - [x] C23  {.noreturn.}       <- [[noreturn]]
 - [x] East-const rule always
+- [x] Multi-line strings
+- [x] Character literals
+- [x] break
+- [x] continue
 ```
 ```md
 # TODO:
-- [ ] Multi-line strings
-- [ ] Character literals
-- [ ] break
-- [ ] continue
 - [ ] Defines
   - [ ] {.define: symbol.}
   - [ ] when defined(symbol)  <- should almost never be #ifdef because of -Wundef not able to catch it missing
@@ -198,6 +198,7 @@ building for any target is as easy as passing `-target=` to the compiler command
     - [ ] Logical    : && || == != < > <= >=
     - [ ] Asignment  : += -= *= /=   &= ^= ~= &=   <<= >>=
   - [ ] Postfix  ++ --
+- [ ] 0.0f suffix for floats
 - [ ] Explicit casting
 - [ ] addr
 - [ ] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
@@ -208,7 +209,6 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] obj->field   pointer access syntax ->
 - [ ] C restrict keyword
 - [ ] C volatile keyword
-- [ ] 0.0f suffix for floats
 ```
 ```md
 # TODO: Extend C

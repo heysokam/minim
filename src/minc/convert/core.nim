@@ -7,6 +7,7 @@
 #____________________________________________________________________|
 # std dependencies
 import std/strutils
+import std/parseutils
 # *Slate dependencies
 import slate/element/procdef
 import slate/element/error
@@ -106,20 +107,29 @@ proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
     of VarKind.Const : "" # constants become constexpr, they don't need type mutability
     of VarKind.Let   : "const "
     of VarKind.Var   : ""
+  if entry[^2].kind == nkEmpty: raise newException(VariableCodegenError,
+    &"Declaring a variable without a type is forbidden. The illegal code is:\n{entry.renderTree}\n")
   let typ = vars.getType(entry)
   var T   = typ.name
   if typ.isPtr: T &= "*"  # T = Type Name
   let name  = vars.getName(entry)
   # Value asignment
   let value = entry[^1] # Value Node
-  if value.kind == nkEmpty and kind == VarKind.Const: # TODO : unbounded support
-    raise newException(VariableCodegenError, &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{entry.renderTree}")
-  let val =
+  if value.kind == nkEmpty and kind == VarKind.Const: raise newException(VariableCodegenError, # TODO : unbounded support
+    &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{entry.renderTree}")
+  let tab1 = (indent+1)*Tab
+  let val  =
     if   value.kind == nkEmpty: ""
-    elif value.kind == nkCall: mincCallRaw( value )
-    elif value.kind in nkStrLit..nkTripleStrLit: &"\"{vars.getValue(entry)}\""
+    elif value.kind == nkCall: " " & mincCallRaw( value )
+    elif value.kind in nkStrLit..nkRStrLit: &" \"{vars.getValue(entry)}\""
+    elif value.kind == nkTripleStrLit:
+      "\n" & tab1 & "\"" &
+      vars.getValue(entry)
+      .replace( "\n" , "\\n\"\n" & tab1 & "\"" ) &  # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
+      "\""
+    elif value.kind == nkCharLit: &" '{vars.getValue(entry).parseInt().char}'"
     else: vars.getValue(entry)
-  let asign = if val == "": "" else: &" = {val}"
+  let asign = if val == "": "" else: &" ={val}"
   # Apply to the result
   if not vars.isPrivate(entry,indent) and indent == 0:
     result.add &"{indent*Tab}extern {T}{name}; " # TODO: Write Extern decl to header
@@ -160,7 +170,7 @@ proc mincCommentStmt (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Control Flow
+# Other tools
 #_____________________________
 proc mincDiscardStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkDiscardStmt
@@ -186,6 +196,16 @@ proc mincReturnStmt (code :PNode; indent :int= 1) :string=
   assert code.kind == nkReturnStmt
   assert indent != 0, "Return statements cannot exist at the top level in C.\n" & code.renderTree
   result.add &"{indent*Tab}return {code[0].strValue};\n"
+#_____________________________
+proc mincContinueStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkContinueStmt
+  assert indent != 0, "Continue statements cannot exist at the top level in C.\n" & code.renderTree
+  result.add &"{indent*Tab}continue;\n"
+#_____________________________
+proc mincBreakStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkBreakStmt
+  assert indent != 0, "Break statements cannot exist at the top level in C.\n" & code.renderTree
+  result.add &"{indent*Tab}break;\n"
 #_____________________________
 proc mincWhileStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkWhileStmt
@@ -220,12 +240,11 @@ proc mincTypeDef (code :PNode; indent :int= 0) :string=
   assert code.kind == nkTypeDef
   let name = &"{types.getName(code)}"
   let info = types.getType(code)
-  let typ  =
-    if info.isPtr : &"{info.name}*"
-    else          : info.name
   let mut  = if info.isRead: " const" else: ""
+  var typ  = info.name & mut
+  if info.isPtr: typ &= "*"
   let body = ""
-  result   = &"typedef {typ}{mut} {name}{body};\n"
+  result   = &"typedef {typ} {name}{body};\n"
 #_____________________________
 proc mincTypeSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkTypeSection
@@ -259,7 +278,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkFuncDef          : result = mincProcDef(code, indent)
   #   Other Tools
   of nkDiscardStmt      : result = mincDiscardStmt(code, indent)
-  of nkReturnStmt       : result = mincReturnStmt(code, indent)
   #   Function calls
   of nkCommand          : result = mincCommand(code, indent)
   of nkCall             : result = mincCall(code, indent)
@@ -279,6 +297,10 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkCommentStmt      : result = mincCommentStmt(code, indent)
   #   Assignment
   of nkAsgn             : result = mincAsgn(code, indent)
+  #   Control flow
+  of nkReturnStmt       : result = mincReturnStmt(code, indent)
+  of nkBreakStmt        : result = mincBreakStmt(code, indent)
+  of nkContinueStmt     : result = mincContinueStmt(code, indent)
 
 
 
@@ -338,7 +360,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkStringToCString  : result = mincStringToCString(code)
   of nkCStringToString  : result = mincCStringToString(code)
 
-  of nkFastAsgn         : result = mincFastAsgn(code)
   of nkGenericParams    : result = mincGenericParams(code)
   of nkFormalParams     : result = mincFormalParams(code)
   of nkOfInherit        : result = mincOfInherit(code)
@@ -366,8 +387,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkTryStmt          : result = mincTryStmt(code)
   of nkFinally          : result = mincFinally(code)
   of nkRaiseStmt        : result = mincRaiseStmt(code)
-  of nkBreakStmt        : result = mincBreakStmt(code)
-  of nkContinueStmt     : result = mincContinueStmt(code)
   of nkBlockStmt        : result = mincBlockStmt(code)
   of nkStaticStmt       : result = mincStaticStmt(code)
 
@@ -441,6 +460,8 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkRStrLit          : result = mincRStrLit(code)
   of nkTripleStrLit     : result = mincTripleStrLit(code)
   of nkNilLit           : result = mincNilLit(code)
+  # Not needed
+  of nkFastAsgn         : result = mincFastAsgn(code)
 
   # Recursive Cases
   of nkStmtList:

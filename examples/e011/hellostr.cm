@@ -1,0 +1,22 @@
+type cstr *{.readonly.}= ptr char
+# Individual characters are defined with 'c' like in C
+let ch :char= 'A'
+
+# MinC supports Nim triple quoted string literals
+# They are delimited by three double quotes """ ... """
+# String literals in this form:
+# - Can run for several lines
+# - Can contain "
+# - Use C's implicit "" concatenation to merge the lines
+# - When the opening """ is followed by a newline
+#   (there may be whitespace between the opening """ and the newline),
+#   the newline (and the preceding whitespace) is not included in the string.
+# See:  https://nim-lang.org/docs/manual.html#lexical-analysis-triple-quoted-string-literals
+var tristr :cstr= """
+TestL0
+Line1"""
+
+proc main *() :int=
+  discard tristr
+  discard ch
+  return 0
