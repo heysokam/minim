@@ -1,0 +1,8 @@
+# The break and continue keywords inside loops
+# have the same behavior as they do in both C and Nim
+proc main *() :int=
+  while not false:
+    break
+  while not true:
+    continue  # Just a showcase example. This loop is illegal because of -Wunreachable-code
+  return 0
