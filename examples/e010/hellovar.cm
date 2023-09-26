@@ -1,0 +1,15 @@
+# Runtime variables can be left uninitialized
+# This is called a `tentative definition` in C
+#
+# They will be formalized, and therefore defined for the first time
+# exactly where they are first assigned.
+proc main *() :int=
+  var forty2 :int   # int forty2;    <- tentative definition
+  forty2 = 42       # forty2 = 42;   <- previous definition is now ignored, and replaced by this one
+  return forty2
+
+
+# Note:
+# This is different to nim, because in nim there are no tentative definitions.
+# MinC supports this C feature, and relays the responsability
+# to the user and the C compiler.

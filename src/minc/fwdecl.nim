@@ -25,7 +25,7 @@ proc mincWhileStmt        (code :PNode; indent :int= 0) :string
 proc mincIfStmt           (code :PNode; indent :int= 0) :string
 proc mincTypeSection      (code :PNode; indent :int= 0) :string
 proc mincTypeDef          (code :PNode; indent :int= 0) :string
-
+proc mincAsgn             (code :PNode; indent :int= 0) :string
 
 # TODO
 proc mincNone             (code :PNode) :string=  assert code.kind == nkNone             ; todo(code)  ## TODO : Converts a nkNone into the Min C Language
@@ -101,7 +101,7 @@ proc mincChckRange64      (code :PNode) :string=  assert code.kind == nkChckRang
 proc mincChckRange        (code :PNode) :string=  assert code.kind == nkChckRange        ; todo(code)  ## TODO : Converts a nkChckRange into the Min C Language
 proc mincStringToCString  (code :PNode) :string=  assert code.kind == nkStringToCString  ; todo(code)  ## TODO : Converts a nkStringToCString into the Min C Language
 proc mincCStringToString  (code :PNode) :string=  assert code.kind == nkCStringToString  ; todo(code)  ## TODO : Converts a nkCStringToString into the Min C Language
-proc mincAsgn             (code :PNode) :string=  assert code.kind == nkAsgn             ; todo(code)  ## TODO : Converts a nkAsgn into the Min C Language
+
 proc mincFastAsgn         (code :PNode) :string=  assert code.kind == nkFastAsgn         ; todo(code)  ## TODO : Converts a nkFastAsgn into the Min C Language
 proc mincGenericParams    (code :PNode) :string=  assert code.kind == nkGenericParams    ; todo(code)  ## TODO : Converts a nkGenericParams into the Min C Language
 proc mincFormalParams     (code :PNode) :string=  assert code.kind == nkFormalParams     ; todo(code)  ## TODO : Converts a nkFormalParams into the Min C Language

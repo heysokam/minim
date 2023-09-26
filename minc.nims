@@ -4,11 +4,13 @@
 # std dependencies
 import std/os
 import std/strformat
+import std/strutils
 #_________________________________________________
 # Project Config
 const thisDir      = currentSourcePath().parentDir()
 const binDir       = thisDir/"bin"
 const testsDir     = thisDir/"tests"
+const examplesdir  = thisDir/"examples"
 const cacheDir     = binDir/"cmcache"
 #_________________________________________________
 
@@ -16,8 +18,8 @@ const cacheDir     = binDir/"cmcache"
 #_________________________________________________
 # Target to Build
 #_____________________________
-const trg   = "helloworld"
-const src   = "t004"/trg&".cm"
+const trg   = "hellovar"
+const src   = "e010"/trg&".cm"
 const flags = ""
 const verb  = on
 const run   = on
@@ -29,8 +31,8 @@ const ss           = binDir/"minc"   # StoS compiler command
 const cc           = "zig cc"        # C Compiler command
 const NoErr        = [
   "-Wno-declaration-after-statement", # Explicitly allow asignment on definition. Useless warning for >= C99
-  ] # Flags to remove from -Weverything
-const MinCFlags    = &"-Weverything -Werror -pedantic -pedantic-errors {NoErr}"  # C Compiler flags
+  ].join(" ") # Flags to remove from -Weverything
+const MinCFlags    = &"--std=c2x -Weverything -Werror -pedantic -pedantic-errors {NoErr}"  # C Compiler flags
 const MinCValidExt = [".cm", ".nim"] # Valid extensions for the MinC language
 #_______________________________________
 type MinCCompileError = object of CatchableError
@@ -50,7 +52,7 @@ proc compile (src,trg,flags :string; verbose=false; cache=cacheDir) :void=
 
 #_________________________________________________
 # Current Test buildsystem
-let srcTest = testsDir/src
+let srcTest = examplesdir/src
 let trgTest = binDir/trg
 buildMinC()
 compile srcTest, trgTest, flags, verb
