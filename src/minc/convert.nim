@@ -23,7 +23,7 @@ const Tab = "  "
 #______________________________________________________
 # Procedure Definition
 #_____________________________
-const ProcDefArgTmpl = "{mut}{typ} {arg.name}{sep}"
+const ProcDefArgTmpl = "{typ}{mut} {arg.name}{sep}"
 proc mincProcDefGetArgs *(code :PNode) :string=
   ## Returns the code for all arguments of the given ProcDef node.
   assert code.kind == nkProcDef
@@ -33,7 +33,7 @@ proc mincProcDefGetArgs *(code :PNode) :string=
   if argc == 0: return "void"  # Explicit fill with void for no arguments
   # Find all arguments
   for arg in procdef.args(code): # For every individual argument -> args can be single or grouped arguments. this expands them
-    let mut  = if not arg.typ.isMut : "const "            else: ""  # Add const by default, when arg is not marked as var
+    let mut  = if not arg.typ.isMut : " const"            else: ""  # Add const by default, when arg is not marked as var
     let typ  = if arg.typ.isPtr     : &"{arg.typ.name}*"  else: arg.typ.name
     let sep  = if arg.last          : ""                  else: ", "
     result.add( fmt ProcDefArgTmpl )
@@ -55,8 +55,12 @@ proc mincProcDef (code :PNode; indent :int= 0) :string=
   var pragma :string
   if procdef.hasPragma(code):
     let prag = procdef.getPragma(code)
-    if prag[0].kind == nkIdent and prag[0].strValue == "noreturn":
-      pragma = "__attribute__((noreturn)) "
+    if prag[0].kind == nkIdent:
+      pragma = case prag[0].strValue
+      of "noreturn_GNU": "__attribute__((noreturn)) "
+      of "noreturn_C11": "_Noreturn "
+      of "noreturn"    : "[[noreturn]] "
+      else:""
   let priv = if procdef.isPrivate(code, indent): "static " else: ""
   result = fmt ProcDefTmpl
 
@@ -73,33 +77,49 @@ proc mincReturnStmt (code :PNode; indent :int= 1) :string=
 #______________________________________________________
 # Variables
 #_____________________________
-proc mincVariable (entry :PNode; indent :int; mutable :bool) :string=
+type VariableCodegenError = object of CatchableError
+type VarKind {.pure.}= enum Const, Let, Var
+proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
   assert entry.kind in [nkConstDef, nkIdentDefs], entry.treeRepr
   let priv  = if vars.isPrivate(entry,indent): "static " else: ""
-  let mut   = if not mutable: "const " else: ""
-  let typ   = vars.getType(entry)
-  let T     = if typ.isPtr: &"{typ.name}*" else: typ.name  # T = Type Name
+  let mut   = case kind
+    of VarKind.Const : "" # constants become constexpr, they don't need type mutability
+    of VarKind.Let   : "const "
+    of VarKind.Var   : ""
+  let typ = vars.getType(entry)
+  var T   = typ.name
+  if typ.isPtr: T &= "*"  # T = Type Name
   let name  = vars.getName(entry)
+  # Value asignment
   let value = entry[^1] # Value Node
-  let val   =
-    if   value.kind == nkCall: mincCallRaw( value )
+  if value.kind == nkEmpty and kind == VarKind.Const: # TODO : unbounded support
+    raise newException(VariableCodegenError, &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{entry.renderTree}")
+  let val =
+    if   value.kind == nkEmpty: ""
+    elif value.kind == nkCall: mincCallRaw( value )
     elif value.kind in nkStrLit..nkTripleStrLit: &"\"{vars.getValue(entry)}\""
     else: vars.getValue(entry)
+  let asign = if val == "": "" else: &" = {val}"
+  # Apply to the result
   if not vars.isPrivate(entry,indent) and indent == 0:
-    result.add &"{indent*Tab}extern {mut}{T} {name}; " # TODO: Write Extern decl to header
-  result.add &"{indent*Tab}{priv}{mut}{T} {name} = {val};\n"
+    result.add &"{indent*Tab}extern {T}{name}; " # TODO: Write Extern decl to header
+  let qualif = case kind
+    of VarKind.Const : &"const/*comptime*/ {priv}"  # TODO:clang.18->   &"constexpr {priv}"
+    of VarKind.Let   : &"{priv}"
+    of VarKind.Var   : &"{priv}"
+  result.add &"{indent*Tab}{qualif}{T} {mut}{name}{asign};\n"
 
 proc mincConstSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkConstSection # Let and Const are identical in C
-  for entry in code.sons: result.add mincVariable(entry,indent, mutable=false)
+  for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Const)
 
 proc mincLetSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkLetSection # Let and Const are identical in C
-  for entry in code.sons: result.add mincVariable(entry,indent, mutable=false)
+  for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Let)
 
 proc mincVarSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkVarSection
-  for entry in code.sons: result.add mincVariable(entry,indent, mutable=true)
+  for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Var)
 
 
 #______________________________________________________
@@ -211,13 +231,21 @@ proc mincTypeDef (code :PNode; indent :int= 0) :string=
   let typ  =
     if info.isPtr : &"{info.name}*"
     else          : info.name
-  let mut  = if info.isRead: "const " else: ""
+  let mut  = if info.isRead: " const" else: ""
   let body = ""
-  result   = &"typedef {mut}{typ} {name}{body};\n"
+  result   = &"typedef {typ}{mut} {name}{body};\n"
 #_____________________________
 proc mincTypeSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkTypeSection
   for entry in code: result.add mincTypeDef(entry, indent)
+
+
+#______________________________________________________
+# Assignment
+#_____________________________
+proc mincAsgn (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkAsgn
+  result = &"{indent*Tab}{code[0].strValue} = {code[^1].strValue};\n"
 
 
 #______________________________________________________
@@ -257,6 +285,9 @@ proc MinC (code :PNode; indent :int= 0) :string=
   of nkElifBranch       : result = mincElifBranch(code)
   #   Comments
   of nkCommentStmt      : result = mincCommentStmt(code, indent)
+  #   Assignment
+  of nkAsgn             : result = mincAsgn(code, indent)
+
 
 
 
@@ -314,7 +345,7 @@ proc MinC (code :PNode; indent :int= 0) :string=
   of nkChckRange        : result = mincChckRange(code)
   of nkStringToCString  : result = mincStringToCString(code)
   of nkCStringToString  : result = mincCStringToString(code)
-  of nkAsgn             : result = mincAsgn(code)
+
   of nkFastAsgn         : result = mincFastAsgn(code)
   of nkGenericParams    : result = mincGenericParams(code)
   of nkFormalParams     : result = mincFormalParams(code)
