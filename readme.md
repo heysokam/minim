@@ -9,29 +9,30 @@ If a type does not exist in C, the C compiler will error.
 It can use C libraries without wrappers, because the compiler outputs (human-readable) C.  
 
 ## MinC can seamlessly be (and stay) out of the way
-Case1: You have an existing C project that you want to use, but you really dislike C syntax.  
+**Case1**: You have an existing C project that you want to use, but you really dislike C syntax.  
+```md
 1. Do whatever you need to do to extend and build that project with extra C files.  
 2. Order the MinC compiler to output your generated C code into paths that the C buildsystem can recognize.  
 3. Build your C project like before.  
-
+```
 No other changes needed.  
 
-
-Case2: You prefer MinC syntax, but you don't want people to know that you use it.  
+**Case2**: You prefer MinC syntax, but you don't want people to know that you use it.  
+```md
 1. Create a private repository that contains your .cm files.  
 2. Create a public repository.  
 3. Order the MinC compiler to output your generated C code into the public repo.  
 4. Keep your private repo private.  
-
+```
 People will only have to deal with (and/or use as a library)   
 your (human-readable, formatted, and standard) C code instead.  
 
-
-Case3: Lets say you regret choosing MinC and want to remove it from your project:  
+**Case3**: Lets say you regret choosing MinC and want to remove it from your project:  
+```md
 1. Build your .cm files into .c files once.  
 2. Erase all your .cm files, and any other trace of minc, completely from your project.  
 3. Keep using your generated (human-readable, formatted, and standard) C code instead.  
-
+```
 Remember, MinC is C.  
 
 ## MinC is NOT nim
@@ -63,7 +64,7 @@ but MinC allows their expression with a cleaner, more readable and minimal synta
 MinC targets C23 first.  
 It also has sane defaults for building for modern 64bits targets in a safe/sanitized way.  
 It is also not afraid of breaking backwards compatibility with its default options.  
-But... complete and unbounded-C usage is allowed as an explicit opt-in.  
+But... unbounded-C and complete usage of C features is allowed as an explicit opt-in.  
 If you want to build C99 code and target old platforms, you can.  
 
 ## MinC is Explicit
@@ -82,19 +83,21 @@ Namespaces  (dot syntax)
 ```
 
 ## MinC will never be Nim
+In Nim with it's C backend, the Nim language is the owner of how applications must be written.  
+In MinC, **C** is **the owner** of said rules.  
+If something is illegal in C, it will be illegal in MinC, even if its legal in Nim.  
+
 The `minc` compiler does not (and never will) support the complete feature-set of Nim:  
 ```md
 No Garbage Collector
 No Exceptions
 No Meta-programming
 No ctypes. Types are translated verbatim. (aka no cint/cchar/cuint,cfloat,etc)
+No Dynamically allocated types (aka: no string, seq[T], openArray[T], etc)
 No Symbol Overloads
 ```
-## MinC vs Nim
-In Nim with it's C backend, the Nim language is the owner of the rules for how applications must be written.  
-In MinC, **C** is **the owner** of said rules.  
 
-### No Nim types
+**No Nim types**:
 Types are translated verbatim.  
 ```nim
 var thing :int= 1
@@ -103,9 +106,9 @@ var thing :int= 1
 // Result
 int thing = 1;
 ```
-**Important**: Note how we haven't written `cint`, we wrote `int`.  
+*Important*: Note how we haven't written `cint`, we wrote `int`.  
 
-### No Nim ctypes
+**No Nim ctypes**:
 `cint` is not a valid C type. It's a Nim type.  
 If you write `cint` or `int32` and you didn't define those symbols, the code won't compile in C.  
 If you want to use `int32` as a type, you need to define it yourself before using it.  
@@ -143,6 +146,8 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] Sketch   : Single condition only
   - [x] While
   - [x] if/elif/else blocks
+- [x] Variable asignment
+- [x] Tentative variable definition
 # Done: Extend C
 - [x] Immutable data by default  (const unless marked as mutable)
   - [x] Function arguments
@@ -155,39 +160,8 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] GNU  {.noreturn.}
 - [x] East-const rule always
 ```
-
-```md
-# Internal C compiler todo
-- [ ] --verbose-cc
-- [ ] Bundle zigcc
-- [ ] Provide an interface for zigcc in the minc binary
-- [ ] Provide the `-c` option to just output C code and not build it.
-- [ ] Docs:
-  - [ ] Link to an always-up-to-date list of natively supported cross-compilation targets
-  - [ ] Reminder that nim is only required for building the compiler itself. Users don't need it
-  - [ ] Reminder that ZigCC is bundled, and doesn't need to be manually installed
-  - [ ] Reasons for using ZigCC as the internal compiler
-        https://www.youtube.com/watch?v=YXrb-DqsBNU&t=506s
-        https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html
-        https://ziglang.org/learn/overview/#zig-is-also-a-c-compiler
-  - [ ] No need for cmake/makefiles/etc. Compiler support is integrated into the source files.
-  - [ ] Info on libc-musl-etc target options from zigcc
-  - [ ] Reminder about the ease of Cross-compilation UX (installation of msvc,mingw,osxcross,etc)
-- [ ] --unbounded (explicit opt-in for unbounded-C support)
-- [ ] -ffunction-sections -fdata-sections --gc-sections --print-gc-sections
-- [ ] -fvisibility=hidden   <- like id-Tech3
-- [ ] other flags : https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc
-- [ ] Optimization options
-  - [ ] -O4 ??   -O2 -flto instead?
-  - [ ] ?mold on linux ?
-- [ ] Build modes:
-  - [ ] Debug    # All debug flags active
-  - [ ] Release  # Optimization flags active
-  - [ ] None     # No flags. Blank slate for --passC:" ... "
-```
 ```md
 # TODO:
-- [ ] Variable asignment
 - [ ] Multi-line strings
 - [ ] Character literals
 - [ ] Arrays
@@ -233,6 +207,8 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] Defines
   - [ ] {.define: symbol.}
   - [ ] when defined(symbol)  <- should almost never be #ifdef because of -Wundef not able to catch it missing
+```
+```md
 # TODO: Extend C
 - [ ] Compiler interface within the code:
   - [ ] {.compile: "file.c".}         # Passes the file to zigcc as one of the files to cache
@@ -270,7 +246,10 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [ ] Sideffects
     - [ ] __attribute__ ((pure))
     - [ ] write-only memory idea from herose (like GPU write-only mem)
+  - [ ] Forbid tentative definitions in const (aka /*comptime*/ constexpr) but allow in var/let
 - [ ] {.unreachable.} unreachable macro (clang.17) https://releases.llvm.org/17.0.1/tools/clang/docs/ReleaseNotes.html#c2x-feature-support
+```
+```md
 # Problems
 - [ ] Preserve non-doc comments
 - [ ] Preserve empty lines
@@ -281,6 +260,35 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [ ] ? type MyType {.readonly.} = ptr char
   - [ ] ? type MyType = ptr Const[char]     ?howto: Const[T] ?
   - [ ] ? type MyType = lent ptr char
+```
+```md
+# Internal C compiler todo
+- [ ] --verbose-cc
+- [ ] Bundle zigcc
+- [ ] Provide an interface for zigcc in the minc binary
+- [ ] Provide the `-c` option to just output C code and not build it.
+- [ ] Docs:
+  - [ ] Link to an always-up-to-date list of natively supported cross-compilation targets
+  - [ ] Reminder that nim is only required for building the compiler itself. Users don't need it
+  - [ ] Reminder that ZigCC is bundled, and doesn't need to be manually installed
+  - [ ] Reasons for using ZigCC as the internal compiler
+        https://www.youtube.com/watch?v=YXrb-DqsBNU&t=506s
+        https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html
+        https://ziglang.org/learn/overview/#zig-is-also-a-c-compiler
+  - [ ] No need for cmake/makefiles/etc. Compiler support is integrated into the source files.
+  - [ ] Info on libc-musl-etc target options from zigcc
+  - [ ] Reminder about the ease of Cross-compilation UX (installation of msvc,mingw,osxcross,etc)
+- [ ] --unbounded (explicit opt-in for unbounded-C support)
+- [ ] -ffunction-sections -fdata-sections --gc-sections --print-gc-sections
+- [ ] -fvisibility=hidden   <- like id-Tech3
+- [ ] other flags : https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc
+- [ ] Optimization options
+  - [ ] -O4 ??   -O2 -flto instead?
+  - [ ] ?mold on linux ?
+- [ ] Build modes:
+  - [ ] Debug    # All debug flags active
+  - [ ] Release  # Optimization flags active
+  - [ ] None     # No flags. Blank slate for --passC:" ... "
 ```
 ```c
 // Non-GNU-exclusive {.noreturn.} pragma
