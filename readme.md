@@ -5,23 +5,27 @@ It does not try to be feature-full, its only goal is to write Pure C.
 
 ## MinC is C
 MinC is a different version of C that uses nim syntax.  
-If a type does not exist in C, the C compiler will error.
-It can use C libraries without wrappers, because the compiler outputs C (human-readable).  
+If a type does not exist in C, the C compiler will error.  
+It can use C libraries without wrappers, because the compiler outputs (human-readable) C.  
 
 ## MinC can seamlessly be (and stay) out of the way
 Case1: You have an existing C project that you want to use, but you really dislike C syntax.  
-1. Do whatever you need to do to extend and build that project with extra C files.
-2. Order the MinC compiler to output your generated C code into paths that the C buildsystem can recognize.
-3. Build your C project like before.
-No other changes needed.
+1. Do whatever you need to do to extend and build that project with extra C files.  
+2. Order the MinC compiler to output your generated C code into paths that the C buildsystem can recognize.  
+3. Build your C project like before.  
+
+No other changes needed.  
+
 
 Case2: You prefer MinC syntax, but you don't want people to know that you use it.  
 1. Create a private repository that contains your .cm files.  
 2. Create a public repository.  
 3. Order the MinC compiler to output your generated C code into the public repo.  
-4. Keep your private repo private.
+4. Keep your private repo private.  
+
 People will only have to deal with (and/or use as a library)   
 your (human-readable, formatted, and standard) C code instead.  
+
 
 Case3: Lets say you regret choosing MinC and want to remove it from your project:  
 1. Build your .cm files into .c files once.  
@@ -63,7 +67,7 @@ But... complete and unbounded-C usage is allowed as an explicit opt-in.
 If you want to build C99 code and target old platforms, you can.  
 
 ## MinC is Explicit
-In MinC you write imperatively and explicitly.
+In MinC you write imperatively and explicitly.  
 MinC does not assume anything about your code, and it does not auto-resolve types/symbols either.  
 There is no `auto` keyword, no implicity type resolution, and other similarly implicit behavior.  
 Everything is translated literally. And there are no symbol overloads either.  
