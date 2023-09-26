@@ -157,13 +157,20 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [x] Discard statement
 - [x] Function calls: Command syntax
 - [x] noreturn pragma
-  - [x] GNU  {.noreturn.}
+  - [x] GNU  {.noreturn_GNU.}   <- __attribute__((noreturn))
+  - [x] C11  {.noreturn_C11.}   <- _Noreturn
+  - [x] C23  {.noreturn.}       <- [[noreturn]]
 - [x] East-const rule always
 ```
 ```md
 # TODO:
 - [ ] Multi-line strings
 - [ ] Character literals
+- [ ] break
+- [ ] continue
+- [ ] Defines
+  - [ ] {.define: symbol.}
+  - [ ] when defined(symbol)  <- should almost never be #ifdef because of -Wundef not able to catch it missing
 - [ ] Arrays
   - [ ] Sized
   - [ ] Unknown size  one :array[_,char]   ->   char one[]
@@ -182,8 +189,6 @@ building for any target is as easy as passing `-target=` to the compiler command
     - [ ] else: == default:
   - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
   - [ ] do {...} while (cond);
-- [ ] break
-- [ ] continue
 - [ ] Multi-word types  (eg: unsigned T)
 - [ ] Operators
   - [ ] Prefix   + - & ! *
@@ -204,9 +209,6 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] C restrict keyword
 - [ ] C volatile keyword
 - [ ] 0.0f suffix for floats
-- [ ] Defines
-  - [ ] {.define: symbol.}
-  - [ ] when defined(symbol)  <- should almost never be #ifdef because of -Wundef not able to catch it missing
 ```
 ```md
 # TODO: Extend C
@@ -217,10 +219,6 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] {.emit: " ... ".}               # Writes the contents of the pragma literally into the output without any checks.
 - [ ] {.passL: "-lm".}                # Sends the given flags to the compiler in the linker section of the command
 - [ ] {.passC: "-I/some/folder".}     # Sends the given flags to the compiler in the source compilation section of the command
-- [ ] noreturn pragma
-  - [ ] GNU  {.noreturn_GNU.}
-  - [ ] C11  {.noreturn_C11.}
-  - [ ] C23  (todo: Make it default)
 - [ ] Object extension   (type MyType = object of ... )
 - [ ] Variant types
 - [ ] Generics
