@@ -148,6 +148,15 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] if/elif/else blocks
 - [x] Variable asignment
 - [x] Tentative variable definition
+- [x] Multi-line strings
+- [x] Character literals
+- [x] break
+- [x] continue
+- [x] Defines
+  - [x] {.define: symbol.}
+  - [x] when defined(symbol)
+- [x] {.error:"msg".}
+- [x] {.warning:"msg".}
 # Done: Extend C
 - [x] Immutable data by default  (const unless marked as mutable)
   - [x] Function arguments
@@ -161,16 +170,10 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] C11  {.noreturn_C11.}   <- _Noreturn
   - [x] GNU  {.noreturn_GNU.}   <- __attribute__((noreturn))
 - [x] East-const rule always
-- [x] Multi-line strings
-- [x] Character literals
-- [x] break
-- [x] continue
-- [x] Defines
-  - [x] {.define: symbol.}
-  - [x] when defined(symbol)
 ```
 ```md
 # TODO:
+- [ ] Multi-word types  (eg: unsigned T)
 - [ ] Arrays
   - [ ] Sized
   - [ ] Unknown size  one :array[_,char]   ->   char one[]
@@ -189,7 +192,6 @@ building for any target is as easy as passing `-target=` to the compiler command
     - [ ] else: == default:
   - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
   - [ ] do {...} while (cond);
-- [ ] Multi-word types  (eg: unsigned T)
 - [ ] Operators
   - [ ] Prefix   + - & ! *
   - [ ] Infix
@@ -202,8 +204,6 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] Explicit casting
 - [ ] addr
 - [ ] Enums
-- [ ] {.error:"msg".}
-- [ ] {.warning:"msg".}
 - [ ] Ternary operator   let one = if condition: 1 else: 2
 - [ ] Unions
 - [ ] varargs

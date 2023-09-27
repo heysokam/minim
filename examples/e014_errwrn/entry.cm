@@ -1,0 +1,6 @@
+proc main *() :int=
+  when false:
+    {.error: "This creates a compilation error when triggered".}
+  elif true:
+    {.warning: "This creates a compilation warning when triggered.".}
+  return 0

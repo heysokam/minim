@@ -18,8 +18,8 @@ const cacheDir     = binDir/"cmcache"
 #_________________________________________________
 # Target to Build
 #_____________________________
-const trg   = "defines"
-const src   = "e013"/trg&".cm"
+const trg   = "multiwordtype"
+const src   = "e015_"&trg/"entry.cm"
 const flags = ""
 const verb  = on
 const run   = on
@@ -31,6 +31,8 @@ const ss           = binDir/"minc"   # StoS compiler command
 const cc           = "zig cc"        # C Compiler command
 const NoErr        = [
   "-Wno-declaration-after-statement", # Explicitly allow asignment on definition. Useless warning for >= C99
+  "-Wno-error=pre-c2x-compat",        # Explicitly allow < c2x compat, but keep the warnings
+  "-Wno-error=#warnings",             # Explicitly allow user warnings without creating errors
   ].join(" ") # Flags to remove from -Weverything
 const MinCFlags    = &"--std=c2x -Weverything -Werror -pedantic -pedantic-errors {NoErr}"  # C Compiler flags
 const MinCValidExt = [".cm", ".nim"] # Valid extensions for the MinC language

@@ -168,21 +168,30 @@ type PragmaCodegenError = object of CatchableError
 proc mincPragmaDefine (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma
   assert code[0].len == 2, &"Only {{.define:symbol.}} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}"
-  let sym = code[0][1].strValue
-  result.add &"{indent*Tab}#define {sym}\n"
+  result.add &"{indent*Tab}#define {code[0][1].strValue}\n"
 #_____________________________
 proc mincPragmaError (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma
+  let data = code[0] # The data is inside an nkExprColonExpr node
+  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.error:\"msg\".}} error pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}"
+  result.add &"{indent*Tab}#error {data[1].strValue}\n"
 #_____________________________
 proc mincPragmaWarning (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma
+  let data = code[0] # The data is inside an nkExprColonExpr node
+  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.warning:\"msg\".}} warning pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}"
+  result.add &"{indent*Tab}#warning {data[1].strValue}\n"
 #_____________________________
 proc mincPragma (code :PNode; indent :int= 0) :string=
+  ## Codegen for standalone pragmas
+  ## Context-specific pragmas are handled inside each section
   assert code.kind == nkPragma
   assert code[0].kind == nkExprColonExpr and code[0].len == 2, &"Only pragmas with the shape {{.key:val.}} are currently supported.\nThe incorrect code is:\n{code.renderTree}"
   let key = code[0][0].strValue
   case key
-  of "define": result = mincPragmaDefine(code,indent)
+  of "define"  : result = mincPragmaDefine(code,indent)
+  of "error"   : result = mincPragmaError(code,indent)
+  of "warning" : result = mincPragmaWarning(code,indent)
   else: raise newException(PragmaCodegenError, &"Only {{.define:symbol.}} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}")
 
 
@@ -253,16 +262,17 @@ proc mincWhenStmt (code :PNode; indent :int= 0) :string=
       else:""
     assert pfx != "", "Unknown branch kind in minc.WhenStmt"
     # Get the condition
-    assert branch[^2].len <= 2, "Multi-condition when/elif/else statements are currently not supported"
+    assert branch[^2].kind == nkIdent or branch[^2].len <= 2, "Multi-condition when/elif/else statements are currently not supported"
     let cond = branch[0]
     assert cond.kind == nkPrefix or cond.kind == nkIdent, &"Only Prefix or Single conditions are currently supported\n{code.renderTree}"
     var condition :string
-    if cond[0].kind == nkIdent and cond[0].strValue == "not":
+    if cond.kind == nkIdent: # single condition case. Add its content to condition
+      condition.add cond.strValue
+    elif cond[0].kind == nkIdent and cond[0].strValue == "not":
       condition.add "!"
-    elif cond[0].kind == nkIdent:
-      condition.add cond[0].strValue
     # TODO: This is broken for most. Only works for `when defined(thing)`
-    if cond[1].kind == nkCall and cond[1][0].strValue == "defined":
+    if cond.kind == nkIdent: discard # single condition case. Skip searching for subnodes
+    elif cond[1].kind == nkCall and cond[1][0].strValue == "defined":
       condition.add &"defined({cond[1][1].strValue})"
     elif cond[1].kind == nkIdent:
       condition.add cond[1].strValue
