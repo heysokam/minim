@@ -187,7 +187,6 @@ building for any target is as easy as passing `-target=` to the compiler command
 ```
 ```md
 # TODO:
-- [ ] 0.0f suffix for floats
 - [ ] Arrays
   - [ ] Sized
   - [ ] Unknown size  one :array[_,char]   ->   char one[]
@@ -210,6 +209,7 @@ building for any target is as easy as passing `-target=` to the compiler command
     - [ ] else: == default:
   - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
   - [ ] do {...} while (cond);
+- [ ] 0.0f suffix for floats
 - [ ] Explicit casting
 - [ ] addr
 - [ ] Enums
