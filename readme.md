@@ -170,14 +170,30 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] C11  {.noreturn_C11.}   <- _Noreturn
   - [x] GNU  {.noreturn_GNU.}   <- __attribute__((noreturn))
 - [x] East-const rule always
+- [x] Booleans without stdbool.h  (-std=c23)
+- [x] Multi-word types  (eg: unsigned T)
+  - [x] signed
+  - [x] unsigned
+  - [x] long
+  - [x] short
+  - [x] double, triple and quadruple worded types
 ```
 ```md
 # TODO:
-- [ ] Multi-word types  (eg: unsigned T)
+- [ ] Operators
+  - [ ] Prefix   + - & ! * -- ++
+  - [ ] Infix
+    - [ ] Arithmetic : + - * / %
+    - [ ] Bitwise    : & | << >>
+    - [ ] Logical    : && || == != < > <= >=
+    - [ ] Asignment  : += -= *= /=   &= ^= ~= &=   <<= >>=
+  - [ ] Postfix  ++ --
+- [ ] 0.0f suffix for floats
 - [ ] Arrays
   - [ ] Sized
   - [ ] Unknown size  one :array[_,char]   ->   char one[]
   - [ ] Initialization
+  - [ ] indexed access
 - [ ] Structs
   - [ ] Declaration
   - [ ] Definition
@@ -192,15 +208,6 @@ building for any target is as easy as passing `-target=` to the compiler command
     - [ ] else: == default:
   - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
   - [ ] do {...} while (cond);
-- [ ] Operators
-  - [ ] Prefix   + - & ! *
-  - [ ] Infix
-    - [ ] Arithmetic : + - * / %
-    - [ ] Bitwise    : & | << >>
-    - [ ] Logical    : && || == != < > <= >=
-    - [ ] Asignment  : += -= *= /=   &= ^= ~= &=   <<= >>=
-  - [ ] Postfix  ++ --
-- [ ] 0.0f suffix for floats
 - [ ] Explicit casting
 - [ ] addr
 - [ ] Enums
@@ -211,9 +218,11 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] C restrict keyword
 - [ ] C volatile keyword
 - [ ] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
+- [ ] Multi-word pointer types  (eg: ptr unsigned long long int)
 ```
 ```md
 # TODO: Extend C
+- [ ] Typed Pointer notation for function/array function arguments  (Modern C, page 19)
 - [ ] Compiler interface within the code:
   - [ ] {.compile: "file.c".}         # Passes the file to zigcc as one of the files to cache
   - [ ] {.compile: "/some/folder/".}  # Passes a glob of all files in the given folder to zigcc

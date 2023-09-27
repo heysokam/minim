@@ -128,7 +128,7 @@ proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
       .replace( "\n" , "\\n\"\n" & tab1 & "\"" ) &  # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
       "\""
     elif value.kind == nkCharLit: &" '{vars.getValue(entry).parseInt().char}'"
-    else: vars.getValue(entry)
+    else: " " & vars.getValue(entry)
   let asign = if val == "": "" else: &" ={val}"
   # Apply to the result
   if not vars.isPrivate(entry,indent) and indent == 0:
@@ -287,10 +287,11 @@ proc mincWhenStmt (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # Types
 #_____________________________
+const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 proc mincTypeDef (code :PNode; indent :int= 0) :string=
   assert code.kind == nkTypeDef
   let name = &"{types.getName(code)}"
-  let info = types.getType(code)
+  let info = types.getType(code, KnownMultiwordPrefixes)
   let mut  = if info.isRead: " const" else: ""
   var typ  = info.name & mut
   if info.isPtr: typ &= "*"

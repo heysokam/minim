@@ -18,7 +18,7 @@ const cacheDir     = binDir/"cmcache"
 #_________________________________________________
 # Target to Build
 #_____________________________
-const trg   = "multiwordtype"
+const trg   = "multiwordtypes"
 const src   = "e015_"&trg/"entry.cm"
 const flags = ""
 const verb  = on
