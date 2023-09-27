@@ -9,7 +9,7 @@ If a type does not exist in C, the C compiler will error.
 It can use C libraries without wrappers, because the compiler outputs (human-readable) C.  
 
 ## MinC can seamlessly be (and stay) out of the way
-**Case1**: You have an existing C project that you want to use, but you really dislike C syntax.  
+**Case1**: You have an existing C project that you want to use, but you don't like C syntax.  
 ```md
 1. Do whatever you need to do to extend and build that project with extra C files.  
 2. Order the MinC compiler to output your generated C code into paths that the C buildsystem can recognize.  
@@ -107,11 +107,11 @@ var thing :int= 1
 int thing = 1;
 ```
 *Important*: Note how we haven't written `cint`, we wrote `int`.  
+If you want to use nim's `int32` as a type, you need to define it yourself before using it.  
 
 **No Nim ctypes**:
 `cint` is not a valid C type. It's a Nim type.  
-If you write `cint` or `int32` and you didn't define those symbols, the code won't compile in C.  
-If you want to use `int32` as a type, you need to define it yourself before using it.  
+If you write `cint` or `cfloat` and you didn't define those symbols, the code won't compile in C.  
 
 ## Compiler
 MinC uses an StoS compiler that generates C code.  
