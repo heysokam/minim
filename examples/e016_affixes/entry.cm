@@ -1,0 +1,15 @@
+# The only known prefixes are the Increment/Decrement operators.
+# MinC supports all C and Nim infix operators
+# Increment/Decrement operators are illegal as postfix in MinC. The current parser does not understand them
+proc main *() :int=
+  var one :int= 1
+  var two :int= 2
+  # Standalone Prefixes
+  ++one
+  --one
+  # Standalone infixes
+  one += two
+  one -= two
+  one *= two
+  one <<= two
+  return one

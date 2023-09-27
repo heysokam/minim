@@ -16,9 +16,73 @@ import slate/element/incldef
 import slate/element/calls
 import slate/element/loops
 import slate/element/types
+import slate/element/affixes
 # minc dependencies
 import ../cfg
 include ./fwdecl
+
+
+#______________________________________________________
+# Affixes
+#_____________________________
+type AffixCodegenError = object of CatchableError
+#_____________________________
+proc mincPrefix (code :PNode; indent :int= 0; raw :bool= false) :string=
+  assert code.kind == nkPrefix
+  let data = affixes.getPrefix(code)
+  if not raw: result.add indent*Tab
+  case data.fix
+  of "++","--":
+    discard # Known Prefixes. Do nothing, the line after this caseof will add their code
+  of "+", "-", "~":
+    assert raw, &"Found a prefix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}"
+  of "&", "!", "*": raise newException(AffixCodegenError,
+    &"Found a C prefix that cannot be used in MinC. The incorrect code is:\n{code.renderTree}")
+  result.add &"{data.fix}{data.right}"
+  if not raw: result.add ";\n"
+#_____________________________
+proc mincInfix (code :PNode; indent :int= 0; raw :bool= false) :string=
+  assert code.kind == nkInfix
+  var data = affixes.getInfix(code)
+  if not raw: result.add indent*Tab
+  case data.fix
+  of "++","--":
+    if data.right == "": raise newException(AffixCodegenError,
+      &"Using ++ or -- as postfixes is currently not possible. The default Nim parser interprets them as infix, and breaks the code written afterwards. Please convert them to prefixes. The code that triggered this is:\n{code.renderTree}\n")
+  of "+=", "-=", "/=", "*=", "%=", "&=", "|=", "^=", "<<=", ">>=":
+    # Known Infixes. Do nothing, the line after this caseof will add their code
+    discard
+  of "+", "-", "*", "/", "%", "&", "|", "^", ">>", "<<",
+     "and", "or", "xor", "shr", "shl", "div", "mod":
+    # Known infixes that cannot be standalone
+    assert raw, &"Found an infix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}"
+  of "in", "notin", "is", "isnot", "of", "as", "from":
+    assert false, &"Found a nim infix keyword that cannot be used in MinC. The incorrect code is:\n{code.renderTree}"
+  of "not":
+    assert false, &"Found a nim infix keyword that can only be used as prefix. The incorrect code is:\n{code.renderTree}"
+  else: raise newException(AffixCodegenError, &"Found an unknown infix. The code that contains it is:\n{code.renderTree}\n")
+  # Remap nim keywords to C
+  case data.fix
+  of "and" : data.fix = "&"
+  of "or"  : data.fix = "|"
+  of "xor" : data.fix = "^"
+  of "shl" : data.fix = "<<"
+  of "shr" : data.fix = ">>"
+  of "div" : data.fix = "/"  # TODO: Check that the types used are integers
+  of "mod" : data.fix = "%"
+  else:discard
+  # Add the the code as left fix right
+  result.add &"{data.left} {data.fix} {data.right}"
+  if not raw: result.add ";\n"
+#_____________________________
+proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
+  ## WARNING: Nim parser interprets no postfixes, other than `*` for visibility
+  ## https://nim-lang.org/docs/macros.html#callsslashexpressions-postfix-operator-call
+  assert code.kind == nkPostfix
+  case affixes.getPostfix(code).fix
+  of "*": raise newException(AffixCodegenError,
+    &"Using * as a postfix is forbidden in MinC. The code that triggered this error is:\n{code.renderTree}")
+  else: raise newException(AffixCodegenError, "Unreachable case found in mincPostfix.\n{code.treeRepr}\n{code.renderTree}")
 
 
 #______________________________________________________
@@ -100,6 +164,7 @@ proc mincCommand (code :PNode; indent :int= 0) :string=
 #_____________________________
 type VariableCodegenError = object of CatchableError
 type VarKind {.pure.}= enum Const, Let, Var
+#_____________________________
 proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
   assert entry.kind in [nkConstDef, nkIdentDefs], entry.treeRepr
   let priv  = if vars.isPrivate(entry,indent): "static " else: ""
@@ -372,6 +437,10 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkContinueStmt     : result = mincContinueStmt(code, indent)
   #   Pragmas
   of nkPragma           : result = mincPragma(code, indent)
+  #   Pre-In-Post.fix
+  of nkInfix            : result = mincInfix(code, indent)
+  of nkPrefix           : result = mincPrefix(code, indent)
+  of nkPostfix          : result = mincPostfix(code, indent)
 
 
 
@@ -385,10 +454,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
 
   of nkDotCall          : result = mincDotCall(code)
   of nkCallStrLit       : result = mincCallStrLit(code)
-
-  of nkInfix            : result = mincInfix(code)
-  of nkPrefix           : result = mincPrefix(code)
-  of nkPostfix          : result = mincPostfix(code)
 
   of nkHiddenCallConv   : result = mincHiddenCallConv(code)
   of nkExprEqExpr       : result = mincExprEqExpr(code)

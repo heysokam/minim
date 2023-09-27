@@ -177,17 +177,16 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] long
   - [x] short
   - [x] double, triple and quadruple worded types
+- [x] Operators
+  - [x] Prefix   + - & ! * -- ++
+  - [x] Infix
+    - [x] Arithmetic : + - * / %
+    - [x] Bitwise    : & | << >>
+    - [x] Asignment  : += -= *= /= %=  |= ^= ~=   <<= >>=
+    - [x] Postfix  ++ --  (nim parser has no postfix, other than * for visibility)
 ```
 ```md
 # TODO:
-- [ ] Operators
-  - [ ] Prefix   + - & ! * -- ++
-  - [ ] Infix
-    - [ ] Arithmetic : + - * / %
-    - [ ] Bitwise    : & | << >>
-    - [ ] Logical    : && || == != < > <= >=
-    - [ ] Asignment  : += -= *= /=   &= ^= ~= &=   <<= >>=
-  - [ ] Postfix  ++ --
 - [ ] 0.0f suffix for floats
 - [ ] Arrays
   - [ ] Sized
@@ -199,6 +198,9 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [ ] Definition
   - [ ] Field access
 - [ ] For loops:  Basic support
+- [ ] Operators
+  - [ ] Infix
+    - [ ] Logical   && || == != < > <= >=
 - [ ] Conditions
   - [ ] Complete : Arbitrary condition tree support
   - [ ] Switch case
@@ -238,7 +240,9 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] Enum-arrays
 - [ ] range[A..B] : Range limited numbers
 - [ ] For loops: Range based
-- [ ] int div vs /
+- [ ] Operators
+  - [ ] Custom infix Operators
+  - [ ] int div vs /
 - [ ] CERT C compliance (clang-tidy automated pass  +  -Weverything -Werror)
 - [ ] ?maybe? Member functions? (very undecided, feels like too much handholding)
 - [ ] C function aliases for modules
