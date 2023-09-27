@@ -162,19 +162,28 @@ proc mincIncludeStmt (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Comments
+# Pragmas
 #_____________________________
-proc mincCommentStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkCommentStmt
-  result.add &"{indent*Tab}/// {code.strValue}\n"
-
-
-#______________________________________________________
-# Other tools
+type PragmaCodegenError = object of CatchableError
+proc mincPragmaDefine (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkPragma
+  assert code[0].len == 2, &"Only {{.define:symbol.}} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}"
+  let sym = code[0][1].strValue
+  result.add &"{indent*Tab}#define {sym}\n"
 #_____________________________
-proc mincDiscardStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkDiscardStmt
-  for arg in code: result.add &"{indent*Tab}(void){arg.strValue}; //discard\n"
+proc mincPragmaError (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkPragma
+#_____________________________
+proc mincPragmaWarning (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkPragma
+#_____________________________
+proc mincPragma (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkPragma
+  assert code[0].kind == nkExprColonExpr and code[0].len == 2, &"Only pragmas with the shape {{.key:val.}} are currently supported.\nThe incorrect code is:\n{code.renderTree}"
+  let key = code[0][0].strValue
+  case key
+  of "define": result = mincPragmaDefine(code,indent)
+  else: raise newException(PragmaCodegenError, &"Only {{.define:symbol.}} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}")
 
 
 #______________________________________________________
@@ -224,13 +233,45 @@ proc mincIfStmt (code :PNode; indent :int= 0) :string=
       elif branch.kind == nkElse                   : " else "
       else:""
     assert pfx != "", "Unknown branch kind in minc.IfStmt"
-    assert branch[^1][0].len > 1, "Multi-condition if/elif statements are currently not supported"
+    assert branch[^1][0].len <= 2, "Multi-condition if/elif statements are currently not supported"
     let condition :string=
       if   branch.kind == nkElifBranch : &"({mincGetCondition(branch)}) "
       elif branch.kind == nkElse       : ""
       else:""
     result.add &"{pfx}{condition}{{\n{body}{tab}}}"
   result.add "\n" # Finish with Newline on the last branch
+#_____________________________
+proc mincWhenStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkWhenStmt
+  let tab :string= indent*Tab
+  for id,branch in code.pairs:
+    # Get the macro prefix
+    let pfx :string=
+      if   branch.kind == nkElifBranch and id == 0 : &"{tab}#if "
+      elif branch.kind == nkElifBranch             : &"{tab}#elif "
+      elif branch.kind == nkElse                   : &"{tab}#else "
+      else:""
+    assert pfx != "", "Unknown branch kind in minc.WhenStmt"
+    # Get the condition
+    assert branch[^2].len <= 2, "Multi-condition when/elif/else statements are currently not supported"
+    let cond = branch[0]
+    assert cond.kind == nkPrefix or cond.kind == nkIdent, &"Only Prefix or Single conditions are currently supported\n{code.renderTree}"
+    var condition :string
+    if cond[0].kind == nkIdent and cond[0].strValue == "not":
+      condition.add "!"
+    elif cond[0].kind == nkIdent:
+      condition.add cond[0].strValue
+    # TODO: This is broken for most. Only works for `when defined(thing)`
+    if cond[1].kind == nkCall and cond[1][0].strValue == "defined":
+      condition.add &"defined({cond[1][1].strValue})"
+    elif cond[1].kind == nkIdent:
+      condition.add cond[1].strValue
+    else: assert false, &"Unknown when condition in:\n{code.renderTree}"
+    # Get the body code from the Stmt section
+    let body = &"{MinC(branch[^1], indent+1)}"
+    # Add to the result
+    result.add &"{pfx}{condition}\n{body}"
+  result.add &"{tab}#endif\n"
 
 
 #______________________________________________________
@@ -257,6 +298,22 @@ proc mincTypeSection (code :PNode; indent :int= 0) :string=
 proc mincAsgn (code :PNode; indent :int= 0) :string=
   assert code.kind == nkAsgn
   result = &"{indent*Tab}{code[0].strValue} = {code[^1].strValue};\n"
+
+
+#______________________________________________________
+# Comments
+#_____________________________
+proc mincCommentStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkCommentStmt
+  result.add &"{indent*Tab}/// {code.strValue}\n"
+
+
+#______________________________________________________
+# Other tools
+#_____________________________
+proc mincDiscardStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkDiscardStmt
+  for arg in code: result.add &"{indent*Tab}(void){arg.strValue}; //discard\n"
 
 
 #______________________________________________________
@@ -292,6 +349,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkWhileStmt        : result = mincWhileStmt(code, indent)
   #   Conditionals
   of nkIfStmt           : result = mincIfStmt(code, indent)
+  of nkWhenStmt         : result = mincWhenStmt(code, indent)
   of nkElifBranch       : result = mincElifBranch(code)
   #   Comments
   of nkCommentStmt      : result = mincCommentStmt(code, indent)
@@ -301,6 +359,8 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkReturnStmt       : result = mincReturnStmt(code, indent)
   of nkBreakStmt        : result = mincBreakStmt(code, indent)
   of nkContinueStmt     : result = mincContinueStmt(code, indent)
+  #   Pragmas
+  of nkPragma           : result = mincPragma(code, indent)
 
 
 
@@ -371,10 +431,8 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkIteratorDef      : result = mincIteratorDef(code)
   of nkExceptBranch     : result = mincExceptBranch(code)
   of nkAsmStmt          : result = mincAsmStmt(code)
-  of nkPragma           : result = mincPragma(code)
   of nkPragmaBlock      : result = mincPragmaBlock(code)
 
-  of nkWhenStmt         : result = mincWhenStmt(code)
   of nkCaseStmt         : result = mincCaseStmt(code)
   of nkOfBranch         : result = mincOfBranch(code)
   of nkElse             : result = mincElse(code)

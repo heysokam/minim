@@ -1,0 +1,13 @@
+# MinC supports defining keywords at compile time
+# They will be converted to C define preprocessor macros
+{.define: Something.}  # <- becomes:    #define Something
+
+proc main *() :int=
+  # Compile-time conditionals are relayed to the C preprocessor.
+  # When they are defined with `when COND`, they convert into `#if COND`
+  # When the condition is declared with `defined(KEYWORD)`
+  #   it converts to its equivalent: `#if defined(KEYWORD)`
+  when not defined(Something):   # <- becomes:    #if !defined(Something)
+    printf "Hello something\n"
+  return 0
+
