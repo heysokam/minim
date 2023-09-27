@@ -184,14 +184,14 @@ building for any target is as easy as passing `-target=` to the compiler command
     - [x] Bitwise    : & | << >>
     - [x] Asignment  : += -= *= /= %=  |= ^= ~=   <<= >>=
     - [x] Postfix  ++ --  (nim parser has no postfix, other than * for visibility)
+- [x] Arrays
+  - [x] Sized
+  - [x] Unknown size  one :array[_,char]   ->   char one[]
+  - [x] Initialization
+  - [x] indexed access
 ```
 ```md
 # TODO:
-- [ ] Arrays
-  - [ ] Sized
-  - [ ] Unknown size  one :array[_,char]   ->   char one[]
-  - [ ] Initialization
-  - [ ] indexed access
 - [ ] Structs
   - [ ] Declaration
   - [ ] Definition
@@ -221,6 +221,7 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] C volatile keyword
 - [ ] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
 - [ ] Multi-word pointer types  (eg: ptr unsigned long long int)
+- [ ] Arrays: nested
 ```
 ```md
 # TODO: Extend C
@@ -264,15 +265,12 @@ building for any target is as easy as passing `-target=` to the compiler command
 ```
 ```md
 # Problems
-- [ ] Preserve non-doc comments
-- [ ] Preserve empty lines
-- [ ] Allow pragmas for types (not just symbols)
 - [ ] Better readonly pragma: Const types how?
   - [ ] ? type MyType = ptr char {.immutable.}
   - [ ] ? type MyType = ptr {.immutable.} char
   - [ ] ? type MyType {.readonly.} = ptr char
   - [ ] ? type MyType = ptr Const[char]     ?howto: Const[T] ?
-  - [ ] ? type MyType = lent ptr char
+  - [ ] ? type MyType = lent ptr char    <- char const * const  (aka incorrect)
 ```
 ```md
 # Internal C compiler todo
@@ -302,6 +300,13 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [ ] Debug    # All debug flags active
   - [ ] Release  # Optimization flags active
   - [ ] None     # No flags. Blank slate for --passC:" ... "
+```
+```md
+# Extend Parser (maybe)
+- [ ] Preserve non-doc comments
+- [ ] Preserve empty lines
+- [ ] Multi-value discard
+- [ ] Pragmas for types (not just symbols)
 ```
 ```c
 // Non-GNU-exclusive {.noreturn.} pragma
