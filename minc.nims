@@ -18,8 +18,8 @@ const cacheDir     = binDir/"cmcache"
 #_________________________________________________
 # Target to Build
 #_____________________________
-const trg   = "breakcontinue"
-const src   = "e012"/trg&".cm"
+const trg   = "defines"
+const src   = "e013"/trg&".cm"
 const flags = ""
 const verb  = on
 const run   = on

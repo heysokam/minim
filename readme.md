@@ -157,20 +157,20 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [x] Discard statement
 - [x] Function calls: Command syntax
 - [x] noreturn pragma
-  - [x] GNU  {.noreturn_GNU.}   <- __attribute__((noreturn))
-  - [x] C11  {.noreturn_C11.}   <- _Noreturn
   - [x] C23  {.noreturn.}       <- [[noreturn]]
+  - [x] C11  {.noreturn_C11.}   <- _Noreturn
+  - [x] GNU  {.noreturn_GNU.}   <- __attribute__((noreturn))
 - [x] East-const rule always
 - [x] Multi-line strings
 - [x] Character literals
 - [x] break
 - [x] continue
+- [x] Defines
+  - [x] {.define: symbol.}
+  - [x] when defined(symbol)
 ```
 ```md
 # TODO:
-- [ ] Defines
-  - [ ] {.define: symbol.}
-  - [ ] when defined(symbol)  <- should almost never be #ifdef because of -Wundef not able to catch it missing
 - [ ] Arrays
   - [ ] Sized
   - [ ] Unknown size  one :array[_,char]   ->   char one[]
@@ -201,14 +201,16 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] 0.0f suffix for floats
 - [ ] Explicit casting
 - [ ] addr
-- [ ] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
-- [ ] Ternary operator   let one = if condition: 1 else: 2
 - [ ] Enums
+- [ ] {.error:"msg".}
+- [ ] {.warning:"msg".}
+- [ ] Ternary operator   let one = if condition: 1 else: 2
 - [ ] Unions
 - [ ] varargs
 - [ ] obj->field   pointer access syntax ->
 - [ ] C restrict keyword
 - [ ] C volatile keyword
+- [ ] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
 ```
 ```md
 # TODO: Extend C
