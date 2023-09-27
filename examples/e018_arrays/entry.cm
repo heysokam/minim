@@ -1,0 +1,12 @@
+proc main *() :int=
+  # Arrays can be declared by specifying a size and a type
+  var arr0 :array[1,int]
+  # They can also be initialized at the same time as they are declared
+  var arr1 :array[1,int]= [0]
+  # An option not available in Nim is undetermined sized arrays, using `_` as its size specifier
+  var arr2 :array[_,int]= [0,1]
+  # Accessing array values is done with the `[]` bracketed syntax
+  var one :int= arr2[1]
+
+  discard arr0; discard arr1; discard arr2; discard one
+  return 0

@@ -18,8 +18,8 @@ const cacheDir     = binDir/"cmcache"
 #_________________________________________________
 # Target to Build
 #_____________________________
-const trg   = "suffixes"
-const src   = "e017_"&trg/"entry.cm"
+const trg   = "arrays"
+const src   = "e018_"&trg/"entry.cm"
 const flags = ""
 const verb  = on
 const run   = on
@@ -33,6 +33,7 @@ const NoErr        = [
   "-Wno-declaration-after-statement", # Explicitly allow asignment on definition. Useless warning for >= C99
   "-Wno-error=pre-c2x-compat",        # Explicitly allow < c2x compat, but keep the warnings
   "-Wno-error=#warnings",             # Explicitly allow user warnings without creating errors
+  "-Wno-error=unsafe-buffer-usage",   # Explicitly avoid erroring on this (half-finished) warning group from clang.16
   ].join(" ") # Flags to remove from -Weverything
 const MinCFlags    = &"--std=c2x -Weverything -Werror -pedantic -pedantic-errors {NoErr}"  # C Compiler flags
 const MinCValidExt = [".cm", ".nim"] # Valid extensions for the MinC language

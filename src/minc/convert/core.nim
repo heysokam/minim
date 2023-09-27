@@ -23,6 +23,16 @@ include ./fwdecl
 
 
 #______________________________________________________
+# General tools
+#_____________________________
+proc mincGetValueRaw *(code :PNode) :string=
+  assert code.kind in [nkEmpty, nkIdent, nkBracketExpr] or code.kind in nkCharLit..nkTripleStrLit
+  if   code.kind == nkEmpty       : ""
+  elif code.kind == nkBracketExpr : &"{code[0].strValue}[{code[1].strValue}]"
+  else                            : code.strValue
+
+
+#______________________________________________________
 # Affixes
 #_____________________________
 type AffixCodegenError = object of CatchableError
@@ -176,6 +186,13 @@ proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
     &"Declaring a variable without a type is forbidden. The illegal code is:\n{entry.renderTree}\n")
   let typ = vars.getType(entry)
   var T   = typ.name
+  # if typ.isArr and typ.arrSize == "_": raise newException(VariableCodegenError,  # TODO: When -Wunsafe-buffer-usage becomes stable
+  #   &"MinC uses the Safe Buffers programming model exclusively. Declaring arrays of an unknown size is disabled. The illegal code is:\n{entry.renderTree}\n")
+  var arr :string=
+    if   typ.isArr and typ.arrSize == "_": "[]"
+    elif typ.isArr and typ.arrSize != "_": &"[{typ.arrSize}]"
+    else:""
+  assert not (typ.isArr and arr == ""), "Found an array type, but its code has not been correctly generated.\n{entry.treeRepr}\n{entry.renderTree}\n"
   if typ.isPtr: T &= "*"  # T = Type Name
   let name  = vars.getName(entry)
   # Value asignment
@@ -184,34 +201,36 @@ proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
     &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{entry.renderTree}")
   let tab1 = (indent+1)*Tab
   let val  =
-    if   value.kind == nkEmpty: ""
-    elif value.kind == nkCall: " " & mincCallRaw( value )
-    elif value.kind in nkStrLit..nkRStrLit: &" \"{vars.getValue(entry)}\""
-    elif value.kind == nkTripleStrLit:
+    if   value.kind == nkEmpty             : ""
+    elif value.kind == nkCall              : " " & mincCallRaw( value )
+    elif value.kind in nkStrLit..nkRStrLit : &" \"{vars.getValue(entry)}\""
+    elif value.kind == nkTripleStrLit      :
       "\n" & tab1 & "\"" &
       vars.getValue(entry)
       .replace( "\n" , "\\n\"\n" & tab1 & "\"" ) &  # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
       "\""
-    elif value.kind == nkCharLit: &" '{vars.getValue(entry).parseInt().char}'"
+    elif value.kind == nkCharLit     : &" '{vars.getValue(entry).parseInt().char}'"
+    elif typ.isArr                   : &" {{ {vars.getValue(entry).split(\" \").join(\", \")} }}"
+    elif value.kind == nkBracketExpr : &" {mincGetValueRaw(value)}"
     else: " " & vars.getValue(entry)
   let asign = if val == "": "" else: &" ={val}"
   # Apply to the result
   if not vars.isPrivate(entry,indent) and indent == 0:
-    result.add &"{indent*Tab}extern {T}{name}; " # TODO: Write Extern decl to header
+    result.add &"{indent*Tab}extern {T}{name}{arr}; " # TODO: Write Extern decl to header
   let qualif = case kind
     of VarKind.Const : &"const/*comptime*/ {priv}"  # TODO:clang.18->   &"constexpr {priv}"
     of VarKind.Let   : &"{priv}"
     of VarKind.Var   : &"{priv}"
-  result.add &"{indent*Tab}{qualif}{T} {mut}{name}{asign};\n"
-
+  result.add &"{indent*Tab}{qualif}{T} {mut}{name}{arr}{asign};\n"
+#_____________________________
 proc mincConstSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkConstSection # Let and Const are identical in C
   for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Const)
-
+#_____________________________
 proc mincLetSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkLetSection # Let and Const are identical in C
   for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Let)
-
+#_____________________________
 proc mincVarSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkVarSection
   for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Var)
@@ -271,14 +290,13 @@ proc mincGetCondition (code :PNode) :string=
     else:                         result.add code[0][1].strValue
   else: assert false, &"Non-Prefix conditions are currently supported\n{code.renderTree}"
 
-
 #______________________________________________________
 # Control Flow
 #_____________________________
 proc mincReturnStmt (code :PNode; indent :int= 1) :string=
   assert code.kind == nkReturnStmt
   assert indent != 0, "Return statements cannot exist at the top level in C.\n" & code.renderTree
-  result.add &"{indent*Tab}return {code[0].strValue};\n"
+  result.add &"{indent*Tab}return {mincGetValueRaw(code[0])};\n"
 #_____________________________
 proc mincContinueStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkContinueStmt
