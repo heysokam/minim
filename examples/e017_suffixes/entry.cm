@@ -1,0 +1,7 @@
+# Nim size specifying suffixes are also allowed in MinC
+proc main *() :int=
+  let one :float= 0.0'f32
+  let two :uint=  0'u32
+  discard one
+  discard two
+  return 0
