@@ -39,6 +39,9 @@ proc mincContinueStmt     (code :PNode; indent :int= 0) :string
 proc mincBreakStmt        (code :PNode; indent :int= 0) :string
 proc mincWhenStmt         (code :PNode; indent :int= 0) :string
 proc mincPragma           (code :PNode; indent :int= 0) :string
+proc mincInfix            (code :PNode; indent :int= 0; raw :bool= false) :string
+proc mincPrefix           (code :PNode; indent :int= 0; raw :bool= false) :string
+proc mincPostfix          (code :PNode; indent :int= 0; raw :bool= false) :string
 
 # TODO
 proc mincNone             (code :PNode) :string=  assert code.kind == nkNone             ; todo(code)  ## TODO : Converts a nkNone into the Min C Language
@@ -70,9 +73,6 @@ proc mincComesFrom        (code :PNode) :string=  assert code.kind == nkComesFro
 proc mincDotCall          (code :PNode) :string=  assert code.kind == nkDotCall          ; todo(code)  ## TODO : Converts a nkDotCall into the Min C Language
 proc mincCallStrLit       (code :PNode) :string=  assert code.kind == nkCallStrLit       ; todo(code)  ## TODO : Converts a nkCallStrLit into the Min C Language
 
-proc mincInfix            (code :PNode) :string=  assert code.kind == nkInfix            ; todo(code)  ## TODO : Converts a nkInfix into the Min C Language
-proc mincPrefix           (code :PNode) :string=  assert code.kind == nkPrefix           ; todo(code)  ## TODO : Converts a nkPrefix into the Min C Language
-proc mincPostfix          (code :PNode) :string=  assert code.kind == nkPostfix          ; todo(code)  ## TODO : Converts a nkPostfix into the Min C Language
 proc mincHiddenCallConv   (code :PNode) :string=  assert code.kind == nkHiddenCallConv   ; todo(code)  ## TODO : Converts a nkHiddenCallConv into the Min C Language
 proc mincExprEqExpr       (code :PNode) :string=  assert code.kind == nkExprEqExpr       ; todo(code)  ## TODO : Converts a nkExprEqExpr into the Min C Language
 proc mincExprColonExpr    (code :PNode) :string=  assert code.kind == nkExprColonExpr    ; todo(code)  ## TODO : Converts a nkExprColonExpr into the Min C Language

@@ -18,8 +18,8 @@ const cacheDir     = binDir/"cmcache"
 #_________________________________________________
 # Target to Build
 #_____________________________
-const trg   = "multiwordtypes"
-const src   = "e015_"&trg/"entry.cm"
+const trg   = "affixes"
+const src   = "e016_"&trg/"entry.cm"
 const flags = ""
 const verb  = on
 const run   = on
