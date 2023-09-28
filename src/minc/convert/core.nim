@@ -175,6 +175,38 @@ proc mincCommand (code :PNode; indent :int= 0) :string=
 type VariableCodegenError = object of CatchableError
 type VarKind {.pure.}= enum Const, Let, Var
 #_____________________________
+proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent :int= 0) :string=
+  ## Gets the value of a variable entry, based on its value node.
+  # note: Just a blocked alias to avoid mincVariable complexity/readability from becoming absurd.
+  let tab1  = (indent+1)*Tab
+  let isObj = value.kind == nkObjConstr
+  result =
+    if   value.kind == nkEmpty             : ""
+    elif value.kind == nkCall              : &" {mincCallRaw(value)}"
+    elif value.kind in nkStrLit..nkRStrLit : &" \"{vars.getValue(entry)}\""
+    elif value.kind == nkTripleStrLit      :
+      &"\n{tab1}\"" &
+      vars.getValue(entry)
+      .replace( "\n" , &"\\n\"\n{tab1}\"" ) &  # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
+      "\""
+    elif value.kind == nkCharLit           : &" '{vars.getValue(entry).parseInt().char}'"
+    elif value.kind == nkBracketExpr       : &" {mincGetValueRaw(value)}"
+    elif not (typ.isArr or isObj)          : &" {vars.getValue(entry)}"
+    else                                   : ""
+  if typ.isArr:
+    result.add " {\n"
+    let values = vars.getValue(entry).split(" ")
+    for id,it in values.pairs:
+      result.add &"{tab1}[{id}]= {it},\n"
+    result.add &"{indent*Tab}}}"
+  elif value.kind == nkObjConstr:
+    result.add " {\n"
+    for field in value.sons[1..^1]:
+      assert field.kind == nkExprColonExpr
+      result.add &"{tab1}.{field[0].strValue}= {field[1].strValue},\n"
+    result.add &"{indent*Tab}}}"
+  if result == "": report entry; report value; assert false
+#_____________________________
 proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
   assert entry.kind in [nkConstDef, nkIdentDefs], entry.treeRepr
   let priv  = if vars.isPrivate(entry,indent): "static " else: ""
@@ -199,20 +231,7 @@ proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
   let value = entry[^1] # Value Node
   if value.kind == nkEmpty and kind == VarKind.Const: raise newException(VariableCodegenError, # TODO : unbounded support
     &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{entry.renderTree}")
-  let tab1 = (indent+1)*Tab
-  let val  =
-    if   value.kind == nkEmpty             : ""
-    elif value.kind == nkCall              : " " & mincCallRaw( value )
-    elif value.kind in nkStrLit..nkRStrLit : &" \"{vars.getValue(entry)}\""
-    elif value.kind == nkTripleStrLit      :
-      "\n" & tab1 & "\"" &
-      vars.getValue(entry)
-      .replace( "\n" , "\\n\"\n" & tab1 & "\"" ) &  # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
-      "\""
-    elif value.kind == nkCharLit     : &" '{vars.getValue(entry).parseInt().char}'"
-    elif typ.isArr                   : &" {{ {vars.getValue(entry).split(\" \").join(\", \")} }}"
-    elif value.kind == nkBracketExpr : &" {mincGetValueRaw(value)}"
-    else: " " & vars.getValue(entry)
+  let val   = mincVariableGetValue(entry, value, typ, indent)
   let asign = if val == "": "" else: &" ={val}"
   # Apply to the result
   if not vars.isPrivate(entry,indent) and indent == 0:
@@ -371,15 +390,41 @@ proc mincWhenStmt (code :PNode; indent :int= 0) :string=
 # Types
 #_____________________________
 const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
+type ObjectCodegenError = object of CatchableError
+#_____________________________
+proc mincGetObjectFieldDef *(code :PNode; indent :int= 1) :string=
+  assert code.kind == nkIdentDefs
+  if code[^1].kind != nkEmpty: raise newException(ObjectCodegenError,
+    &"Default values for types are not allowed in MinC. The illegal code is:\n{code.renderTree}\n")
+  var name =
+    if   code[0].kind == nkIdent   : code[0].strValue
+    elif code[0].kind == nkPostfix : code[0][1].strValue
+    else                            : &"{types.getName(code)}"
+  let typ =
+    if code[^2].kind == nkIdent : TypeInfo(name:code[^2].strValue)
+    else                        : types.getType(code, KnownMultiwordPrefixes)
+  result.add &"{indent*Tab}{typ.name} {name};\n"
+
+#_____________________________
 proc mincTypeDef (code :PNode; indent :int= 0) :string=
   assert code.kind == nkTypeDef
-  let name = &"{types.getName(code)}"
+  var name = &"{types.getName(code)}"
   let info = types.getType(code, KnownMultiwordPrefixes)
   let mut  = if info.isRead: " const" else: ""
-  var typ  = info.name & mut
-  if info.isPtr: typ &= "*"
-  let body = ""
-  result   = &"typedef {typ} {name}{body};\n"
+  var typ  =
+    if info.isObj : &"struct {name}{mut}"
+    else          : info.name & mut
+  if info.isPtr: typ.add "*"
+  var body :string= ""
+  var other :string= ""
+  if info.isObj:
+    assert code[^1].kind == nkObjectTy and code[^1][^1].kind == nkRecList
+    body.add "{\n"
+    for field in code[^1][^1]:  # For every field in the object's value (aka the object body)
+      body.add mincGetObjectFieldDef(field, indent+1)
+    body.add &"{indent*Tab}}}"
+  result = &"typedef {typ} {name};\n"  # Normal decl for non-obj and fw.decl for objects
+  if info.isObj: result.add &"{indent*Tab}{typ} {body};\n"
 #_____________________________
 proc mincTypeSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkTypeSection
@@ -558,12 +603,10 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkWith             : result = mincWith(code)
   of nkWithout          : result = mincWithout(code)
   of nkTypeOfExpr       : result = mincTypeOfExpr(code)
-  of nkObjectTy         : result = mincObjectTy(code)
   of nkTupleTy          : result = mincTupleTy(code)
   of nkTupleClassTy     : result = mincTupleClassTy(code)
   of nkTypeClassTy      : result = mincTypeClassTy(code)
   of nkStaticTy         : result = mincStaticTy(code)
-  of nkRecList          : result = mincRecList(code)
   of nkRecCase          : result = mincRecCase(code)
   of nkRecWhen          : result = mincRecWhen(code)
   of nkRefTy            : result = mincRefTy(code)
@@ -612,6 +655,8 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkRStrLit          : result = mincRStrLit(code)
   of nkTripleStrLit     : result = mincTripleStrLit(code)
   of nkNilLit           : result = mincNilLit(code)
+  of nkObjectTy         : result = mincObjectTy(code)  # Accessed by nkTypeDef
+  of nkRecList          : result = mincRecList(code)   # Accessed by nkObjectTy
   # Not needed
   of nkFastAsgn         : result = mincFastAsgn(code)
 
