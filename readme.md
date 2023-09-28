@@ -3,12 +3,12 @@
 MinC is a minimalistic C language with nim syntax.  
 It does not try to be feature-full, its only goal is to write Pure C.  
 
-## MinC is C
+### MinC is C
 MinC is a different version of C that uses nim syntax.  
 If a type does not exist in C, the C compiler will error.  
 It can use C libraries without wrappers, because the compiler outputs (human-readable) C.  
 
-## MinC can seamlessly be (and stay) out of the way
+### MinC can seamlessly be (and stay) out of the way
 **Case1**: You have an existing C project that you want to use, but you don't like C syntax.  
 ```md
 1. Do whatever you need to do to extend and build that project with extra C files.  
@@ -35,7 +35,7 @@ your (human-readable, formatted, and standard) C code instead.
 ```
 Remember, MinC is C.  
 
-## MinC is NOT nim
+### MinC is NOT nim
 MinC is not nim, its C.  
 If you think about MinC as writing nim and then compiling it to C, you are already in the wrong mindset, because you are thinking of:  
 ```md
@@ -53,28 +53,28 @@ C has none of that, so MinC does not have it either _(unless you write it yourse
 MinC does **not** use the Nim's c backend or semantic passes of its compiler pipeline.  
 This makes the entire nim language go away, and it becomes just C with different grammar/syntax.  
 
-## MinC is Minimalistic
+### MinC is Minimalistic
 MinC does as little as possible to ensure compliance to its rules, and gets out of the way.  
 
 MinC extends C, but it does so in a minimal way.  
 Its extensions are things that you would manually write in modern C code,  
 but MinC allows their expression with a cleaner, more readable and minimal syntax.  
 
-## MinC is Modern
+### MinC is Modern
 MinC targets C23 first.  
 It also has sane defaults for building for modern 64bits targets in a safe/sanitized way.  
 It is also not afraid of breaking backwards compatibility with its default options.  
-But... unbounded-C and complete usage of C features is allowed as an explicit opt-in.  
+But... unbounded and complete usage of C features is allowed as an explicit opt-in.  
 If you want to build C99 code and target old platforms, you can.  
 
-## MinC is Explicit
+### MinC is Explicit
 In MinC you write imperatively and explicitly.  
 MinC does not assume anything about your code, and it does not auto-resolve types/symbols either.  
 There is no `auto` keyword, no implicity type resolution, and other similarly implicit behavior.  
 Everything is translated literally. And there are no symbol overloads either.  
 What you said is what you meant.  
 
-## MinC extends C
+### MinC extends C
 ```md
 Strong-types
 Modules
@@ -82,7 +82,7 @@ Namespaces  (dot syntax)
 ... : See the todo+done sections
 ```
 
-## MinC will never be Nim
+### MinC will never be Nim
 In Nim with it's C backend, the Nim language is the owner of how applications must be written.  
 In MinC, **C** is **the owner** of said rules.  
 If something is illegal in C, it will be illegal in MinC, even if its legal in Nim.  
@@ -113,7 +113,7 @@ If you want to use nim's `int32` as a type, you need to define it yourself befor
 `cint` is not a valid C type. It's a Nim type.  
 If you write `cint` or `cfloat` and you didn't define those symbols, the code won't compile in C.  
 
-## Compiler
+### Compiler
 MinC uses an StoS compiler that generates C code.  
 The generated output code is standard, human-readable and editable C code.  
 The output code is then compiled with a regular C compiler as usual.  
@@ -156,21 +156,6 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] {.define: symbol.}
   - [x] when defined(symbol)
 - [x] {.error:"msg".}
-- [x] {.warning:"msg".}
-# Done: Extend C
-- [x] Immutable data by default  (const unless marked as mutable)
-  - [x] Function arguments
-- [x] Private (aka static) symbols unless explicitly specified otherwise
-  - [x] Function definitions
-  - [x] Variable definitions
-- [x] Discard statement
-- [x] Function calls: Command syntax
-- [x] noreturn pragma
-  - [x] C23  {.noreturn.}       <- [[noreturn]]
-  - [x] C11  {.noreturn_C11.}   <- _Noreturn
-  - [x] GNU  {.noreturn_GNU.}   <- __attribute__((noreturn))
-- [x] East-const rule always
-- [x] Booleans without stdbool.h  (-std=c23)
 - [x] Multi-word types  (eg: unsigned T)
   - [x] signed
   - [x] unsigned
@@ -189,12 +174,30 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] Unknown size  one :array[_,char]   ->   char one[]
   - [x] Initialization
   - [x] indexed access
+  - [x] Designated Initialization
+# Done: Extend C
+- [x] Immutable data by default  (const unless marked as mutable)
+  - [x] Function arguments
+- [x] Private (aka static) symbols unless explicitly specified otherwise
+  - [x] Function definitions
+  - [x] Variable definitions
+- [x] Discard statement
+- [x] Function calls: Command syntax
+- [x] noreturn pragma
+  - [x] C23  {.noreturn.}       <- [[noreturn]]
+  - [x] C11  {.noreturn_C11.}   <- _Noreturn
+  - [x] GNU  {.noreturn_GNU.}   <- __attribute__((noreturn))
+- [x] East-const rule always
+- [x] Booleans without stdbool.h  (-std=c23)
+- [x] {.warning:"msg".}   (#warning from -std=c23)
 ```
 ```md
 # TODO:
 - [ ] Structs
-  - [ ] Declaration
-  - [ ] Definition
+  - [x] Declaration
+  - [x] Definition
+  - [x] Designated Initialization
+  - [ ] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
   - [ ] Field access
 - [ ] For loops:  Basic support
 - [ ] Operators
@@ -261,7 +264,13 @@ building for any target is as easy as passing `-target=` to the compiler command
     - [ ] __attribute__ ((pure))
     - [ ] write-only memory idea from herose (like GPU write-only mem)
   - [ ] Forbid tentative definitions in const (aka /*comptime*/ constexpr) but allow in var/let
+  - [ ] Bounds Safety
+        https://discourse.llvm.org/t/rfc-c-buffer-hardening/65734/90
+        https://llvm.swoogo.com/2023eurollvm/session/1414468/keynote-%E2%80%9C-fbounds-safety%E2%80%9D-enforcing-bounds-safety-for-production-c-code
 - [ ] {.unreachable.} unreachable macro (clang.17) https://releases.llvm.org/17.0.1/tools/clang/docs/ReleaseNotes.html#c2x-feature-support
+- [ ] {.emitfrom: (file.c, firstline, lastline).}
+- [ ] static: blocks -> Convert to nimscript and run them literally
+- [ ] iterators
 ```
 ```md
 # Problems
@@ -321,9 +330,30 @@ building for any target is as easy as passing `-target=` to the compiler command
 #define MINC_NORETURN __attribute__((noreturn))
 #endif
 ```
+```c
+// Standard Initializers
+struct A { int a; }
+struct B { A a; int b }
+B b = { 1, 1 };
+// Should be:
+B b;
+memset(&b, 0xff, sizeof(b)); // if your locals are zeroed by default including padding
+b.a.a = 1;
+b.b = 1;
+// Achieved by:  Struct Designated Initializer
+B b = { .a.a= 1, .b=1 }
+```
+```c
+// Array Designated Initializer
+u32 arr[] = {
+  [2] = 19,
+  }
+// [0] = 0,   <- Implied because its missing
+// [1] = 0,   <- Implied because its missing
+```
 ---
 
-## Other
+### Other
 ```md
 # Name Styles
 ᛟ minc
