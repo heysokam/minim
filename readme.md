@@ -175,6 +175,11 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] Initialization
   - [x] indexed access
   - [x] Designated Initialization
+- [x] Structs
+  - [x] Declaration
+  - [x] Definition
+  - [x] Designated Initialization
+  - [x] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
 # Done: Extend C
 - [x] Immutable data by default  (const unless marked as mutable)
   - [x] Function arguments
@@ -193,16 +198,12 @@ building for any target is as easy as passing `-target=` to the compiler command
 ```
 ```md
 # TODO:
-- [ ] Structs
-  - [x] Declaration
-  - [x] Definition
-  - [x] Designated Initialization
-  - [ ] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
-  - [ ] Field access
 - [ ] For loops:  Basic support
 - [ ] Operators
   - [ ] Infix
     - [ ] Logical   && || == != < > <= >=
+- [ ] Structs
+  - [ ] Field access
 - [ ] Conditions
   - [ ] Complete : Arbitrary condition tree support
   - [ ] Switch case
@@ -267,6 +268,9 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [ ] Bounds Safety
         https://discourse.llvm.org/t/rfc-c-buffer-hardening/65734/90
         https://llvm.swoogo.com/2023eurollvm/session/1414468/keynote-%E2%80%9C-fbounds-safety%E2%80%9D-enforcing-bounds-safety-for-production-c-code
+  - [ ] Struct: Packing/Alignment codegen
+        https://metricpanda.com/rival-fortress-update-35-avoiding-automatic-structure-padding-in-c/
+        http://www.catb.org/esr/structure-packing/
 - [ ] {.unreachable.} unreachable macro (clang.17) https://releases.llvm.org/17.0.1/tools/clang/docs/ReleaseNotes.html#c2x-feature-support
 - [ ] {.emitfrom: (file.c, firstline, lastline).}
 - [ ] static: blocks -> Convert to nimscript and run them literally

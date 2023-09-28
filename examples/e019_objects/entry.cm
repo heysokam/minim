@@ -1,0 +1,8 @@
+type Thing * = object
+  val1 *:int
+  val2  :char
+
+proc main *() :int=
+  let one :Thing= Thing(val1:0, val2:'A')
+  discard one
+  return 0
