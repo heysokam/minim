@@ -8,6 +8,35 @@ MinC is a different version of C that uses nim syntax.
 If a type does not exist in C, the C compiler will error.  
 It can use C libraries without wrappers, because the compiler outputs (human-readable) C.  
 
+### MinC extends C
+```md
+Strong-types
+Modules
+Namespaces  (dot syntax)
+... : See the todo+done sections
+```
+
+### MinC is Minimalistic
+MinC does as little as possible to ensure compliance to its rules, and gets out of the way.  
+
+MinC extends C, but it does so in a minimal way.  
+Its extensions are things that you would manually write in modern C code,  
+but MinC allows their expression with a cleaner, more readable and minimal syntax.  
+
+### MinC is Modern
+MinC targets C23 first.  
+It also has sane defaults for building for modern 64bits targets in a safe/sanitized way.  
+It is also not afraid of breaking backwards compatibility with its default options.  
+But... unbounded and complete usage of C features is allowed as an explicit opt-in.  
+If you want to build C99 code and target old platforms, you can.  
+
+### MinC is Explicit
+In MinC you write imperatively and explicitly.  
+MinC does not assume anything about your code, and it does not auto-resolve types/symbols either.  
+There is no `auto` keyword, no implicity type resolution, and other similarly implicit behavior.  
+Everything is translated literally. And there are no symbol overloads either.  
+What you said is what you meant.  
+
 ### MinC can seamlessly be (and stay) out of the way
 **Case1**: You have an existing C project that you want to use, but you don't like C syntax.  
 ```md
@@ -44,8 +73,11 @@ If you think about MinC as writing nim and then compiling it to C, you are alrea
 - exceptions
 - garbage collection
 - codegen optimizations
-- the nim compiler
 - nim libraries
+- dynamically allocated types (aka: string, seq[T], openArray[T], etc)
+- symbol overloads
+- meta-programming
+- the nim compiler
 - etc etc  
 ```
 C has none of that, so MinC does not have it either _(unless you write it yourself)_.  
@@ -53,49 +85,9 @@ C has none of that, so MinC does not have it either _(unless you write it yourse
 MinC does **not** use the Nim's c backend or semantic passes of its compiler pipeline.  
 This makes the entire nim language go away, and it becomes just C with different grammar/syntax.  
 
-### MinC is Minimalistic
-MinC does as little as possible to ensure compliance to its rules, and gets out of the way.  
-
-MinC extends C, but it does so in a minimal way.  
-Its extensions are things that you would manually write in modern C code,  
-but MinC allows their expression with a cleaner, more readable and minimal syntax.  
-
-### MinC is Modern
-MinC targets C23 first.  
-It also has sane defaults for building for modern 64bits targets in a safe/sanitized way.  
-It is also not afraid of breaking backwards compatibility with its default options.  
-But... unbounded and complete usage of C features is allowed as an explicit opt-in.  
-If you want to build C99 code and target old platforms, you can.  
-
-### MinC is Explicit
-In MinC you write imperatively and explicitly.  
-MinC does not assume anything about your code, and it does not auto-resolve types/symbols either.  
-There is no `auto` keyword, no implicity type resolution, and other similarly implicit behavior.  
-Everything is translated literally. And there are no symbol overloads either.  
-What you said is what you meant.  
-
-### MinC extends C
-```md
-Strong-types
-Modules
-Namespaces  (dot syntax)
-... : See the todo+done sections
-```
-
-### MinC will never be Nim
 In Nim with it's C backend, the Nim language is the owner of how applications must be written.  
 In MinC, **C** is **the owner** of said rules.  
 If something is illegal in C, it will be illegal in MinC, even if its legal in Nim.  
-
-The `minc` compiler does not (and never will) support the complete feature-set of Nim:  
-```md
-No Garbage Collector
-No Exceptions
-No Meta-programming
-No ctypes. Types are translated verbatim. (aka no cint/cchar/cuint,cfloat,etc)
-No Dynamically allocated types (aka: no string, seq[T], openArray[T], etc)
-No Symbol Overloads
-```
 
 **No Nim types**:
 Types are translated verbatim.  
@@ -107,11 +99,9 @@ var thing :int= 1
 int thing = 1;
 ```
 *Important*: Note how we haven't written `cint`, we wrote `int`.  
-If you want to use nim's `int32` as a type, you need to define it yourself before using it.  
-
-**No Nim ctypes**:
 `cint` is not a valid C type. It's a Nim type.  
-If you write `cint` or `cfloat` and you didn't define those symbols, the code won't compile in C.  
+If you write `cint`, `cfloat`, `int32`, etc, and you didn't define those symbols, the code won't compile in C.  
+If you want to use nim's types, you need to create the types yourself first before using them.  
 
 ### Compiler
 MinC uses an StoS compiler that generates C code.  
