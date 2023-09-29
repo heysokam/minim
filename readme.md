@@ -194,6 +194,9 @@ building for any target is as easy as passing `-target=` to the compiler command
     - [ ] Logical   && || == != < > <= >=
 - [ ] Structs
   - [ ] Field access
+  - [ ] Construction: Function Parameters
+  - [ ] Construction: Reassignment
+  - [ ] {.stub.} for using the non-typedef version of the struct  (todo: Find better word than stub. innerdef or similar)
 - [ ] Conditions
   - [ ] Complete : Arbitrary condition tree support
   - [ ] Switch case
@@ -204,6 +207,7 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
   - [ ] do {...} while (cond);
 - [ ] 0.0f suffix for floats
+- [ ] Character literals: Resolve to 'c' everywhere
 - [ ] Explicit casting
 - [ ] addr
 - [ ] Enums
@@ -265,6 +269,9 @@ building for any target is as easy as passing `-target=` to the compiler command
 - [ ] {.emitfrom: (file.c, firstline, lastline).}
 - [ ] static: blocks -> Convert to nimscript and run them literally
 - [ ] iterators
+- [ ] distinct types -> wrap the type inside a named struct
+      type Handle = distinc int   ->   typedef struct int_d { int data; } Handle;
+- [ ] if/elif/else variable asignment autoexpand
 ```
 ```md
 # Problems
@@ -326,8 +333,8 @@ building for any target is as easy as passing `-target=` to the compiler command
 ```
 ```c
 // Standard Initializers
-struct A { int a; }
-struct B { A a; int b }
+struct A { int a; };
+struct B { A a; int b };
 B b = { 1, 1 };
 // Should be:
 B b;
@@ -335,7 +342,7 @@ memset(&b, 0xff, sizeof(b)); // if your locals are zeroed by default including p
 b.a.a = 1;
 b.b = 1;
 // Achieved by:  Struct Designated Initializer
-B b = { .a.a= 1, .b=1 }
+B b = { .a.a= 1, .b=1 };
 ```
 ```c
 // Array Designated Initializer
@@ -344,6 +351,14 @@ u32 arr[] = {
   }
 // [0] = 0,   <- Implied because its missing
 // [1] = 0,   <- Implied because its missing
+```
+```nim
+proc recurseSolve (code :PNode; idents :var seq[PNode]) :void=
+  if code.kind == nkDotExpr:
+    result.add code[^1]
+    recurseSolve(code[0], idents)
+  else:
+    ...
 ```
 ---
 
