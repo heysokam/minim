@@ -22,6 +22,14 @@ import ../cfg
 include ./fwdecl
 
 
+##[ TODO : Recurse nkDotExpr ]#_________________________________________
+var idents  = newSeq[PNode]()
+var theExpr = yourExpr
+while theExpr.kind == nnkDotExpr:
+  idents.add theExpr[^1]
+  theExpr = theExpr[0]
+]###____________________________________________________________________
+
 #______________________________________________________
 # General tools
 #_____________________________
