@@ -1,8 +1,13 @@
+# MinC Objects are the equivalent of C structs
+# They are declared like Nim, but private/public property of fields is ignored
 type Thing * = object
-  val1 *:int
+  val1 *:int   # All struct fields are public in C, so this * will be ignored
   val2  :char
 
 proc main *() :int=
+  # Object definition syntax works just like in Nim
+  # It has the form   Type(field1:Type1, field2:Type2)  and can be used anywhere a struct definition is allowed in C
   let one :Thing= Thing(val1:0, val2:'A')
-  discard one
-  return 0
+
+  # Fields access is done with dot syntax, just like in C
+  return one.val1

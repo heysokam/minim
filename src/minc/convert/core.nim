@@ -33,10 +33,29 @@ while theExpr.kind == nnkDotExpr:
 #______________________________________________________
 # General tools
 #_____________________________
+proc mincDotExprRec (code :PNode; idents :var seq[PNode]) :void=
+  if code.kind == nkDotExpr:
+    assert code[^1].kind == nkIdent
+    idents.add code[^1]
+    mincDotExprRec(code[0], idents)
+  elif code.kind == nkIdent:
+    idents.add code
+  else: assert false, code.treeRepr
+#_____________________________
+iterator dotExpr *(code :PNode) :PNode=
+  var idents :seq[PNode]
+  mincDotExprRec(code, idents)
+  for id in countdown(idents.high, idents.low): yield idents[id]
+#_____________________________
+proc mincDotExprList (code :PNode) :seq[string]=
+  for it in code.dotExpr: result.add it.strValue
+#_____________________________
 proc mincGetValueRaw *(code :PNode) :string=
-  assert code.kind in [nkEmpty, nkIdent, nkBracketExpr] or code.kind in nkCharLit..nkTripleStrLit
+  assert code.kind in [nkEmpty, nkIdent, nkBracketExpr, nkDotExpr] or code.kind in nkCharLit..nkTripleStrLit
   if   code.kind == nkEmpty       : ""
   elif code.kind == nkBracketExpr : &"{code[0].strValue}[{code[1].strValue}]"
+  elif code.kind == nkDotExpr     : mincDotExprList(code).join(".")
+  elif code.kind == nkCharLit     : &"'{code.strValue.parseInt().char}'"
   else                            : code.strValue
 
 
@@ -211,7 +230,7 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
     result.add " {\n"
     for field in value.sons[1..^1]:
       assert field.kind == nkExprColonExpr
-      result.add &"{tab1}.{field[0].strValue}= {field[1].strValue},\n"
+      result.add &"{tab1}.{field[0].strValue}= {mincGetValueRaw(field[1])},\n"
     result.add &"{indent*Tab}}}"
   if result == "": report entry; report value; assert false
 #_____________________________
