@@ -170,6 +170,9 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [x] Definition
   - [x] Designated Initialization
   - [x] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
+  - [x] Field access
+    - [x] Return statement
+- [x] Character literals: Resolve to 'c' everywhere
 # Done: Extend C
 - [x] Immutable data by default  (const unless marked as mutable)
   - [x] Function arguments
@@ -193,7 +196,6 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [ ] Infix
     - [ ] Logical   && || == != < > <= >=
 - [ ] Structs
-  - [ ] Field access
   - [ ] Construction: Function Parameters
   - [ ] Construction: Reassignment
   - [ ] {.stub.} for using the non-typedef version of the struct  (todo: Find better word than stub. innerdef or similar)
@@ -207,7 +209,6 @@ building for any target is as easy as passing `-target=` to the compiler command
   - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
   - [ ] do {...} while (cond);
 - [ ] 0.0f suffix for floats
-- [ ] Character literals: Resolve to 'c' everywhere
 - [ ] Explicit casting
 - [ ] addr
 - [ ] Enums
