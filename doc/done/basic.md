@@ -1,0 +1,59 @@
+```md
+# Done:
+- [x] Function Definition (proc)
+- [x] Return
+- [x] Main function
+- [x] Static/Extern
+  - [x] Variables
+  - [x] Functions
+- [x] Header include
+- [x] Function calls: Call(syntax)
+- [x] Doc Comments
+- [x] Type declaration
+  - [x] Type aliasing    typedef char* str;
+  - [x] Mutable pointer to immutable data    {.readonly.} pragma
+- [x] Variable definition:
+  - [x] Immutable : Let/Const
+  - [x] Mutable   : Var
+- [ ] Conditions
+  - [x] Sketch   : Single condition only
+  - [x] While
+  - [x] if/elif/else blocks
+- [x] Variable asignment
+- [x] Tentative variable definition
+- [x] Multi-line strings
+- [x] Character literals
+- [x] break
+- [x] continue
+- [x] Defines
+  - [x] {.define: symbol.}
+  - [x] when defined(symbol)
+- [x] {.error:"msg".}
+- [x] Multi-word types  (eg: unsigned T)
+  - [x] signed
+  - [x] unsigned
+  - [x] long
+  - [x] short
+  - [x] double, triple and quadruple worded types
+- [x] Operators
+  - [x] Prefix   + - & ! * -- ++
+  - [x] Infix
+    - [x] Arithmetic : + - * / %
+    - [x] Bitwise    : & | << >>
+    - [x] Asignment  : += -= *= /= %=  |= ^= ~=   <<= >>=
+    - [x] Postfix  ++ --  (nim parser has no postfix, other than * for visibility)
+- [x] Arrays
+  - [x] Sized
+  - [x] Unknown size  one :array[_,char]   ->   char one[]
+  - [x] Initialization
+  - [x] indexed access
+  - [x] Designated Initialization
+- [x] Structs
+  - [x] Declaration
+  - [x] Definition
+  - [x] Designated Initialization
+  - [x] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
+  - [x] Field access
+    - [x] Return statement
+- [x] Character literals: Resolve to 'c' everywhere
+```
