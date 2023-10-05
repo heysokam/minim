@@ -113,26 +113,3 @@ MinC can be used to create C libraries, because the output is normal C code.
 Cross-compilation is a first class citizen.  
 Thanks to the internal usage of the ZigCC compiler interface,  
 building for any target is as easy as passing `-target=` to the compiler command.  
-
----
-
-### Other
-```md
-# Name Styles
-ᛟ minc
-Min < C > niM
-Min> C <niM
-```
-```md
-# MinC properties lost on compilation:
-- let vs const
-- call vs command
-```
-```md
-# Notes
--Wno-error=warning-name  <- how to pass build-errors when migrating
-https://stackoverflow.com/questions/1472138/c-default-arguments
-https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html
--std=c?? | https://en.wikipedia.org/wiki/C99 | https://en.wikipedia.org/wiki/C17 https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2244.htm
-clang vers status -> https://clang.llvm.org/c_status.html
-```
