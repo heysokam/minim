@@ -1,0 +1,33 @@
+```md
+# TODO:
+- [ ] For loops:  Basic support
+- [ ] Operators
+  - [ ] Infix
+    - [ ] Logical   && || == != < > <= >=
+- [ ] Structs
+  - [ ] Construction: Function Parameters
+  - [ ] Construction: Reassignment
+  - [ ] {.stub.} for using the non-typedef version of the struct  (todo: Find better word than stub. innerdef or similar)
+- [ ] Conditions
+  - [ ] Complete : Arbitrary condition tree support
+  - [ ] Switch case
+    - [ ] case ... of:
+    - [ ] discard = donothing
+    - [ ] Mandatory explicit fallthrough, otherwise (break;) auto
+    - [ ] else: == default:
+  - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
+  - [ ] do {...} while (cond);
+- [ ] 0.0f suffix for floats
+- [ ] Explicit casting
+- [ ] addr
+- [ ] Enums
+- [ ] Ternary operator   let one = if condition: 1 else: 2
+- [ ] Unions
+- [ ] varargs
+- [ ] obj->field   pointer access syntax ->
+- [ ] C restrict keyword
+- [ ] C volatile keyword
+- [ ] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
+- [ ] Multi-word pointer types  (eg: ptr unsigned long long int)
+- [ ] Arrays: nested
+```
