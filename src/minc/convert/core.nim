@@ -170,7 +170,8 @@ proc mincProcDef  (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # Function Calls
 #_____________________________
-# const CallArgTmpl = "{calls.getArgs(arg.node)} {calls.getArgName(arg.node)}{sep}"
+type CallsCodegenError = object of CatchableError
+const KnownKeywords = ["addr"]
 proc mincCallGetArgs (code :PNode) :string=
   ## Returns the code for all arguments of the given ProcDef node.
   assert code.kind in [nkCall, nkCommand]
@@ -180,6 +181,12 @@ proc mincCallGetArgs (code :PNode) :string=
       let str = arg.node.strValue.replace("\n", "\\n")
       result.add &"\"{str}\""
     elif arg.node.kind == nkNilLit: result.add "NULL"
+    elif arg.node.kind in [nkCall, nkCommand]:
+      let cname = arg.node[0].strValue # Call/Command function name
+      assert cname in KnownKeywords
+      case cname
+      of "addr": result.add "&" & arg.node[1].strValue
+      else: raise newException(CallsCodegenError, "")
     else: result.add arg.node.strValue
     result.add( if arg.last: "" else: ", " )
 #_____________________________
@@ -220,7 +227,7 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
     elif value.kind == nkBracketExpr       : &" {mincGetValueRaw(value)}"
     elif not (typ.isArr or isObj)          : &" {vars.getValue(entry)}"
     else                                   : ""
-  if typ.isArr:
+  if typ.isArr and value.kind != nkEmpty:
     result.add " {\n"
     let values = vars.getValue(entry).split(" ")
     for id,it in values.pairs:
@@ -232,7 +239,7 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
       assert field.kind == nkExprColonExpr
       result.add &"{tab1}.{field[0].strValue}= {mincGetValueRaw(field[1])},\n"
     result.add &"{indent*Tab}}}"
-  if result == "": report entry; report value; assert false
+  # if result == "": report entry; report value; assert false
 #_____________________________
 proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
   assert entry.kind in [nkConstDef, nkIdentDefs], entry.treeRepr
@@ -261,12 +268,12 @@ proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
   let val   = mincVariableGetValue(entry, value, typ, indent)
   let asign = if val == "": "" else: &" ={val}"
   # Apply to the result
-  if not vars.isPrivate(entry,indent) and indent == 0:
-    result.add &"{indent*Tab}extern {T}{name}{arr}; " # TODO: Write Extern decl to header
   let qualif = case kind
     of VarKind.Const : &"const/*comptime*/ {priv}"  # TODO:clang.18->   &"constexpr {priv}"
     of VarKind.Let   : &"{priv}"
     of VarKind.Var   : &"{priv}"
+  if not vars.isPrivate(entry,indent) and indent == 0:
+    result.add &"{indent*Tab}extern {qualif}{T} {mut}{name}{arr}; " # TODO: Write Extern decl to header
   result.add &"{indent*Tab}{qualif}{T} {mut}{name}{arr}{asign};\n"
 #_____________________________
 proc mincConstSection (code :PNode; indent :int= 0) :string=
@@ -328,6 +335,7 @@ proc mincPragma (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # Conditions
 #_____________________________
+type ConditionCodegenError = object of CatchableError
 proc mincGetCondition (code :PNode) :string=
   # TODO: Unconfuse this total mess. Remove hardcoded numbers. Should be names and a loop.
   if code[0].kind == nkPrefix:
@@ -371,7 +379,9 @@ proc mincIfStmt (code :PNode; indent :int= 0) :string=
       elif branch.kind == nkElse                   : " else "
       else:""
     assert pfx != "", "Unknown branch kind in minc.IfStmt"
-    assert branch[^1][0].len <= 2, "Multi-condition if/elif statements are currently not supported"
+    if branch[0].len > 2:
+      report branch
+      raise newException(ConditionCodegenError, "Multi-condition if/elif statements are currently not supported")
     let condition :string=
       if   branch.kind == nkElifBranch : &"({mincGetCondition(branch)}) "
       elif branch.kind == nkElse       : ""

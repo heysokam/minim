@@ -19,7 +19,6 @@
   - [ ] do {...} while (cond);
 - [ ] 0.0f suffix for floats
 - [ ] Explicit casting
-- [ ] addr
 - [ ] Enums
 - [ ] Ternary operator   let one = if condition: 1 else: 2
 - [ ] Unions

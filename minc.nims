@@ -36,6 +36,19 @@ const NoErr        = [
   "-Wno-error=unsafe-buffer-usage",   # Explicitly avoid erroring on this (half-finished) warning group from clang.16
   "-Wno-error=vla",                   # Explicitly avoid erroring on VLA usage, but keep the warning (todo: only for debug)
   "-Wno-error=padded",                # Warn when structs are automatically padded, but don't error.
+  # Ignore C++ flags. We build C
+  "-Wno-c++-compat",
+  "-Wno-c++0x-compat",                   "-Wno-c++0x-extensions",                         "-Wno-c++0x-narrowing",
+  "-Wno-c++11-compat",                   "-Wno-c++11-compat-deprecated-writable-strings", "-Wno-c++11-compat-pedantic",       "-Wno-c++11-compat-reserved-user-defined-literal",
+  "-Wno-c++11-extensions",               "-Wno-c++11-extra-semi",                         "-Wno-c++11-inline-namespace",      "-Wno-c++11-long-long",                            "-Wno-c++11-narrowing",
+  "-Wno-c++14-attribute-extensions",     "-Wno-c++14-binary-literal",                     "-Wno-c++14-compat",                "-Wno-c++14-compat-pedantic",                      "-Wno-c++14-extensions",
+  "-Wno-c++17-attribute-extensions",     "-Wno-c++17-compat",                             "-Wno-c++17-compat-mangling",       "-Wno-c++17-compat-pedantic",                      "-Wno-c++17-extensions",
+  "-Wno-c++1y-extensions",               "-Wno-c++1z-compat",                             "-Wno-c++1z-compat-mangling",       "-Wno-c++1z-extensions",
+  "-Wno-c++20-attribute-extensions",     "-Wno-c++20-compat",                             "-Wno-c++20-compat-pedantic",       "-Wno-c++20-designator",                           "-Wno-c++20-extensions",
+  "-Wno-c++2a-compat",                   "-Wno-c++2a-compat-pedantic",                    "-Wno-c++2a-extensions",            "-Wno-c++2b-extensions",
+  "-Wno-c++98-c++11-c++14-c++17-compat", "-Wno-c++98-c++11-c++14-c++17-compat-pedantic",  "-Wno-c++98-c++11-c++14-compat",    "-Wno-c++98-c++11-c++14-compat-pedantic",
+  "-Wno-c++98-c++11-compat",             "-Wno-c++98-c++11-compat-binary-literal",        "-Wno-c++98-c++11-compat-pedantic",
+  "-Wno-c++98-compat",                   "-Wno-c++98-compat-bind-to-temporary-copy",      "-Wno-c++98-compat-extra-semi",     "-Wno-c++98-compat-local-type-template-args",      "-Wno-c++98-compat-pedantic", "-Wno-c++98-compat-unnamed-type-template-args",
   ].join(" ") # Flags to remove from -Weverything
 const MinCFlags    = &"--std=c2x -Weverything -Werror -pedantic -pedantic-errors {NoErr}"  # C Compiler flags
 const MinCValidExt = [".cm", ".nim"] # Valid extensions for the MinC language
