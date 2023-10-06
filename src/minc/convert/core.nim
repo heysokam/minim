@@ -7,28 +7,34 @@
 #____________________________________________________________________|
 # std dependencies
 import std/strutils
-import std/parseutils
+import std/tables
 # *Slate dependencies
 import slate/element/procdef
 import slate/element/error
 import slate/element/vars
 import slate/element/incldef
 import slate/element/calls
-import slate/element/loops
+# import slate/element/loops
 import slate/element/types
 import slate/element/affixes
 # minc dependencies
 import ../cfg
 include ./fwdecl
 
+#______________________________________________________
+# Codegen: Errors
+#_____________________________
+type AffixCodegenError     = object of CatchableError
+type CallsCodegenError     = object of CatchableError
+type VariableCodegenError  = object of CatchableError
+type PragmaCodegenError    = object of CatchableError
+type ConditionCodegenError = object of CatchableError
+type ObjectCodegenError    = object of CatchableError
 
-##[ TODO : Recurse nkDotExpr ]#_________________________________________
-var idents  = newSeq[PNode]()
-var theExpr = yourExpr
-while theExpr.kind == nnkDotExpr:
-  idents.add theExpr[^1]
-  theExpr = theExpr[0]
-]###____________________________________________________________________
+#______________________________________________________
+# Codegen: Types
+#_____________________________
+type Renames = Table[string, string]
 
 #______________________________________________________
 # General tools
@@ -50,19 +56,36 @@ iterator dotExpr *(code :PNode) :PNode=
 proc mincDotExprList (code :PNode) :seq[string]=
   for it in code.dotExpr: result.add it.strValue
 #_____________________________
+proc mincInfixList *(code :PNode; renames :Renames= Renames()) :string=
+  # TODO: Merge with mincInfix
+  assert code.kind == nkInfix
+  let fix   = code[0]
+  let left  = code[1]
+  let right = code[2]
+  assert fix.kind == nkIdent and left.kind in [nkIdent,nkInfix] and right.kind in [nkIdent,nkInfix] and code.sons.len == 3
+  # Add the left value (including recursion)
+  if   left.kind == nkIdent : result.add left.strValue                # Base Case
+  elif left.kind == nkInfix : result.add mincInfixList(left, renames) # Recursive case
+  # Add the affix
+  if fix.strValue in renames : result.add &" {renames[fix.strValue]} "
+  else                       : result.add &" {fix.strValue} "
+  # Add the right value (including recursion)
+  if   right.kind == nkIdent : result.add right.strValue                # Base case
+  elif right.kind == nkInfix : result.add mincInfixList(right, renames) # Recursive case
+  else: raise newException(AffixCodegenError, &"Found an unmapped infix kind  {right.kind}  The code that contains it is:\n{code.renderTree}\n")
+#_____________________________
 proc mincGetValueRaw *(code :PNode) :string=
-  assert code.kind in [nkEmpty, nkIdent, nkBracketExpr, nkDotExpr] or code.kind in nkCharLit..nkTripleStrLit
+  assert code.kind in [nkEmpty, nkIdent, nkBracketExpr, nkDotExpr, nkInfix] or code.kind in nkCharLit..nkTripleStrLit
   if   code.kind == nkEmpty       : ""
   elif code.kind == nkBracketExpr : &"{code[0].strValue}[{code[1].strValue}]"
   elif code.kind == nkDotExpr     : mincDotExprList(code).join(".")
   elif code.kind == nkCharLit     : &"'{code.strValue.parseInt().char}'"
+  elif code.kind == nkInfix       : mincInfixList(code)
   else                            : code.strValue
 
 
 #______________________________________________________
 # Affixes
-#_____________________________
-type AffixCodegenError = object of CatchableError
 #_____________________________
 proc mincPrefix (code :PNode; indent :int= 0; raw :bool= false) :string=
   assert code.kind == nkPrefix
@@ -75,6 +98,7 @@ proc mincPrefix (code :PNode; indent :int= 0; raw :bool= false) :string=
     assert raw, &"Found a prefix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}"
   of "&", "!", "*": raise newException(AffixCodegenError,
     &"Found a C prefix that cannot be used in MinC. The incorrect code is:\n{code.renderTree}")
+  else: raise newException(AffixCodegenError, &"Found an unknown prefix  {data.fix}  The code that contains it is:\n{code.renderTree}\n")
   result.add &"{data.fix}{data.right}"
   if not raw: result.add ";\n"
 #_____________________________
@@ -97,7 +121,7 @@ proc mincInfix (code :PNode; indent :int= 0; raw :bool= false) :string=
     assert false, &"Found a nim infix keyword that cannot be used in MinC. The incorrect code is:\n{code.renderTree}"
   of "not":
     assert false, &"Found a nim infix keyword that can only be used as prefix. The incorrect code is:\n{code.renderTree}"
-  else: raise newException(AffixCodegenError, &"Found an unknown infix. The code that contains it is:\n{code.renderTree}\n")
+  else: raise newException(AffixCodegenError, &"Found an unknown infix  {data.fix}  The code that contains it is:\n{code.renderTree}\n")
   # Remap nim keywords to C
   case data.fix
   of "and" : data.fix = "&"
@@ -170,8 +194,7 @@ proc mincProcDef  (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # Function Calls
 #_____________________________
-type CallsCodegenError = object of CatchableError
-const KnownKeywords = ["addr"]
+const KnownKeywords = ["addr", "sizeof"]
 proc mincCallGetArgs (code :PNode) :string=
   ## Returns the code for all arguments of the given ProcDef node.
   assert code.kind in [nkCall, nkCommand]
@@ -185,8 +208,11 @@ proc mincCallGetArgs (code :PNode) :string=
       let cname = arg.node[0].strValue # Call/Command function name
       assert cname in KnownKeywords
       case cname
-      of "addr": result.add "&" & arg.node[1].strValue
+      of "addr"   : result.add "&" & arg.node[1].strValue
+      of "sizeof" : result.add &"sizeof({arg.node[1].strValue})"
       else: raise newException(CallsCodegenError, "")
+    elif arg.node.kind == nkInfix:
+      result.add arg.name
     else: result.add arg.node.strValue
     result.add( if arg.last: "" else: ", " )
 #_____________________________
@@ -206,7 +232,6 @@ proc mincCommand (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # Variables
 #_____________________________
-type VariableCodegenError = object of CatchableError
 type VarKind {.pure.}= enum Const, Let, Var
 #_____________________________
 proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent :int= 0) :string=
@@ -216,6 +241,7 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
   let isObj = value.kind == nkObjConstr
   result =
     if   value.kind == nkEmpty             : ""
+    elif value.kind == nkNilLit            : " NULL"
     elif value.kind == nkCall              : &" {mincCallRaw(value)}"
     elif value.kind in nkStrLit..nkRStrLit : &" \"{vars.getValue(entry)}\""
     elif value.kind == nkTripleStrLit      :
@@ -225,12 +251,16 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
       "\""
     elif value.kind == nkCharLit           : &" '{vars.getValue(entry).parseInt().char}'"
     elif value.kind == nkBracketExpr       : &" {mincGetValueRaw(value)}"
+    elif value.kind == nkInfix             : &" {mincGetValueRaw(value)}"
     elif not (typ.isArr or isObj)          : &" {vars.getValue(entry)}"
     else                                   : ""
   if typ.isArr and value.kind != nkEmpty:
-    result.add " {\n"
     let values = vars.getValue(entry).split(" ")
+    if values.len < 2 and values[0] == "": return " {0}"
+    result.add " {\n"
+    echo values
     for id,it in values.pairs:
+      if it == "": break
       result.add &"{tab1}[{id}]= {it},\n"
     result.add &"{indent*Tab}}}"
   elif value.kind == nkObjConstr:
@@ -301,48 +331,60 @@ proc mincIncludeStmt (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # Pragmas
 #_____________________________
-type PragmaCodegenError = object of CatchableError
 proc mincPragmaDefine (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma
-  assert code[0].len == 2, &"Only {{.define:symbol.}} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}"
+  assert code[0].len == 2, &"Only {{.define:symbol.}} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
   result.add &"{indent*Tab}#define {code[0][1].strValue}\n"
 #_____________________________
 proc mincPragmaError (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma
   let data = code[0] # The data is inside an nkExprColonExpr node
-  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.error:\"msg\".}} error pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}"
+  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.error:\"msg\".}} error pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
   result.add &"{indent*Tab}#error {data[1].strValue}\n"
 #_____________________________
 proc mincPragmaWarning (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma
   let data = code[0] # The data is inside an nkExprColonExpr node
-  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.warning:\"msg\".}} warning pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}"
+  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.warning:\"msg\".}} warning pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
   result.add &"{indent*Tab}#warning {data[1].strValue}\n"
 #_____________________________
+proc mincPragmaNamespace (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkPragma
+  let data = code[0] # The data is inside an nkExprColonExpr node
+  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkIdent, &"Only {{.namespace:name.}} namespace pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
+  result.add &"{indent*Tab}// namespace {data[1].strValue}\n"
+#_____________________________
+const KnownPragmas = ["define", "error", "warning", "namespace"]
 proc mincPragma (code :PNode; indent :int= 0) :string=
   ## Codegen for standalone pragmas
   ## Context-specific pragmas are handled inside each section
   assert code.kind == nkPragma
-  assert code[0].kind == nkExprColonExpr and code[0].len == 2, &"Only pragmas with the shape {{.key:val.}} are currently supported.\nThe incorrect code is:\n{code.renderTree}"
+  assert code[0].kind == nkExprColonExpr and code[0].len == 2, &"Only pragmas with the shape {{.key:val.}} are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
   let key = code[0][0].strValue
   case key
-  of "define"  : result = mincPragmaDefine(code,indent)
-  of "error"   : result = mincPragmaError(code,indent)
-  of "warning" : result = mincPragmaWarning(code,indent)
-  else: raise newException(PragmaCodegenError, &"Only {{.define:symbol.}} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}")
+  of "define"    : result = mincPragmaDefine(code,indent)
+  of "error"     : result = mincPragmaError(code,indent)
+  of "warning"   : result = mincPragmaWarning(code,indent)
+  of "namespace" : result = mincPragmaNamespace(code,indent)
+  else: raise newException(PragmaCodegenError, &"Only {KnownPragmas} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n")
 
 
 #______________________________________________________
 # Conditions
 #_____________________________
-type ConditionCodegenError = object of CatchableError
+const ConditionAffixRenames :Renames= {
+  "and": "&&",
+  "or" : "||",
+  }.toTable()
 proc mincGetCondition (code :PNode) :string=
   # TODO: Unconfuse this total mess. Remove hardcoded numbers. Should be names and a loop.
   if code[0].kind == nkPrefix:
     result.add code[0][0].strValue.replace("not","!")
     if code[0][1].kind == nkCall: result.add mincCallRaw( code[0][1] )
     else:                         result.add code[0][1].strValue
-  else: assert false, &"Non-Prefix conditions are currently supported\n{code.renderTree}"
+  elif code[0].kind == nkInfix:
+    result.add mincInfixList(code[0], ConditionAffixRenames)  # TODO: Restrict to comparison only
+  else: assert false, &"Non Prefix/Infix conditions are currently supported\n{code.renderTree}"
 
 #______________________________________________________
 # Control Flow
@@ -379,9 +421,6 @@ proc mincIfStmt (code :PNode; indent :int= 0) :string=
       elif branch.kind == nkElse                   : " else "
       else:""
     assert pfx != "", "Unknown branch kind in minc.IfStmt"
-    if branch[0].len > 2:
-      report branch
-      raise newException(ConditionCodegenError, "Multi-condition if/elif statements are currently not supported")
     let condition :string=
       if   branch.kind == nkElifBranch : &"({mincGetCondition(branch)}) "
       elif branch.kind == nkElse       : ""
@@ -427,7 +466,6 @@ proc mincWhenStmt (code :PNode; indent :int= 0) :string=
 # Types
 #_____________________________
 const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
-type ObjectCodegenError = object of CatchableError
 #_____________________________
 proc mincGetObjectFieldDef *(code :PNode; indent :int= 1) :string=
   assert code.kind == nkIdentDefs
@@ -453,7 +491,7 @@ proc mincTypeDef (code :PNode; indent :int= 0) :string=
     else          : info.name & mut
   if info.isPtr: typ.add "*"
   var body :string= ""
-  var other :string= ""
+  # var other :string= ""
   if info.isObj:
     assert code[^1].kind == nkObjectTy and code[^1][^1].kind == nkRecList
     body.add "{\n"
@@ -473,7 +511,12 @@ proc mincTypeSection (code :PNode; indent :int= 0) :string=
 #_____________________________
 proc mincAsgn (code :PNode; indent :int= 0) :string=
   assert code.kind == nkAsgn
-  result = &"{indent*Tab}{code[0].strValue} = {code[^1].strValue};\n"
+  let value = code[^1]
+  let val =
+    if   value.kind == nkIdent             : value.strValue
+    elif value.kind in [nkCall, nkCommand] : mincCallRaw(value)
+    else:""
+  result = &"{indent*Tab}{code[0].strValue} = {val};\n"
 
 
 #______________________________________________________

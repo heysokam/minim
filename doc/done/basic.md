@@ -19,6 +19,8 @@
   - [x] Sketch   : Single condition only
   - [x] While
   - [x] if/elif/else blocks
+  - [x] Operators:  (and,&&) (or,||) (&,&) (|,|)
+  - [x] Multi-condition support (recursive)
 - [x] Variable asignment
 - [x] Tentative variable definition
 - [x] Multi-line strings
