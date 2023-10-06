@@ -9,8 +9,6 @@
 - [ ] Operators
   - [ ] Infix
     - [ ] Logical   && || == != < > <= >=
-- [ ] Conditions
-  - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
 - [ ] Structs
   - [ ] Construction: Function Parameters
   - [ ] Construction: Reassignment

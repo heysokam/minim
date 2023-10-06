@@ -1,0 +1,277 @@
+#:__________________________________________________________
+#  Min> C <niM |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#:__________________________________________________________
+## stdlib dependencies
+include "<stdio.h>"
+include "<stdlib.h>"
+include "<stdint.h>"
+include "<string.h>"
+## External dependencies
+include "<epoxy/gl.h>"
+include "<epoxy/glx.h>"
+include "<GLFW/glfw3.h>"
+
+#_______________________________________
+## Types
+#___________________
+type byte * = uint8_t
+type i32  * = int32_t
+type u32  * = uint32_t
+type str  * = ptr char
+type cstr *{.readonly.}= ptr char
+
+#_______________________________________
+## GLFW: Aliases
+#___________________
+{.namespace: glfw.}
+const ClientApi      *:i32=  GLFW_CLIENT_API
+const NoApi          *:i32=  GLFW_NO_API
+const Resizable      *:i32=  GLFW_RESIZABLE
+const GLVers_M       *:i32=  GLFW_CONTEXT_VERSION_MAJOR
+const GLVers_m       *:i32=  GLFW_CONTEXT_VERSION_MINOR
+const OpenGLProf     *:i32=  GLFW_OPENGL_PROFILE
+const OpenGLCore     *:i32=  GLFW_OPENGL_CORE_PROFILE
+const ColorBit       *:i32=  GL_COLOR_BUFFER_BIT
+const glfw_KeyEscape *:i32=  GLFW_KEY_ESCAPE
+const glfw_Press     *:i32=  GLFW_PRESS
+{.namespace: _.}
+#_______________________________________
+## OpenGL: Aliases
+#___________________
+{.namespace: gl.}
+# Texture: Types
+const gl_Rgba         *:i32=  GL_RGBA
+const gl_Rgba8        *:i32=  GL_RGBA8
+const gl_UnsignedByte *:i32=  GL_UNSIGNED_BYTE
+const gl_Tex2D        *:i32=  GL_TEXTURE_2D
+# Texture: Properties
+const gl_Repeat       *:i32=  GL_REPEAT
+const gl_Nearest      *:i32=  GL_NEAREST
+const gl_WrapS        *:i32=  GL_TEXTURE_WRAP_S
+const gl_WrapT        *:i32=  GL_TEXTURE_WRAP_T
+const gl_FilterMin    *:i32=  GL_TEXTURE_MIN_FILTER
+const gl_FilterMag    *:i32=  GL_TEXTURE_MAG_FILTER
+{.namespace: _.}
+#_______________________________________
+## OpenGL: Configuration
+#___________________
+{.namespace: gl.}
+const InfoMsgLen *:i32=  512
+{.namespace: _.}
+
+#_______________________________________
+## Input Manager
+#___________________
+{.namespace: i.}
+proc i_key (win :var ptr GLFWwindow; key,code,action,mods :var i32) :void=
+  discard code; discard mods
+  if key == glfw_KeyEscape and action == glfw_Press:
+    glfwSetWindowShouldClose(win, true)
+{.namespace: _.}
+
+#_______________________________________
+## Callbacks
+#___________________
+{.namespace: cb.}
+#___________________
+proc cb_resize (win :var ptr GLFWwindow; W,H :var i32) :void=
+  ## GLFW resize Callback
+  glViewport(0,0, W,H); discard win
+#___________________
+proc cb_error (code :var i32; descr :var cstr) :void=
+  ## GLFW error callback
+  printf "GLFW.Error:%d %s\n", code, descr
+#___________________
+{.namespace: _.}
+
+#_______________________________________
+## Helpers
+#___________________
+proc echo (msg :cstr) :void=  printf "%s\n", msg
+  ## Print an message to CLI with a newline at the end
+proc err (msg :cstr) :void {.noreturn.}=  echo msg; exit -1 # TODO: Error codes
+  ## Print an error to CLI and exit with -1
+
+#_______________________________________
+## Shaders: Code
+#___________________
+# Shaders
+const TriVert :cstr= """
+//:_____________________________________________________
+//  hello  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+//:_____________________________________________________
+// Hardcoded Fullscreen triangle in NDC coordinates |
+// UVs flipped vertically, so that 0,0 is topleft   |
+//__________________________________________________|
+#version 330 core
+out vec2 vUV;
+void main() { 
+  vec2 vertices[3] = vec2[3](
+    vec2(-1,-1),
+    vec2( 3,-1),
+    vec2(-1, 3));
+  gl_Position = vec4(vertices[gl_VertexID],0,1);
+  vUV   = 0.5 * gl_Position.xy + vec2(0.5);
+
+  // vUV.flipVertical(), so that (0,0) is at topleft (OpenGL wants 0,0 at bottomleft)
+  // TODO: Flip the triangle vertices instead, and figure out backface drawing
+  // remember:  glClipControl(GL_UPPER_LEFT)  core@gl4.5
+  //            ARB_clip_control extension:  https://registry.khronos.org/OpenGL/extensions/ARB/ARB_clip_control.txt
+  vUV.y = 1-vUV.y;
+}"""
+const TriFrag :cstr= """
+//:_____________________________________________________
+//  hello  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+//:_____________________________________________________
+#version 330 core
+uniform sampler2D pixels;
+in vec2 vUV;
+out vec4 fColor;
+void main() { fColor = texture(pixels, vUV); }
+"""
+
+#_______________________________________
+## Image: Tools
+#___________________
+const R    *:i32=  1 # TODO: channels enum
+const RG   *:i32=  2 # TODO: channels enum
+const RGB  *:i32=  3 # TODO: channels enum
+const RGBA *:i32=  4 # TODO: channels enum
+
+#_______________________________________
+## Configuration
+#___________________
+const cfg_Title :str=  "MinC | Hello Triangle"
+const cfg_W     :i32=   960
+const cfg_H     :i32=   540
+
+#_______________________________________
+## Framebuffer
+#___________________
+{.namespace: fb.}
+# Properties
+const fb_Size :u32=  cfg_W*cfg_H * RGBA
+# State
+var fb_pixels :ptr byte= nil
+{.namespace: _.}
+
+#_______________________________________
+## Software Renderer
+#___________________
+{.namespace: msr.}
+proc msr_update (pix :ptr byte; size :u32) :void=
+  memset(pix, 255, size) # Clear the entire buffer
+{.namespace: _.}
+
+##_______________________________________
+proc main *() :i32=
+  ## Application Entry Point
+  echo cfg_Title
+
+  # Initialize GLFW
+  glfwSetErrorCallback(cb_error)
+  var ok :i32= glfwInit()
+  if not ok: err "Failed to Initialize GLFW"
+
+  # Initialize the Window
+  glfwWindowHint(OpenGLProf, OpenGLCore)
+  glfwWindowHint(GLVers_M, 3)
+  glfwWindowHint(GLVers_m, 3)
+  glfwWindowHint(Resizable, false)
+  var win :ptr GLFWwindow= glfwCreateWindow(cfg_W,cfg_H, cfg_Title, nil, nil)
+  if not win: err "Failed to create GLFW window"
+  glfwSetFramebufferSizeCallback(win, cb_resize)
+  glfwMakeContextCurrent(win)
+
+  # Initialize Inputs
+  glfwSetKeyCallback(win, i_key)
+  glfwSetCursorPosCallback(win, nil)
+  glfwSetMouseButtonCallback(win, nil)
+  glfwSetScrollCallback(win, nil)
+
+  # Initialize the Triangle
+  var triID :u32= 0
+  glGenVertexArrays(1, addr triID)
+
+  # Initialize the Framebuffer pixels data
+  #  └─  Allocate the texture pixels
+  fb_pixels = calloc(fb_Size, sizeof byte)
+  memset(fb_pixels, 128, fb_Size) # Clear the pixels to (128,128,128,128)
+  #  └─  Create the texture's OpenGL Handle
+  var texID :u32= 0
+  glGenTextures(1, addr texID)
+  #  └─  Configure the texture properties
+  glBindTexture(gl_Tex2D, texID)
+  #    └─  Configure the texture's Wrapping Mode
+  glTexParameteri(gl_Tex2D, gl_WrapS, gl_Repeat)
+  glTexParameteri(gl_Tex2D, gl_WrapT, gl_Repeat)
+  #    └─  Configure the texture's Filter Mode
+  glTexParameteri(gl_Tex2D, gl_FilterMin, gl_Nearest)
+  glTexParameteri(gl_Tex2D, gl_FilterMag, gl_Nearest)
+  #  └─  Upload the initial texture data to the GPU
+  glTexImage2D(gl_Tex2D, 0, gl_Rgba8, cfg_W, cfg_H, 0, gl_Rgba, gl_UnsignedByte, fb_pixels)
+  #  └─  Clean OpenGL state after we are done configuring the texture
+  glBindTexture(gl_Tex2D, 0)
+
+  # Initialize the Framebuffer shader
+  var infoLog :array[InfoMsgLen, char]
+  #  └─  Create and Compile the Vertex Shader
+  let vertID :u32= glCreateShader(GL_VERTEX_SHADER)
+  glShaderSource(vertID, 1, addr TriVert, nil)
+  glCompileShader(vertID)
+  glGetShaderiv(vertID, GL_COMPILE_STATUS, addr ok)
+  if not ok:
+    glGetShaderInfoLog(vertID, InfoMsgLen, nil, infoLog)
+    echo "Failed to compile the Vertex Shader:"; err infoLog
+  #  └─  Create and Compile the Fragment Shader
+  let fragID :u32= glCreateShader(GL_FRAGMENT_SHADER)
+  glShaderSource(fragID, 1, addr TriFrag, nil)
+  glCompileShader(fragID)
+  glGetShaderiv(fragID, GL_COMPILE_STATUS, addr ok)
+  if not ok:
+    glGetShaderInfoLog(fragID, InfoMsgLen, nil, infoLog)
+    echo "Failed to compile the Fragment Shader:"; err infoLog
+  #  └─  Link Vert+Frag shaders into a Shader Program
+  let shader :u32= glCreateProgram()
+  glAttachShader(shader, vertID)
+  glAttachShader(shader, fragID)
+  glLinkProgram(shader)
+  glGetProgramiv(shader, GL_LINK_STATUS, addr ok)
+  if not ok:
+    glGetProgramInfoLog(shader, InfoMsgLen, nil, infoLog)
+    echo "Failed to link the Shader Program:"; err infoLog
+  #  └─  Destroy the Vert+Frag shaders
+  glDeleteShader(vertID)
+  glDeleteShader(fragID)
+
+  # Update the window+input
+  while not glfwWindowShouldClose(win):
+    # Update the window+input events
+    glfwPollEvents()
+    # Draw
+    #  └─  Update the pixel buffer
+    msr_update(fb_pixels, fb_Size)
+    #  └─  Clear the screen
+    glClearColor(1.0, 0.3, 0.3, 1.0)
+    glClear(ColorBit)
+    #  └─  Upload the Framebuffer pixels data to the GPU
+    glBindTexture(gl_Tex2D, texID)
+    glTexImage2D(gl_Tex2D, 0, gl_Rgba8, cfg_W, cfg_H, 0, gl_Rgba, gl_UnsignedByte, fb_pixels)
+    glBindTexture(gl_Tex2D, 0)
+    #  └─  Draw the Fullscreen Triangle
+    glUseProgram(shader)
+    glBindTexture(gl_Tex2D, texID)
+    glBindVertexArray(triID)
+    glDrawArrays(GL_TRIANGLES, 0,3)
+    #  └─  Clear OpenGL state after drawing
+    glBindTexture(gl_Tex2D, 0)
+    glBindVertexArray(0)
+    glUseProgram(0)
+    # Present to the screen
+    glfwSwapBuffers(win)
+
+  # Terminate GLFW
+  glfwDestroyWindow(win)
+  glfwTerminate()
+  return 0
+
