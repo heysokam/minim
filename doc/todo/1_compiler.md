@@ -26,4 +26,10 @@
   - [ ] Debug    # All debug flags active
   - [ ] Release  # Optimization flags active
   - [ ] None     # No flags. Blank slate for --passC:" ... "
+- [ ] Single Header option
+```
+
+```md
+# For 2.0.0
+- [ ] Auto-nim bindings option
 ```
