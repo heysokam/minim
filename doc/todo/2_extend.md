@@ -49,4 +49,5 @@
 - [ ] distinct types -> wrap the type inside a named struct
       type Handle = distinc int   ->   typedef struct int_d { int data; } Handle;
 - [ ] if/elif/else variable asignment autoexpand
+- [ ] {.namespace: one.sub.}  and  {.namespace: _.}
 ```
