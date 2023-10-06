@@ -30,3 +30,8 @@ MinC can be used to create C libraries, because the output is normal C code.
 Cross-compilation is a first class citizen.  
 Thanks to the internal usage of the ZigCC compiler interface,  
 building for any target is as easy as passing `-target=` to the compiler command.  
+
+### *Slate | Compiler Helper Library
+Code generation relies on its companion library @[*Slate](https://github.com/heysokam/slate),  
+which is also in early stages of development.  
+Over time, many of its internal features will be removed from the compiler and moved to *Slate instead, in order to make them usable for compilation of Nim into other languages.  
