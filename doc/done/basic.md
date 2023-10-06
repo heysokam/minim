@@ -56,4 +56,5 @@
   - [x] Field access
     - [x] Return statement
 - [x] Character literals: Resolve to 'c' everywhere
+- [x] addr
 ```
