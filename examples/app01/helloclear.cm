@@ -1,0 +1,95 @@
+#:__________________________________________________________
+#  Min> C <niM |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#:__________________________________________________________
+## stdlib dependencies
+include "<stdio.h>"
+include "<stdlib.h>"
+## External dependencies
+include "<epoxy/gl.h>"
+include "<epoxy/glx.h>"
+include "<GLFW/glfw3.h>"
+
+#_______________________________________
+## Types
+#___________________
+type str  * = ptr char
+type cstr *{.readonly.}= ptr char
+
+#_______________________________________
+## GLFW Aliases
+#___________________
+const ClientApi  *:int=  GLFW_CLIENT_API
+const NoApi      *:int=  GLFW_NO_API
+const Resizable  *:int=  GLFW_RESIZABLE
+const GLVers_M   *:int=  GLFW_CONTEXT_VERSION_MAJOR
+const GLVers_m   *:int=  GLFW_CONTEXT_VERSION_MINOR
+const OpenGLProf *:int=  GLFW_OPENGL_PROFILE
+const OpenGLCore *:int=  GLFW_OPENGL_CORE_PROFILE
+const ColorBit   *:int=  GL_COLOR_BUFFER_BIT
+
+#_______________________________________
+## Callbacks
+#___________________
+proc cb_resize (win :var ptr GLFWwindow; W,H :var int) :void=
+  ## GLFW resize Callback
+  glViewport(0,0, W,H); discard win
+#___________________
+proc cb_error (code :var int; descr :var cstr) :void=
+  ## GLFW error callback
+  printf "GLFW.Error:%d %s\n", code, descr
+
+#_______________________________________
+## Helpers
+#___________________
+proc echo (msg :cstr) :void=  printf "%s\n", msg
+  ## Print an message to CLI with a newline at the end
+proc err (msg :cstr) :void {.noreturn.}=  echo msg; exit -1 # TODO: Error codes
+  ## Print an error to CLI and exit with -1
+
+#_______________________________________
+## Configuration
+#___________________
+const cfg_Title :str= "MinC | Hello OpenGL 3.3"
+const cfg_W     :int=  960
+const cfg_H     :int=  540
+
+##_______________________________________
+proc main *() :int=
+  ## Application Entry Point
+  echo cfg_Title
+
+  # Initialize GLFW
+  glfwSetErrorCallback(cb_error)
+  glfwInit()
+
+  # Initialize the Window
+  glfwWindowHint(OpenGLProf, OpenGLCore)
+  glfwWindowHint(GLVers_M, 3)
+  glfwWindowHint(GLVers_m, 3)
+  glfwWindowHint(Resizable, false)
+  var win :ptr GLFWwindow= glfwCreateWindow(cfg_W,cfg_H, cfg_Title, nil, nil)
+  if not win: err "Failed to create GLFW window"
+  glfwSetFramebufferSizeCallback(win, cb_resize)
+  glfwMakeContextCurrent(win)
+
+  # Initialize Inputs
+  glfwSetKeyCallback(win, nil)
+  glfwSetCursorPosCallback(win, nil)
+  glfwSetMouseButtonCallback(win, nil)
+  glfwSetScrollCallback(win, nil)
+
+  # Update the window+input
+  while not glfwWindowShouldClose(win):
+    # Update the window+input events
+    glfwPollEvents()
+    # Draw
+    glClearColor(1.0, 0.3, 0.3, 1.0)
+    glClear(ColorBit)
+    # Present to the screen
+    glfwSwapBuffers(win)
+
+  # Terminate GLFW
+  glfwDestroyWindow(win)
+  glfwTerminate()
+  return 0
+

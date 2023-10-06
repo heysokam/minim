@@ -1,0 +1,50 @@
+#:__________________________________________________________
+#  Min> C <niM |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#:__________________________________________________________
+# C stdlib dependencies
+include "<stdbool.h>"
+# External dependencies
+include "<GLFW/glfw3.h>"
+
+#_______________________________________
+## GLFW Aliases
+#___________________
+const ClientApi :int= GLFW_CLIENT_API
+const NoApi     :int= GLFW_NO_API
+const Resizable :int= GLFW_RESIZABLE
+
+#_______________________________________
+## Callbacks
+#___________________
+proc resize (win :ptr GLFWwindow; W,H :int) :void=
+  ## GLFW resize Callback
+  discard win
+  discard W
+  discard H
+
+#_______________________________________
+## Entry Point
+#___________________
+proc main *() :int=
+  # Initialize GLFW
+  glfwInit()
+  glfwWindowHint(ClientApi, NoApi)
+  glfwWindowHint(Resizable, false)
+  var win :ptr GLFWwindow= glfwCreateWindow(960,540, "MinC | Hello GLFW", nil, nil)
+  glfwSetFramebufferSizeCallback(win, resize)
+
+  # Initialize Inputs
+  glfwSetKeyCallback(win, nil)
+  glfwSetCursorPosCallback(win, nil)
+  glfwSetMouseButtonCallback(win, nil)
+  glfwSetScrollCallback(win, nil)
+
+  # Update the window+input
+  while not glfwWindowShouldClose(win):
+    glfwPollEvents()
+
+  # Terminate GLFW
+  glfwDestroyWindow(win)
+  glfwTerminate()
+  return 0
+
