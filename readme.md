@@ -1,7 +1,22 @@
 # ᛟ minc | Minimalistic C Language
 `Min> C <niM`  
 MinC is a minimalistic C language with nim syntax.  
-It does not try to be feature-full, its only goal is to write Pure C.  
+It does not try to be feature-full, its only goal is to write Modern and Pure C.  
+
+### Current State of Development
+TL;DR: **Early** :)
+```md
+The language works, and can create full applications.  
+
+The current way to work with the language involves continuously hitting assertions,  
+with very little (or at times none) error information, other than the backtrace and a treeRepr of the code that crashed.  
+
+See the todo and done folders for a complete list of features implemented and tbd.  
+There is also a roadmap file, used for version planning and goal-setting.  
+```
+@[done](./doc/done/)  
+@[todo](./doc/todo/), @[roadmap](./doc/roadmap.md)  
+Full application example @[app03 Framebuffer OpenGL](./examples/app03_framebufferGL)  
 
 ### MinC is C
 MinC is a different version of C that uses nim syntax.  
