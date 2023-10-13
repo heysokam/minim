@@ -10,6 +10,5 @@ import ./convert/core
 
 proc toMinC *(code :string|Path) :string=
   ## Converts a block of Nim code into the Min C Language
-  when code is Path: MinC( code.readAST() ) & "\n"
-  else:              MinC( code.getAST()  ) & "\n"
-
+  when code is Path: MinC( nimc.readAST(code) ) & "\n"
+  else:              MinC( nimc.getAST(code)  ) & "\n"
