@@ -8,7 +8,10 @@
 # std dependencies
 import std/strutils
 import std/tables
+import std/sets
+import std/sequtils
 # *Slate dependencies
+import slate/element/base as slateBase
 import slate/element/procdef
 import slate/element/error
 import slate/element/vars
@@ -30,58 +33,165 @@ type VariableCodegenError  = object of CatchableError
 type PragmaCodegenError    = object of CatchableError
 type ConditionCodegenError = object of CatchableError
 type ObjectCodegenError    = object of CatchableError
+type AssignCodegenError    = object of CatchableError
 
 #______________________________________________________
 # Codegen: Types
 #_____________________________
-type Renames = Table[string, string]
+type  VarKind {.pure.}= enum Const, Let, Var
+type  Renames         = Table[string, string]
+const SomeLit         = {nkCharLit..nkTripleStrLit}
+const SomeStrLit      = {nkStrLit..nkTripleStrLit}
+const SomeCall        = {nkCall,nkCommand}
+const SomeValueNode   = {nkIdent, nkPtrTy, nkInfix}+SomeLit+{nkNilLit}
+# Special cases
+const Reserved            = ["pointer"]
+const NoSpacingInfixes    = ["->"]
+const ValidRawStrPrefixes = ["raw"]
+const ValidInfixKind      = {nkIdent,nkInfix,nkPar,nkCast,nkBracketExpr,nkDotExpr,nkPtrTy} + SomeCall + SomeLit
+const ValidCastOperators  = ["as", "@"]
+const ValueAffixRenames   = {
+  "shl": "<<",  "shr": ">>",
+  "and": "&" ,  "or" : "|" ,  "xor": "^" ,
+  "mod": "%" ,  "div": "/" ,
+  }.toTable
+const ConditionAffixRenames = {
+  "and": "&&",
+  "or" : "||",
+  }.toTable()
+const KnownMainNames         = ["main", "WinMain"]
+const KnownKeywords          = ["addr", "sizeof"]
+const KnownPragmas           = ["define", "error", "warning", "namespace", "emit"]
+const KnownForInfix          = ["..", "..<"]
+const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 
 #______________________________________________________
 # General tools
 #_____________________________
-proc mincDotExprRec (code :PNode; idents :var seq[PNode]) :void=
-  if code.kind == nkDotExpr:
-    assert code[^1].kind == nkIdent
-    idents.add code[^1]
-    mincDotExprRec(code[0], idents)
-  elif code.kind == nkIdent:
-    idents.add code
-  else: assert false, code.treeRepr
+proc isCustomTripleStrLitRaw (code :PNode) :bool= (code.kind in {nkCallStrLit} and code[0].strValue in ValidRawStrPrefixes and code[1].kind == nkTripleStrLit)
+proc isTripleStrLit (code :PNode) :bool=  code.kind == nkTripleStrLit or code.isCustomTripleStrLitRaw
+proc mincGetTripleStrLit (code :PNode; indent :int= 0) :string=
+  let tab  = indent*Tab
+  let val  = if code.kind == nkTripleStrLit: code else: code[1]
+  var body = val.strValue
+  if code.isCustomTripleStrLitRaw : body = body.replace( "\n" , &"\"\n{tab}\""  ) # turn every \n character into  \n"\nTAB"  to use C's "" concatenation
+  else                            : body = body.replace( "\n" , &"\\n\"\n{tab}\"" ) # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
+  result = &"\n{tab}\"{body}\""
 #_____________________________
-iterator dotExpr *(code :PNode) :PNode=
-  var idents :seq[PNode]
-  mincDotExprRec(code, idents)
-  for id in countdown(idents.high, idents.low): yield idents[id]
+proc isEmpty (code :PNode) :bool= code.kind == nkEmpty or (code.kind == nkIdent and code.strValue == "_")
+proc mincGetValueStr (code :PNode; indent :int= 0) :string=
+  assert code.kind in SomeValueNode+{nkEmpty,nkDotExpr},
+    &"Tried to get the str value of a node that is not mapped for it. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+  let isPtr = code.kind == nkPtrTy
+  var name  =
+    case code.kind
+    of nkEmpty   : ""
+    of nkPtrTy   : code[0].strValue
+    of nkNilLit  : "NULL"
+    of nkCharLit : &" '{vars.getValue(code).parseInt().char}'"
+    of nkStrLit  : &"\"{code.strValue}\""
+    of nkRStrLit : &"\"{code.strValue}\""
+    of nkInfix   : mincGetValueRaw(code,indent)
+    of nkDotExpr : mincGetValueRaw(code,indent)
+    else         : code.strValue
+  if code.isEmpty: name = ""
+  if code.isTripleStrLit: name = mincGetTripleStrLit(code,indent+1)
+  if name in Reserved : # Reserved identifier names that are always renamed
+    case name
+    of "pointer" : result = "void*"
+    else         : assert false, "Found a Reserved identifier name, but no behavior for it is defined. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+  elif isPtr : result = &"{name}*"
+  else       : result = name
+#_____________________________
+proc mincGetArrayValue (entry,arr :PNode; indent :int= 0) :string=
+  let tab1   = (indent+1)*Tab
+  let values = vars.getValue(entry).split(" ")
+  if values.len < 2 and values[0] == "": return " {0}"
+  result.add " {\n"
+  for id,it in values.pairs:
+    if it == "": break
+    result.add &"{tab1}[{id}]= {it},\n"
+  result.add &"{indent*Tab}}}"
+#_____________________________
+proc mincGetObjectValue (obj :PNode; indent :int= 0) :string=
+  assert obj.kind == nkObjConstr
+  let tab1 = (indent+1)*Tab
+  result.add &"({obj[0].strValue}){{\n"
+  for field in obj.sons[1..^1]:
+    assert field.kind == nkExprColonExpr
+    result.add &"{tab1}.{field[0].strValue}= {mincGetValueRaw(field[1], indent+1)},\n"
+  result.add &"{tab1}}}"
+
 #_____________________________
 proc mincDotExprList (code :PNode) :seq[string]=
-  for it in code.dotExpr: result.add it.strValue
+  for it in slateBase.dotExpr(code): result.add it.strValue
 #_____________________________
-proc mincInfixList *(code :PNode; renames :Renames= Renames()) :string=
+proc mincInfixList *(code :PNode; indent :int= 0; renames :Renames= Renames()) :string=
   # TODO: Merge with mincInfix
+  if code.kind != nkInfix: report code
   assert code.kind == nkInfix
   let fix   = code[0]
   let left  = code[1]
   let right = code[2]
-  assert fix.kind == nkIdent and left.kind in [nkIdent,nkInfix] and right.kind in [nkIdent,nkInfix] and code.sons.len == 3
-  # Add the left value (including recursion)
-  if   left.kind == nkIdent : result.add left.strValue                # Base Case
-  elif left.kind == nkInfix : result.add mincInfixList(left, renames) # Recursive case
-  # Add the affix
-  if fix.strValue in renames : result.add &" {renames[fix.strValue]} "
-  else                       : result.add &" {fix.strValue} "
-  # Add the right value (including recursion)
-  if   right.kind == nkIdent : result.add right.strValue                # Base case
-  elif right.kind == nkInfix : result.add mincInfixList(right, renames) # Recursive case
-  else: raise newException(AffixCodegenError, &"Found an unmapped infix kind  {right.kind}  The code that contains it is:\n{code.renderTree}\n")
+  if not(fix.kind == nkIdent and left.kind in ValidInfixKind and right.kind in ValidInfixKind and (code.sons.len == 3 or (false))):
+    echo left.kind  in ValidInfixKind
+    echo right.kind in ValidInfixKind
+    echo code.sons.len == 3
+  assert fix.kind == nkIdent and left.kind in ValidInfixKind and right.kind in ValidInfixKind and code.sons.len == 3,
+    &"Failed to get the infix list of a node. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+
+  # Helpers to remove the cases mess/noise
+  proc isBase (node:PNode):bool= node.kind in {nkIdent}+SomeLit
+  proc getSideCode (node:PNode; indent :int= 0):string=
+    # Get the side code
+    if   node.isBase                 : result.add mincGetValueRaw(node, indent)          # Base Case
+    elif node.kind == nkPar          : # Parenthesis case
+      if   node[0].isBase            : result.add &"({node[0].strValue})"                # Base case inside parenthesis
+      elif node[0].kind == nkPar     : result.add &"({node[0].getSideCode})"
+      else                           : result.add &"({mincInfixList(node[0], indent, renames)})" # Recursive case between parenthesis
+    elif node.kind == nkCast         : # Normal cast
+      if   node[1].isBase            : result.add &"({node[0].strValue}){node[1].strValue}" # Base case inside cast
+      elif node[1].kind == nkDotExpr : result.add &"({node[0].strValue}){mincGetValueStr(node[1], indent)}" # Base case inside cast
+      else                           : result.add &"({node[0].strValue})({mincInfixList(node[1], indent, renames)})"  # Recursive case with cast
+    elif node.kind == nkInfix        : result.add mincInfixList(node, indent, renames)
+    elif node.kind == nkBracketExpr  : result.add mincGetValueRaw(node, indent)
+    elif node.kind == nkDotExpr      : result.add mincGetValueRaw(node, indent)
+    elif node.kind in SomeCall       : result.add mincGetValueRaw(node, indent)
+    elif node.kind == nkPtrTy        : result.add mincGetValueRaw(node, indent)
+    else: raise newException(AffixCodegenError, &"Found an unmapped infix kind  {node.kind}  The code that contains it is:\n{code.renderTree}\n")
+
+  # Special Custom Cast case
+  if fix.strValue in ValidCastOperators:
+    assert right.kind in {nkIdent,nkPtrTy}, &"Casting targets are only allowed to be identifiers. The illegal tree+code is:\n{code.treeRepr}\n{code.renderTree}\n"
+    result.add &"({getSideCode(right)}){getSideCode(left)}"
+  # Normal infix case
+  else:
+    # Add the left value (including recursion)
+    result.add left.getSideCode()
+    # Add the affix
+    let fixn = fix.strValue
+    let sep  = if fixn in NoSpacingInfixes: "" else: " "
+    if fixn in renames : result.add &"{sep}{renames[fixn]}{sep}"
+    else               : result.add &"{sep}{fixn}{sep}"
+    # Add the right value (including recursion)
+    result.add right.getSideCode()
+
 #_____________________________
-proc mincGetValueRaw *(code :PNode) :string=
-  assert code.kind in [nkEmpty, nkIdent, nkBracketExpr, nkDotExpr, nkInfix] or code.kind in nkCharLit..nkTripleStrLit
-  if   code.kind == nkEmpty       : ""
-  elif code.kind == nkBracketExpr : &"{code[0].strValue}[{code[1].strValue}]"
-  elif code.kind == nkDotExpr     : mincDotExprList(code).join(".")
-  elif code.kind == nkCharLit     : &"'{code.strValue.parseInt().char}'"
-  elif code.kind == nkInfix       : mincInfixList(code)
-  else                            : code.strValue
+const ValidValue = {nkEmpty, nkIdent, nkBracketExpr, nkDotExpr, nkInfix, nkCast, nkCall, nkCommand, nkObjConstr, nkPtrTy}+SomeLit+{nkNilLit}
+proc mincGetValueRaw (code :PNode; indent :int= 0) :string=
+  assert code.kind in ValidValue,
+    &"Tried to get the value of a node, but support for it is not implemented. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+  if code.kind == nkBracketExpr :
+    if code.sons.len == 1       : &"*{code[0].strValue}" # Dereference case
+    else                        : &"{code[0].strValue}[{mincGetValueRaw(code[1], indent)}]"
+  elif code.kind == nkDotExpr   : mincDotExprList(code).join(".")
+  elif code.kind == nkCharLit   : &"'{code.strValue.parseInt().char}'"
+  elif code.kind == nkInfix     : mincInfixList(code, indent, ValueAffixRenames)
+  elif code.kind == nkCast      : &"({mincGetValueStr(code[0], indent)})({mincGetValueRaw(code[1], indent)})" # Recursive case for cast[]()
+  elif code.kind in SomeCall    : mincCallRaw(code, indent)
+  elif code.kind == nkPtrTy     : &"{code[0].strValue}*"
+  elif code.kind == nkObjConstr : mincGetObjectValue(code, indent)
+  else                          : mincGetValueStr(code, indent)
 
 
 #______________________________________________________
@@ -110,22 +220,21 @@ proc mincInfix (code :PNode; indent :int= 0; raw :bool= false) :string=
   of "++","--":
     if data.right == "": raise newException(AffixCodegenError,
       &"Using ++ or -- as postfixes is currently not possible. The default Nim parser interprets them as infix, and breaks the code written afterwards. Please convert them to prefixes. The code that triggered this is:\n{code.renderTree}\n")
-  of "+=", "-=", "/=", "*=", "%=", "&=", "|=", "^=", "<<=", ">>=":
+  of "+=", "-=", "/=", "*=", "%=", "&=", "|=", "^=", "<<=", ">>=", "==", "<=", ">=", "!=":
     # Known Infixes. Do nothing, the line after this caseof will add their code
     discard
-  of "+", "-", "*", "/", "%", "&", "|", "^", ">>", "<<",
+  of "+", "-", "*", "/", "%", "&", "|", "^", ">>", "<<", "->",
      "and", "or", "xor", "shr", "shl", "div", "mod":
     # Known infixes that cannot be standalone
-    assert raw, &"Found an infix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}"
-  of "in", "notin", "is", "isnot", "of", "as", "from":
-    assert false, &"Found a nim infix keyword that cannot be used in MinC. The incorrect code is:\n{code.renderTree}"
-  of "not":
-    assert false, &"Found a nim infix keyword that can only be used as prefix. The incorrect code is:\n{code.renderTree}"
-  else: raise newException(AffixCodegenError, &"Found an unknown infix  {data.fix}  The code that contains it is:\n{code.renderTree}\n")
+    if not raw: raise newException(AffixCodegenError, &"Found an infix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}")
+  of "in", "notin", "is", "isnot", "of", "as", "from", "@":
+    raise newException(AffixCodegenError, &"Found a nim infix keyword that cannot be used as an infix in MinC. The incorrect code is:\n{code.renderTree}")
+  of "not" : raise newException(AffixCodegenError, &"Found a nim infix keyword that can only be used as prefix. The incorrect code is:\n{code.renderTree}")
+  else     : raise newException(AffixCodegenError, &"Found an unknown infix  {data.fix}  The code that contains it is:\n{code.renderTree}\n")
   # Remap nim keywords to C
   case data.fix
-  of "and" : data.fix = "&"
-  of "or"  : data.fix = "|"
+  of "and" : data.fix = "&&"
+  of "or"  : data.fix = "||"
   of "xor" : data.fix = "^"
   of "shl" : data.fix = "<<"
   of "shr" : data.fix = ">>"
@@ -133,7 +242,8 @@ proc mincInfix (code :PNode; indent :int= 0; raw :bool= false) :string=
   of "mod" : data.fix = "%"
   else:discard
   # Add the the code as left fix right
-  result.add &"{data.left} {data.fix} {data.right}"
+  let sep = if data.fix in NoSpacingInfixes: "" else: " "
+  result.add &"{data.left}{sep}{data.fix}{sep}{data.right}"
   if not raw: result.add ";\n"
 #_____________________________
 proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
@@ -187,42 +297,61 @@ proc mincProcDef  (code :PNode; indent :int= 0) :string=
       of "noreturn_C11": "_Noreturn "
       of "noreturn"    : "[[noreturn]] "
       else:""
-  let priv = if procdef.isPrivate(code, indent): "static " else: ""
-  result = fmt "{pragma}{priv}{procdef.getRetT(code)} {procdef.getName(code)} ({mincProcDefGetArgs(code)}) {{{mincProcDefGetBody(code)}}}\n"
+  let isPriv    = procdef.isPrivate(code, indent)
+  let priv      = if isPriv: "static " else: ""
+  let name      = procdef.getName(code)
+  let prototype = fmt"{priv}{procdef.getRetT(code)} {name} ({mincProcDefGetArgs(code)})"
+  if not isPriv and name notin KnownMainNames: result.add &"{prototype};\n" # TODO: Write decl to header
+  result.add &"{pragma}{prototype} {{{mincProcDefGetBody(code)}}}\n"
 
 
 #______________________________________________________
 # Function Calls
 #_____________________________
-const KnownKeywords = ["addr", "sizeof"]
-proc mincCallGetArgs (code :PNode) :string=
+proc mincCallGetName (call :PNode) :string=
+  assert call.kind in {nkCall, nkCommand}
+  result = call[0].strValue
+  case result
+  of "addr" : result = "&"
+
+proc mincCallGetArgs (code :PNode; indent :int= 0) :string=
   ## Returns the code for all arguments of the given ProcDef node.
   assert code.kind in [nkCall, nkCommand]
   if calls.getArgCount(code) == 0: return
   for arg in calls.args(code):
     if arg.node.kind in nkStrLit..nkTripleStrLit:
-      let str = arg.node.strValue.replace("\n", "\\n")
-      result.add &"\"{str}\""
+      let strv = arg.node.strValue.replace("\n", "\\n")
+      result.add &"\"{strv}\""
     elif arg.node.kind == nkNilLit: result.add "NULL"
     elif arg.node.kind in [nkCall, nkCommand]:
-      let cname = arg.node[0].strValue # Call/Command function name
-      assert cname in KnownKeywords
+      let cname = mincCallGetName(arg.node) # Call/Command function name
       case cname
-      of "addr"   : result.add "&" & arg.node[1].strValue
       of "sizeof" : result.add &"sizeof({arg.node[1].strValue})"
-      else: raise newException(CallsCodegenError, "")
+      else: # Recursive Call inside Call case
+        assert cname notin KnownKeywords and arg.node.kind in {nkCall, nkCommand}
+        result.add mincCallRaw(arg.node)
     elif arg.node.kind == nkInfix:
-      result.add arg.name
-    else: result.add arg.node.strValue
+      if arg.node[0].strValue in ValidCastOperators : result.add mincInfixList(arg.node, indent)         # TODO: These two options should be merged
+      else                                          : result.add mincInfix(arg.node, indent=0, raw=true) # TODO: These two options should be merged
+    elif arg.node.kind == nkCast:
+      result.add mincGetValueRaw(arg.node,indent)
+    elif arg.node.kind == nkObjConstr:
+      result.add mincGetObjectValue(arg.node, indent+1)
+    else: result.add mincGetValueStr(arg.node, indent)
     result.add( if arg.last: "" else: ", " )
 #_____________________________
-proc mincCallRaw (code :PNode) :string=
+proc mincCallRaw (code :PNode; indent :int= 0) :string=
   assert code.kind in [nkCall, nkCommand]
-  result = &"{calls.getName(code,0)}({mincCallGetArgs(code)})"
+  # report code
+  let name = mincCallGetName(code)
+  let args = mincCallGetArgs(code,indent)
+  result   =
+    if name == "&" : &"{name}{args}"
+    else           : &"{name}({args})"
 #_____________________________
 proc mincCall (code :PNode; indent :int= 0) :string=
   assert code.kind in [nkCall, nkCommand]
-  result.add &"{indent*Tab}{mincCallRaw(code)};\n"
+  result.add &"{indent*Tab}{mincCallRaw(code,indent)};\n"
 #_____________________________
 proc mincCommand (code :PNode; indent :int= 0) :string=
   assert code.kind in [nkCommand]
@@ -232,43 +361,25 @@ proc mincCommand (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # Variables
 #_____________________________
-type VarKind {.pure.}= enum Const, Let, Var
-#_____________________________
 proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent :int= 0) :string=
   ## Gets the value of a variable entry, based on its value node.
   # note: Just a blocked alias to avoid mincVariable complexity/readability from becoming absurd.
-  let tab1  = (indent+1)*Tab
   let isObj = value.kind == nkObjConstr
   result =
     if   value.kind == nkEmpty             : ""
     elif value.kind == nkNilLit            : " NULL"
-    elif value.kind == nkCall              : &" {mincCallRaw(value)}"
+    elif value.kind == nkCall              : &" {mincCallRaw(value,indent)}"
     elif value.kind in nkStrLit..nkRStrLit : &" \"{vars.getValue(entry)}\""
-    elif value.kind == nkTripleStrLit      :
-      &"\n{tab1}\"" &
-      vars.getValue(entry)
-      .replace( "\n" , &"\\n\"\n{tab1}\"" ) &  # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
-      "\""
+    elif value.isTripleStrLit              : mincGetTripleStrLit(value,indent+1)
     elif value.kind == nkCharLit           : &" '{vars.getValue(entry).parseInt().char}'"
-    elif value.kind == nkBracketExpr       : &" {mincGetValueRaw(value)}"
-    elif value.kind == nkInfix             : &" {mincGetValueRaw(value)}"
+    elif value.kind in {nkBracketExpr,nkInfix,nkCast,nkDotExpr}:
+      &" {mincGetValueRaw(value,indent)}"
     elif not (typ.isArr or isObj)          : &" {vars.getValue(entry)}"
     else                                   : ""
-  if typ.isArr and value.kind != nkEmpty:
-    let values = vars.getValue(entry).split(" ")
-    if values.len < 2 and values[0] == "": return " {0}"
-    result.add " {\n"
-    echo values
-    for id,it in values.pairs:
-      if it == "": break
-      result.add &"{tab1}[{id}]= {it},\n"
-    result.add &"{indent*Tab}}}"
-  elif value.kind == nkObjConstr:
-    result.add " {\n"
-    for field in value.sons[1..^1]:
-      assert field.kind == nkExprColonExpr
-      result.add &"{tab1}.{field[0].strValue}= {mincGetValueRaw(field[1])},\n"
-    result.add &"{indent*Tab}}}"
+  if typ.isArr and value.kind != nkEmpty and value.kind notin SomeStrLit and not value.isTripleStrLit:
+    result.add mincGetArrayValue(entry, value, indent)
+  elif isObj:
+    result.add mincGetObjectValue(value, indent)
   # if result == "": report entry; report value; assert false
 #_____________________________
 proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
@@ -351,10 +462,22 @@ proc mincPragmaWarning (code :PNode; indent :int= 0) :string=
 proc mincPragmaNamespace (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma
   let data = code[0] # The data is inside an nkExprColonExpr node
-  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkIdent, &"Only {{.namespace:name.}} namespace pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
-  result.add &"{indent*Tab}// namespace {data[1].strValue}\n"
+  let name = data[1] # Name node of the namespace
+  assert data.kind == nkExprColonExpr and data.len == 2 and name.kind in [nkIdent,nkDotExpr], &"Only {{.namespace:name.}} and {{.namespace:name.sub.}} namespace pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
+  let val  =
+    if   name.kind == nkIdent   : name.strValue
+    elif name.kind == nkDotExpr : mincDotExprList(name).join(".") # TODO: this is fine, but symbols should be using _
+    else:""
+  assert val != "", &"Failed to find the namespace name value for:\n{code.treeRepr}\n"
+  result.add &"{indent*Tab}// namespace {val}\n"
 #_____________________________
-const KnownPragmas = ["define", "error", "warning", "namespace"]
+proc mincPragmaEmit (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkPragma and code[0].kind == nkExprColonExpr and code[0][0].strValue == "emit" and code[0][1].kind in SomeStrLit,
+    &"Tried to get the code from an emit pragma, but the node does not match the required shape.\nThe incorrect tree+code is:\n{code.treeRepr}\n{code.renderTree}\n"
+  let text = code[0][1].strValue
+  let emit = if text.endsWith("\n"): text[0..^2] else: text
+  result = &"{indent*Tab}{text}\n"
+#_____________________________
 proc mincPragma (code :PNode; indent :int= 0) :string=
   ## Codegen for standalone pragmas
   ## Context-specific pragmas are handled inside each section
@@ -366,25 +489,56 @@ proc mincPragma (code :PNode; indent :int= 0) :string=
   of "error"     : result = mincPragmaError(code,indent)
   of "warning"   : result = mincPragmaWarning(code,indent)
   of "namespace" : result = mincPragmaNamespace(code,indent)
+  of "emit"      : result = mincPragmaEmit(code,indent)
   else: raise newException(PragmaCodegenError, &"Only {KnownPragmas} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n")
 
 
 #______________________________________________________
 # Conditions
 #_____________________________
-const ConditionAffixRenames :Renames= {
-  "and": "&&",
-  "or" : "||",
-  }.toTable()
-proc mincGetCondition (code :PNode) :string=
+proc mincGetCondition (code :PNode; indent :int= 0) :string=
   # TODO: Unconfuse this total mess. Remove hardcoded numbers. Should be names and a loop.
-  if code[0].kind == nkPrefix:
-    result.add code[0][0].strValue.replace("not","!")
-    if code[0][1].kind == nkCall: result.add mincCallRaw( code[0][1] )
-    else:                         result.add code[0][1].strValue
-  elif code[0].kind == nkInfix:
-    result.add mincInfixList(code[0], ConditionAffixRenames)  # TODO: Restrict to comparison only
-  else: assert false, &"Non Prefix/Infix conditions are currently supported\n{code.renderTree}"
+  if code.kind == nkPrefix:
+    result.add code[0].strValue.replace("not","!")
+    if   code[1].kind == nkCall    : result.add mincCallRaw( code[1],indent )
+    elif code[1].kind == nkDotExpr : result.add mincGetValueRaw( code[1],indent )
+    else                           : result.add mincGetValueRaw( code[1],indent )
+  elif code.kind == nkInfix:
+    result.add mincInfixList(code, indent, ConditionAffixRenames)  # TODO: Restrict to comparison only
+  elif code.kind in {nkIdent,nkDotExpr}: result.add mincGetValueRaw(code,indent)
+  else: assert false, &"Only Ident/DotExpr/!Prefix/Infix conditions are currently supported.\n{code.treeRepr}\n{code.renderTree}\n"
+
+#______________________________________________________
+# Loops
+#_____________________________
+proc mincWhileStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkWhileStmt
+  result.add &"{indent*Tab}while ({mincGetCondition(code[0])}) {{\n"
+  result.add MinC( code[^1], indent+1 )
+  result.add &"{indent*Tab}}}\n"
+#_____________________________
+proc mincForStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkForStmt
+  # Name the entries
+  let exprs   = code[1]   # For Expression
+  let value   = exprs[1]  # Initial Value assigned to the sentry
+  let content = code[2]   # Contents of the for body block
+  let sentry  = code[0]   # Sentry variable
+  let infix   = exprs[0]  # Infix operator that does the finalizing condition check
+  let final   = exprs[2]  # Final value checked to terminates the for
+  # Error check
+  assert sentry.kind == nkIdent and exprs.kind == nkInfix and infix.strValue in KnownForInfix and content.kind == nkStmtList,
+    &"Tried to generate the code of a for loop, but its definition syntax is not supported. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+  # Name the outputs
+  let init = if sentry.isEmpty: ""
+    else: &"size_t {sentry.strValue} = {value.strValue}"  # TODO: Remove hardcoded size_t. Should be coming from exprs[1].T
+  let fix  = infix.strValue[2..^1]
+  let cond = if exprs.isEmpty : ""
+    else: &" {mincGetValueStr(sentry)} {fix} {mincGetValueStr(final)}"
+  let iter = if exprs.isEmpty : ""
+    else: &" ++{sentry.strValue}" # TODO : Remove hardcoded ++. Allow decrementing the value
+  let body = &" {{\n{MinC(content,indent+1)}{indent*Tab}}}\n"
+  result.add &"{indent*Tab}for({init};{cond};{iter}){body}"
 
 #______________________________________________________
 # Control Flow
@@ -392,7 +546,7 @@ proc mincGetCondition (code :PNode) :string=
 proc mincReturnStmt (code :PNode; indent :int= 1) :string=
   assert code.kind == nkReturnStmt
   assert indent != 0, "Return statements cannot exist at the top level in C.\n" & code.renderTree
-  result.add &"{indent*Tab}return {mincGetValueRaw(code[0])};\n"
+  result.add &"{indent*Tab}return {mincGetValueRaw(code[0],indent+1)};\n"
 #_____________________________
 proc mincContinueStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkContinueStmt
@@ -403,12 +557,6 @@ proc mincBreakStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkBreakStmt
   assert indent != 0, "Break statements cannot exist at the top level in C.\n" & code.renderTree
   result.add &"{indent*Tab}break;\n"
-#_____________________________
-proc mincWhileStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkWhileStmt
-  result.add &"{indent*Tab}while ({mincGetCondition(code)}) {{\n"
-  result.add MinC( code[^1], indent+1 )
-  result.add &"{indent*Tab}}}\n"
 #_____________________________
 proc mincIfStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkIfStmt
@@ -422,7 +570,7 @@ proc mincIfStmt (code :PNode; indent :int= 0) :string=
       else:""
     assert pfx != "", "Unknown branch kind in minc.IfStmt"
     let condition :string=
-      if   branch.kind == nkElifBranch : &"({mincGetCondition(branch)}) "
+      if   branch.kind == nkElifBranch : &"({mincGetCondition(branch[0])}) "
       elif branch.kind == nkElse       : ""
       else:""
     result.add &"{pfx}{condition}{{\n{body}{tab}}}"
@@ -465,8 +613,6 @@ proc mincWhenStmt (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # Types
 #_____________________________
-const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
-#_____________________________
 proc mincGetObjectFieldDef *(code :PNode; indent :int= 1) :string=
   assert code.kind == nkIdentDefs
   if code[^1].kind != nkEmpty: raise newException(ObjectCodegenError,
@@ -474,32 +620,58 @@ proc mincGetObjectFieldDef *(code :PNode; indent :int= 1) :string=
   var name =
     if   code[0].kind == nkIdent   : code[0].strValue
     elif code[0].kind == nkPostfix : code[0][1].strValue
-    else                            : &"{types.getName(code)}"
+    else                           : &"{types.getName(code)}"
   let typ =
-    if code[^2].kind == nkIdent : TypeInfo(name:code[^2].strValue)
-    else                        : types.getType(code, KnownMultiwordPrefixes)
+    if   code[^2].kind == nkIdent : TypeInfo(name:code[^2].strValue)
+    elif code[^2].kind == nkPtrTy : TypeInfo(name:code[^2][0].strValue&"*")
+    else                          : types.getType(code, KnownMultiwordPrefixes)
   result.add &"{indent*Tab}{typ.name} {name};\n"
 
 #_____________________________
+proc isStub (code :PNode) :bool=
+  ## Returns true if the given nkTypeDef node meets all of the conditions to be a stub object
+  code.kind == nkTypeDef and code[^1].kind == nkObjectTy and
+  code[0].kind == nkPragmaExpr and code[0][^1].kind == nkPragma and
+  code[0][^1][0].kind == nkIdent and code[0][^1][0].strValue == "stub" and
+  code[^1][1].kind == nkOfInherit and code[^1][1][0].kind == nkIdent and
+  code[^1][^1].kind == nkEmpty
+#_____________________________
+proc mincGetStubName (code :PNode) :string= code[^1][1][0].strValue
+  ## Get the `of T` as the name for stub definitions
+proc mincGetStubBody (code :PNode) :string=
+  ## Get the name of the object as the body for stub definitions
+  if   code[0][0].kind == nkIdent   : result = code[0][0].strValue
+  elif code[0][0].kind == nkPostfix : result = code[0][0][1].strValue
+  else: raise newException(ObjectCodegenError, &"Tried to get the stub body of a node that is not recognized.\n{code.treeRepr}\n{code.renderTree}\n")
+#_____________________________
+proc mincGetObjectBody (code :PNode; indent :int= 0) :string=
+  assert code[^1].kind == nkObjectTy
+  if code.isStub: return mincGetStubBody(code)
+  # Get the body normally
+  assert code[^1][^1].kind == nkRecList
+  let tab1 = (indent+1)*Tab
+  if code[1].kind != nkEmpty: result.add &"({code[1].strValue})"
+  result.add "{\n"
+  for field in code[^1][^1]:  # For every field in the object's value (aka the object body)
+    result.add mincGetObjectFieldDef(field, indent+1)
+  result.add &"{tab1}}}"
+#_____________________________
 proc mincTypeDef (code :PNode; indent :int= 0) :string=
   assert code.kind == nkTypeDef
-  var name = &"{types.getName(code)}"
+  let stub = code.isStub
+  var name = if stub: mincGetStubName(code) else: &"{types.getName(code)}"
   let info = types.getType(code, KnownMultiwordPrefixes)
-  let mut  = if info.isRead: " const" else: ""
+  let mut  = if stub: "" elif info.isRead: " const" else: ""
   var typ  =
     if info.isObj : &"struct {name}{mut}"
     else          : info.name & mut
   if info.isPtr: typ.add "*"
   var body :string= ""
   # var other :string= ""
-  if info.isObj:
-    assert code[^1].kind == nkObjectTy and code[^1][^1].kind == nkRecList
-    body.add "{\n"
-    for field in code[^1][^1]:  # For every field in the object's value (aka the object body)
-      body.add mincGetObjectFieldDef(field, indent+1)
-    body.add &"{indent*Tab}}}"
-  result = &"typedef {typ} {name};\n"  # Normal decl for non-obj and fw.decl for objects
-  if info.isObj: result.add &"{indent*Tab}{typ} {body};\n"
+  if info.isObj: body.add mincGetObjectBody(code, indent)
+  if stub: return &"{indent*Tab}typedef {typ} {body};\n"  # {.stub.} objects have a special case
+  result = &"{indent*Tab}typedef {typ} {name};\n"         # Normal decl for non-obj and fw.decl for objects
+  if info.isObj and not stub: result.add &"{indent*Tab}{typ} {body};\n"
 #_____________________________
 proc mincTypeSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkTypeSection
@@ -511,12 +683,32 @@ proc mincTypeSection (code :PNode; indent :int= 0) :string=
 #_____________________________
 proc mincAsgn (code :PNode; indent :int= 0) :string=
   assert code.kind == nkAsgn
+  let sym   = code[0]
   let value = code[^1]
   let val =
     if   value.kind == nkIdent             : value.strValue
-    elif value.kind in [nkCall, nkCommand] : mincCallRaw(value)
+    elif value.kind == nkNilLit            : "NULL"
+    elif value.kind in [nkCall, nkCommand] : mincCallRaw(value, indent)
+    elif value.kind in {nkInfix,nkDotExpr} : mincGetValueRaw(value,indent)
+    elif value.kind == nkObjConstr         : mincGetValueRaw(value,indent)
     else:""
-  result = &"{indent*Tab}{code[0].strValue} = {val};\n"
+  assert val != "", &"Tried to create an asignment, but its value.kind is not mapped. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+  if val == "" and value.kind == nkBracketExpr: raise newException(AssignCodegenError,
+    &"Tried to create dereferencing code for a node, but it has no value asignment. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n")
+  let isDeref     = sym.kind == nkBracketExpr and sym.sons.len == 1
+  let isArrAccess = not isDeref and sym.kind == nkBracketExpr
+  let isDotObj    = sym.kind == nkDotExpr
+  var name =
+    if   isArrAccess              : &"{mincGetValueRaw(sym[0])}[{mincGetValueRaw(sym[^1],indent)}]"
+    elif isDeref                  : # Interpret val[] as dereferencing
+      if   sym[0].kind == nkIdent : "*"&mincGetValueStr(sym[0], indent)
+      elif sym[0].kind == nkInfix : "*"&mincInfixList(sym[0],indent)
+      elif sym[0].kind == nkCast  : "*"&mincGetValueRaw(sym[0],indent)
+      elif sym[0].kind == nkPar   : &"*({mincGetValueRaw(sym[0][0],indent)})"
+      else                        : "*"&sym[0].strValue
+    elif isDotObj                 : mincDotExprList(sym).join(".")
+    else                          : mincGetValueStr(sym, indent)
+  result.add &"{indent*Tab}{name} = {val};\n"
 
 
 #______________________________________________________
@@ -532,7 +724,10 @@ proc mincCommentStmt (code :PNode; indent :int= 0) :string=
 #_____________________________
 proc mincDiscardStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkDiscardStmt
-  for arg in code: result.add &"{indent*Tab}(void){arg.strValue}; //discard\n"
+  case code[0].kind
+  of nkTupleConstr,nkPar:
+    for arg in code[0]: result.add &"{indent*Tab}(void){mincGetValueStr(arg,indent)};/*discard*/\n"
+  else: result.add &"{indent*Tab}(void){mincGetValueStr(code[0],indent)};/*discard*/\n"
 
 
 #______________________________________________________
@@ -566,6 +761,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkVarSection       : result = mincVarSection(code, indent)
   #   Loops
   of nkWhileStmt        : result = mincWhileStmt(code, indent)
+  of nkForStmt          : result = mincForStmt(code, indent)
   #   Conditionals
   of nkIfStmt           : result = mincIfStmt(code, indent)
   of nkWhenStmt         : result = mincWhenStmt(code, indent)
@@ -656,7 +852,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkOfBranch         : result = mincOfBranch(code)
   of nkElse             : result = mincElse(code)
 
-  of nkForStmt          : result = mincForStmt(code)
   of nkParForStmt       : result = mincParForStmt(code)
 
   of nkYieldStmt        : result = mincYieldStmt(code)

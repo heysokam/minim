@@ -1,17 +1,8 @@
 ```md
 # Essentials
-- [ ] For loops:  Basic support
-- [ ] obj->field   pointer access syntax ->
-- [ ] Explicit casting
 - [ ] Enums
 - [ ] Unions
 - [ ] varargs
-- [ ] Operators
-  - [ ] Infix
-    - [ ] Logical   && || == != < > <= >=
-- [ ] Structs
-  - [ ] Construction: Function Parameters
-  - [ ] Construction: Reassignment
 ```
 ```md
 # Important
@@ -27,12 +18,12 @@
 ```
 ```md
 # Complete C
+- [ ] For loops:  Complete support
 - [ ] Conditions : Arbitrary condition tree support
 - [ ] Multi-word pointer types  (eg: ptr unsigned long long int)
-- [ ] Structs
-  - [ ] {.stub.} for using the non-typedef version of the struct  (todo: Find better word than stub. innerdef or similar)
 - [ ] Arrays: nested
 - [ ] C restrict keyword
 - [ ] C volatile keyword
 - [ ] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
+- [ ] {.pragma:once.} and header include guards support
 ```

@@ -3,40 +3,22 @@
 #:______________________________________________________
 # std dependencies
 import std/cmdline
+import std/os
+import std/paths
 # *Slate dependencies
 import slate/types
 # MinC dependencies
 import ./minc/convert
-
-const Ccode * = """
-int main(int argc) {return 0;}"""
-# Ncode
-proc main*(argc :int; argv :ptr string; argv2 :seq[string]; argv3 :array[3,cstring]):int= return 0
-
-
-# Describe the language
-const cmin * = Lang(
-  name : "MinC",
-  pfx  : "minc",
-  )
-
-
-#[
-import ./nimc
-const code = "proc main*(count:int; argc:int32):int= return 42"
-echo "\nrepr______________________________________________________"
-echo nimc.getAST(code).repr
-echo "\nrenderTree________________________________________________"
-echo nimc.getAST(code).renderTree
-echo "\ntreeRepr__________________________________________________"
-echo nimc.getAST(code).treeRepr
-echo "\ntoMinC____________________________________________________"
-var res = convert.toMinC(code)
-echo res
-]#
+import ./minc/prep
 
 when isMainModule:
-  let cli = commandLineParams()
-  let src = cli[0].readFile()
-  let trg = cli[1]
-  trg.writeFile(convert.toMinC(src))
+  # Get the arguments
+  let cli  = commandLineParams()
+  let src  = cli[0]
+  let trg  = cli[1]
+  # Preprocess
+  let root = src.splitFile.dir.Path
+  let code = src.readFile()
+    .processIncludes(root)  # Preprocess includes
+  # Compile the code
+  trg.writeFile(convert.toMinC(code))
