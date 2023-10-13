@@ -738,8 +738,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # Base Cases
   if code == nil: return
   case code.kind
-  of nkNone             : result = mincNone(code)
-  of nkEmpty            : result = mincEmpty(code)
 
   # Process this node
   #   Modules
@@ -783,35 +781,24 @@ proc MinC *(code :PNode; indent :int= 0) :string=
 
 
 
-
   #____________________________________________________
   # TODO cases
-  of nkIdent            : result = mincIdent(code)
   of nkSym              : result = mincSym(code)
   of nkType             : result = mincType(code)
   of nkComesFrom        : result = mincComesFrom(code)
 
   of nkDotCall          : result = mincDotCall(code)
-  of nkCallStrLit       : result = mincCallStrLit(code)
 
   of nkHiddenCallConv   : result = mincHiddenCallConv(code)
   of nkExprEqExpr       : result = mincExprEqExpr(code)
-  of nkExprColonExpr    : result = mincExprColonExpr(code)
   of nkVarTuple         : result = mincVarTuple(code)
-  of nkPar              : result = mincPar(code)
-  of nkObjConstr        : result = mincObjConstr(code)
   of nkCurly            : result = mincCurly(code)
   of nkCurlyExpr        : result = mincCurlyExpr(code)
   of nkBracket          : result = mincBracket(code)
-  of nkBracketExpr      : result = mincBracketExpr(code)
-  of nkPragmaExpr       : result = mincPragmaExpr(code)
   of nkRange            : result = mincRange(code)
-  of nkDotExpr          : result = mincDotExpr(code)
   of nkCheckedFieldExpr : result = mincCheckedFieldExpr(code)
   of nkDerefExpr        : result = mincDerefExpr(code)
   of nkIfExpr           : result = mincIfExpr(code)
-  of nkElifExpr         : result = mincElifExpr(code)
-  of nkElseExpr         : result = mincElseExpr(code)
   of nkLambda           : result = mincLambda(code)
   of nkDo               : result = mincDo(code)
   of nkAccQuoted        : result = mincAccQuoted(code)
@@ -822,7 +809,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkHiddenStdConv    : result = mincHiddenStdConv(code)
   of nkHiddenSubConv    : result = mincHiddenSubConv(code)
   of nkConv             : result = mincConv(code)
-  of nkCast             : result = mincCast(code)
   of nkStaticExpr       : result = mincStaticExpr(code)
   of nkAddr             : result = mincAddr(code)
   of nkHiddenAddr       : result = mincHiddenAddr(code)
@@ -844,7 +830,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkMacroDef         : result = mincMacroDef(code)
   of nkTemplateDef      : result = mincTemplateDef(code)
   of nkIteratorDef      : result = mincIteratorDef(code)
-  of nkExceptBranch     : result = mincExceptBranch(code)
   of nkAsmStmt          : result = mincAsmStmt(code)
   of nkPragmaBlock      : result = mincPragmaBlock(code)
 
@@ -859,6 +844,8 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkTryStmt          : result = mincTryStmt(code)
   of nkFinally          : result = mincFinally(code)
   of nkRaiseStmt        : result = mincRaiseStmt(code)
+  of nkExceptBranch     : result = mincExceptBranch(code)
+
   of nkBlockStmt        : result = mincBlockStmt(code)
   of nkStaticStmt       : result = mincStaticStmt(code)
 
@@ -885,8 +872,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkRecCase          : result = mincRecCase(code)
   of nkRecWhen          : result = mincRecWhen(code)
   of nkRefTy            : result = mincRefTy(code)
-  of nkPtrTy            : result = mincPtrTy(code)
-  of nkVarTy            : result = mincVarTy(code)
   of nkConstTy          : result = mincConstTy(code)
   of nkOutTy            : result = mincOutTy(code)
   of nkDistinctTy       : result = mincDistinctTy(code)
@@ -909,6 +894,9 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkNilRodNode       : result = mincNilRodNode(code)     # for .rod file support: a 'nil' PNode
 
   # Unreachable
+  of nkNone             : result = mincNone(code)
+  of nkEmpty            : result = mincEmpty(code)
+  of nkIdent            : result = mincIdent(code)
   of nkConstDef         : result = mincConstDef(code)   # Accessed by nkConstSection
   of nkIdentDefs        : result = mincIdentDefs(code)  # Accessed by nkLetSection and nkVarSection
   of nkCharLit          : result = mincCharLit(code)
@@ -930,8 +918,20 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkRStrLit          : result = mincRStrLit(code)
   of nkTripleStrLit     : result = mincTripleStrLit(code)
   of nkNilLit           : result = mincNilLit(code)
+  of nkCallStrLit       : result = mincCallStrLit(code)
+  of nkExprColonExpr    : result = mincExprColonExpr(code)
   of nkObjectTy         : result = mincObjectTy(code)  # Accessed by nkTypeDef
+  of nkPtrTy            : result = mincPtrTy(code)
+  of nkVarTy            : result = mincVarTy(code)
   of nkRecList          : result = mincRecList(code)   # Accessed by nkObjectTy
+  of nkCast             : result = mincCast(code)
+  of nkBracketExpr      : result = mincBracketExpr(code)
+  of nkPragmaExpr       : result = mincPragmaExpr(code)
+  of nkPar              : result = mincPar(code)
+  of nkObjConstr        : result = mincObjConstr(code)
+  of nkDotExpr          : result = mincDotExpr(code)
+  of nkElifExpr         : result = mincElifExpr(code)
+  of nkElseExpr         : result = mincElseExpr(code)
   # Not needed
   of nkFastAsgn         : result = mincFastAsgn(code)
 
