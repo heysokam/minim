@@ -5,7 +5,6 @@
   - [ ] {.compile: "file.c".}         # Passes the file to zigcc as one of the files to cache
   - [ ] {.compile: "/some/folder/".}  # Passes a glob of all files in the given folder to zigcc
   - [ ] {.compile: ("/some/folder/", "exceptions").}  # Passes a filtered glob of files in the given folder to zigcc
-- [ ] {.emit: " ... ".}               # Writes the contents of the pragma literally into the output without any checks.
 - [ ] {.passL: "-lm".}                # Sends the given flags to the compiler in the linker section of the command
 - [ ] {.passC: "-I/some/folder".}     # Sends the given flags to the compiler in the source compilation section of the command
 - [ ] Object extension   (type MyType = object of ... )
@@ -49,5 +48,5 @@
 - [ ] distinct types -> wrap the type inside a named struct
       type Handle = distinc int   ->   typedef struct int_d { int data; } Handle;
 - [ ] if/elif/else variable asignment autoexpand
-- [ ] {.namespace: one.sub.}  and  {.namespace: _.}
+- [ ] Default Arguments
 ```

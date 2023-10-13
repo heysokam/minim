@@ -24,6 +24,8 @@
 - [x] Variable asignment
 - [x] Tentative variable definition
 - [x] Multi-line strings
+  - [x] Raw       raw"""..."""
+  - [x] NewLine      """..."""
 - [x] Character literals
 - [x] break
 - [x] continue
@@ -43,7 +45,8 @@
     - [x] Arithmetic : + - * / %
     - [x] Bitwise    : & | << >>
     - [x] Asignment  : += -= *= /= %=  |= ^= ~=   <<= >>=
-    - [x] Postfix  ++ --  (nim parser has no postfix, other than * for visibility)
+    - [x] Logical    : && || == != < > <= >=
+    - [x] Postfix    : ++ --  (nim parser has no postfix, other than * for visibility)
 - [x] Arrays
   - [x] Sized
   - [x] Unknown size  one :array[_,char]   ->   char one[]
@@ -56,7 +59,15 @@
   - [x] Designated Initialization
   - [x] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
   - [x] Field access
-    - [x] Return statement
+    - [x] Value access    thing.sub
+    - [x] Pointer access  thing->sub
+  - [x] Construction: Function Parameters
+  - [x] Construction: Reassignment
+  - [x] {.stub.} for using the non-typedef version of the struct
 - [x] Character literals: Resolve to 'c' everywhere
 - [x] addr
+- [x] Explicit casting
+- [x] Pointer dereference   one[] = val   ->   *one = val
+- [x] obj->field   pointer access syntax ->
+- [x] For loops:  Basic support
 ```
