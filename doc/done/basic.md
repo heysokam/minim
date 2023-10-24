@@ -70,4 +70,5 @@
 - [x] Pointer dereference   one[] = val   ->   *one = val
 - [x] obj->field   pointer access syntax ->
 - [x] For loops:  Basic support
+- [x] Ternary operator   let one = if condition: 1 else: 2
 ```

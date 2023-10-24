@@ -11,7 +11,7 @@
 - [ ] Variant types
 - [ ] Generics
 - [ ] Modules
-- [ ] Function calls: dot.syntax()
+- [ ] Function calls: dot.syntax()   https://en.wikipedia.org/wiki/Uniform_Function_Call_Syntax
 - [ ] Enum-arrays
 - [ ] range[A..B] : Range limited numbers
 - [ ] For loops: Range based
@@ -49,4 +49,8 @@
       type Handle = distinc int   ->   typedef struct int_d { int data; } Handle;
 - [ ] if/elif/else variable asignment autoexpand
 - [ ] Default Arguments
+- [ ] Named Arguments
+- [ ] Nim casting as builtin bit_cast for bit reinterpretation. Leave @ and as for C-like casting
+      https://gist.github.com/m1lkweed/464a9271a37fc3ea5a6d8e346d826525
+      var one :int= cast[int](0.5'f)   ->   int one = ( union{float in; int out;} ){0.5f}.out;
 ```

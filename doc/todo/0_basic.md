@@ -7,7 +7,6 @@
 ```md
 # Important
 - [ ] 0.0f suffix for floats
-- [ ] Ternary operator   let one = if condition: 1 else: 2
   - [ ] do {...} while (cond);
 - [ ] Conditions
   - [ ] Switch case
@@ -15,6 +14,7 @@
     - [ ] discard = donothing
     - [ ] Mandatory explicit fallthrough, otherwise (break;) auto
     - [ ] else: == default:
+- [ ] Array compound literals  (int[]){0,1,2}
 ```
 ```md
 # Complete C
