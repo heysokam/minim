@@ -53,4 +53,10 @@
 - [ ] Nim casting as builtin bit_cast for bit reinterpretation. Leave @ and as for C-like casting
       https://gist.github.com/m1lkweed/464a9271a37fc3ea5a6d8e346d826525
       var one :int= cast[int](0.5'f)   ->   int one = ( union{float in; int out;} ){0.5f}.out;
+- [ ] Multi-Types
+  - [ ] Type Unions        (nim/ts)  ->  type Thing = One or  Two    # Accepts either One or Two, but not both
+  - [ ] Type Intersections (ts)      ->  type Thing = One and Two    # Inherits all properties of One and Two (including methods)
+- [ ] Literal types  (Typescript)   type Thing = 50 | 100;   # Accepts only the literal values given and nothing else. (could map to C enums? something else?)
+- [ ] Explicitly Nullable types. Forbid implicit nulls unless specified otherwise
+      (maybe through Option? :think:  also remember (ts)  thing?.one()  syntax)
 ```
