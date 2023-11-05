@@ -27,6 +27,9 @@
   - [ ] Release  # Optimization flags active
   - [ ] None     # No flags. Blank slate for --passC:" ... "
 - [ ] Single Header option
+- [ ] Redundant code management  (C codegen output)
+  - [ ] Only add used+public types and functions to output
+  - [ ] Option to always add everything
 ```
 
 ```md
