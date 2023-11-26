@@ -49,8 +49,9 @@ const Reserved            = ["pointer"]
 const NoSpacingInfixes    = ["->"]
 const ValidEmpty          = ["_", "{0}"]
 const ValidRawStrPrefixes = ["raw"]
-const ValidInfixKind      = {nkIdent,nkInfix,nkPar,nkCast,nkBracketExpr,nkDotExpr,nkPtrTy} + SomeCall + SomeLit + {nkNilLit}
+const ValidInfixKind      = {nkIdent,nkInfix,nkPar,nkCast,nkBracketExpr,nkBracket,nkDotExpr,nkPtrTy} + SomeCall + SomeLit + {nkNilLit}
 const ValidCastOperators  = ["as", "@"]
+const ValidUnionOperators = [".:"]
 const ValueAffixRenames   = {
   "shl": "<<",  "shr": ">>",
   "and": "&" ,  "or" : "|" ,  "xor": "^" ,
@@ -110,8 +111,10 @@ proc mincGetValueStr (code :PNode; indent :int= 0) :string=
 proc mincGetObjectValue (code :PNode; indent :int= 0) :string=
   # Special case: Redirection from other sections
   if code.kind in {nkCall,nkCommand}:
-    assert code[1].strValue in ValidEmpty
-    return &"({code[0].strValue}){{{0}}}"
+    if code[1].kind == nkIdent and code[1].strValue in ValidEmpty:
+      return &"({code[0].strValue}){{{0}}}"
+    elif code[1].kind == nkInfix and code[1][0].strValue in ValidUnionOperators:
+      report code; quit()
   # Get the body as normal
   assert code.kind == nkObjConstr
   let tab1 = (indent+1)*Tab
@@ -174,6 +177,7 @@ proc mincInfixList *(code :PNode; indent :int= 0; renames :Renames= Renames()) :
       else                           : result.add &"({node[0].strValue})({mincInfixList(node[1], indent, renames)})"  # Recursive case with cast
     elif node.kind == nkInfix        : result.add mincInfixList(node, indent, renames)
     elif node.kind == nkBracketExpr  : result.add mincGetValueRaw(node, indent)
+    elif node.kind == nkBracket      : result.add mincGetValueRaw(node, indent)
     elif node.kind == nkDotExpr      : result.add mincGetValueRaw(node, indent)
     elif node.kind in SomeCall       : result.add mincGetValueRaw(node, indent)
     elif node.kind == nkPtrTy        : result.add mincGetValueRaw(node, indent)
@@ -184,6 +188,9 @@ proc mincInfixList *(code :PNode; indent :int= 0; renames :Renames= Renames()) :
   if fix.strValue in ValidCastOperators:
     assert right.kind in {nkIdent,nkPtrTy}, &"Casting targets are only allowed to be identifiers. The illegal tree+code is:\n{code.treeRepr}\n{code.renderTree}\n"
     result.add &"({getSideCode(right)}){getSideCode(left)}"
+  # Special Union field case
+  elif fix.strValue in ValidUnionOperators:
+    result.add &".{getSideCode(left)}= {getSideCode(right)}"
   # Normal infix case
   else:
     # Add the left value (including recursion)
@@ -361,14 +368,18 @@ proc mincCallGetName (call :PNode) :string=
 #_____________________________
 proc mincCallGetArgs (code :PNode; indent :int= 0) :string=
   ## Returns the code for all arguments of the given ProcDef node.
-  assert code.kind in [nkCall, nkCommand]
+  assert code.kind in {nkCall, nkCommand}
   if calls.getArgCount(code) == 0: return
   for arg in calls.args(code):
     result.add mincGetValueRaw(arg.node, indent)
     result.add( if arg.last: "" else: ", " )
 #_____________________________
 proc mincCallRaw (code :PNode; indent :int= 0) :string=
-  assert code.kind in [nkCall, nkCommand]
+  assert code.kind in {nkCall, nkCommand}
+  # Union special case
+  if code.sons.len == 2 and code[0].kind == nkIdent and code[1].kind == nkInfix and code[1].strValue in ValidUnionOperators:
+    return &"{mincGetObjectValue(code,indent)}"
+  # Other cases
   let name = mincCallGetName(code)
   let args = mincCallGetArgs(code,indent)
   result   =
@@ -377,11 +388,11 @@ proc mincCallRaw (code :PNode; indent :int= 0) :string=
     else                    : &"{name}({args})"
 #_____________________________
 proc mincCall (code :PNode; indent :int= 0) :string=
-  assert code.kind in [nkCall, nkCommand]
+  assert code.kind in {nkCall, nkCommand}
   result.add &"{indent*Tab}{mincCallRaw(code,indent)};\n"
 #_____________________________
 proc mincCommand (code :PNode; indent :int= 0) :string=
-  assert code.kind in [nkCommand]
+  assert code.kind in {nkCommand}
   mincCall(code,indent)  # Command and Call are identical in C
 
 
