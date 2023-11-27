@@ -1,6 +1,7 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
+when not defined(nimscript): import system/nimscript except dirExists
 # std dependencies
 import std/os
 import std/strformat
@@ -9,9 +10,12 @@ import std/strutils
 # Project Config
 const thisDir      = currentSourcePath().parentDir()
 const binDir       = thisDir/"bin"
+const srcDir       = thisDir/"src"
 const testsDir     = thisDir/"tests"
+const libDir       = srcDir/"lib"
 const examplesdir  = thisDir/"examples"
 const cacheDir     = binDir/"cmcache"
+const nimDir       = binDir/"nim"
 #_________________________________________________
 
 
@@ -27,6 +31,7 @@ const run   = on
 
 #_________________________________________________
 # Compiler Manager
+const nc           = nimDir/"nim"    # Nim compiler command
 const ss           = binDir/"minc"   # StoS compiler command
 const cc           = "zig cc"        # C Compiler command
 const NoErr        = [
@@ -54,7 +59,7 @@ const MinCFlags    = &"--std=c2x -Weverything -Werror -pedantic -pedantic-errors
 const MinCValidExt = [".cm", ".nim"] # Valid extensions for the MinC language
 #_______________________________________
 type MinCCompileError = object of CatchableError
-proc buildMinC () :void=  exec "nim confy.nims minc"
+proc buildMinC () :void=  exec "{nc} confy.nims minc"
 #_______________________________________
 proc sh (cmd :string; verbose=false) :void=
   if verbose: echo cmd
