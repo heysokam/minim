@@ -9,6 +9,8 @@ when not defined(nimble):
 else:
   import confy
 
+cfg.zigSystemBin = off
+
 var mincGen = Program.new(cfg.srcDir/"minc"/"gen"/"proto.nim", "mincGen")
 os.removeFile( cfg.binDir/mincGen.trg )
 mincGen.build( @[mincGen.trg.string], run=true, force=true )
