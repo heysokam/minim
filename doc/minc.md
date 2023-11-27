@@ -29,7 +29,7 @@ If you want to build C99 code and target old platforms, you can.
 In MinC you write imperatively and explicitly.  
 The compiler will do what you said, not what it thinks you meant.  
 MinC does not assume anything about your code, and it does not auto-resolve types/symbols either.  
-There is no `auto` keyword, no implicity type resolution, and other similarly implicit behavior.  
+There is no `auto` keyword, no implicit type resolution, and other similarly implicit behavior.  
 Everything is translated literally. And there are no symbol overloads either.  
 What you said is what you meant.  
 
