@@ -20,6 +20,15 @@ There is also a roadmap file, used for version planning and goal-setting.
 @[todo](./doc/todo/), @[roadmap](./doc/roadmap.md)  
 Full application example @[app03 Framebuffer OpenGL](./examples/app03_framebufferGL)  
 
+### Build requirements
+`shell`/`powershell`, `git`, `gcc`, `libubsan`
+```bash
+# Optional: Add `~/.minc/bin` and `~/.cmin/bin` to your PATH variable
+# For Bash Shell: Add this to your `~/.bashrc`
+if [[ -d "$HOME/.minc/bin" ]] ; then export PATH="$PATH:$HOME/.minc/bin" ; fi
+if [[ -d "$HOME/.cnim/bin" ]] ; then export PATH="$PATH:$HOME/.cnim/bin" ; fi
+```
+
 ### Compiler
 MinC uses an StoS compiler that generates C code.  
 The generated output code is standard, human-readable and editable C code.  
