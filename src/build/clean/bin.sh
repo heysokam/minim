@@ -9,7 +9,7 @@ clean_binDir () {
   echo -e "*\n!.gitignore" > "$binDir"/.gitignore
 }
 dir=$(realpath $binDir)
-wrn="$Prefix Warning-> This will delete everything at $dir. Continue?"$'\n'$"  [Recommended (yes)]  (y/n)? "
+wrn="$Prefix Warning-> This will delete everything at $dir . Continue?"$'\n'$"  [Recommended (yes)]  (y/n)? "
 read -rep "$wrn" -n 1 answer
 case "$answer" in
   "y" | "Y" | "" ) echo "$Prefix Cleaning $(realpath $dir) ..."; clean_binDir ;;
