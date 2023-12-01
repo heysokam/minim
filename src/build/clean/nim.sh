@@ -15,7 +15,7 @@ clean_nimDir () {
   git checkout $nimBranch
   git reset --hard
   git clean -fdx
-  git pull
+  git pull --rebase
   cd $prevDir
 }
 dir=$(realpath $nimDir)
