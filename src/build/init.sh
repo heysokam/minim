@@ -21,6 +21,14 @@ case "$answer" in
   "y" | "Y" | "" ) echo "$Prefix Building Nim into $binDir ..." ; build_nim ;;
   "n" | "N" | *  ) echo "$Prefix Continuing without building Nim."          ;;
 esac
+# Link Nim's folder to HOME
+cnimHome=$HOME/.cnim
+wrn="$Prefix Do you want to create a symbolic link to Nim's repository at $cnimHome ?"$'\n'$"  [Recommended (yes)]  (y/n)? "
+read -rep "$wrn" -n 1 answer
+case "$answer" in
+  "y" | "Y" | "" ) echo "$Prefix Linking Nim's repository into $cnimHome ..." ; ln -s $nimDir $cnimHome ;;
+  "n" | "N" | *  ) echo "$Prefix Continuing without Linking Nim's repository. Make sure the folder exists, or rerun this script and pick (yes)." ;;
+esac
 
 # Build MinC
 build_minc () {
@@ -32,6 +40,14 @@ read -rep "$wrn" -n 1 answer
 case "$answer" in
   "y" | "Y" | "" ) echo "$Prefix Building MinC into $binDir ..." ; build_minc ;;
   "n" | "N" | *  ) echo "$Prefix Continuing without building MinC."           ;;
+esac
+# Link MinC's folder to HOME
+mincHome=$HOME/.minc
+wrn="$Prefix Do you want to create a symbolic link from MinC's root folder $rootDir to $mincHome ?"$'\n'$"  [Recommended (yes)]  (y/n)? "
+read -rep "$wrn" -n 1 answer
+case "$answer" in
+  "y" | "Y" | "" ) echo "$Prefix Linking MinC's root folder to $mincHome ..." ; ln -s $rootDir $mincHome ;;
+  "n" | "N" | *  ) echo "$Prefix Continuing without linking MinC's root folder. Make sure the folder exists, or rerun this script and pick (yes)." ;;
 esac
 
 # Go back to the folder from where this script was called
