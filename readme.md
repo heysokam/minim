@@ -21,12 +21,20 @@ There is also a roadmap file, used for version planning and goal-setting.
 Full application example @[app03 Framebuffer OpenGL](./examples/app03_framebufferGL)  
 
 ### Build requirements
-`shell`/`powershell`, `git`, `gcc`, `libubsan`
+`bash`/`powershell`, `git`, `gcc`, `libubsan`
 ```bash
 # Optional: Add `~/.minc/bin` and `~/.cmin/bin` to your PATH variable
 # For Bash Shell: Add this to your `~/.bashrc`
 if [[ -d "$HOME/.minc/bin" ]] ; then export PATH="$PATH:$HOME/.minc/bin" ; fi
 if [[ -d "$HOME/.cnim/bin" ]] ; then export PATH="$PATH:$HOME/.cnim/bin" ; fi
+```
+```md
+# TODO !!# Platform specific quirks
+# Gentoo
+Gentoo doesn't have a global libubsan link stored in the folders that ZigCC searches for it.
+Will need to create a symbolic link for libubsan to be able to compile applications in debug mode.
+`ln -s /usr/lib/gcc/x86_64-pc-linux-gnu/13/libubsan.so /usr/local/lib64/libubsan.so`
+Change the `../13/..` to whatever version of gcc your system is using.
 ```
 
 ### Compiler
