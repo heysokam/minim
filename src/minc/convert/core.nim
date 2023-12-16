@@ -114,7 +114,15 @@ proc mincGetObjectValue (code :PNode; indent :int= 0) :string=
     if code[1].kind == nkIdent and code[1].strValue in ValidEmpty:
       return &"({code[0].strValue}){{{0}}}"
     elif code[1].kind == nkInfix and code[1][0].strValue in ValidUnionOperators:
-      report code; quit()
+      # Union case
+      result.add &"({code[0].strValue}){{ .{code[1][1].strValue}= {{ "
+      let fields = code[1][2]
+      # .color= (VkClearColorValue) { .float32= {[0]= 1.0, [1]= 1.0, [2]= 1.0, [3]= 1.0} },
+      for id,field in fields.sons.pairs:
+        result.add &"[{id}]= {mincGetValueRaw(field)}" # Add the value of each field with designated initialization
+        if id < fields.sons.high: result.add ", "       # Add a separator for all fields except the last
+      result.add " } }"
+      return
   # Get the body as normal
   assert code.kind == nkObjConstr
   let tab1 = (indent+1)*Tab
