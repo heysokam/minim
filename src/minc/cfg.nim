@@ -4,4 +4,5 @@
 
 #_______________________________________
 # Format
-const Tab *{.strdefine.}= "  "
+const Tab    *{.strdefine.}= "  "
+const Prefix *{.strdefine.}= "「ᛟ minc 」"
