@@ -1,17 +1,18 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# std dependencies
+# @dependencies std
 import std/cmdline
 import std/os
 import std/paths
-# *Slate dependencies
-import slate/types
-# MinC dependencies
+# @dependencies MinC
+import ./minc/logger
 import ./minc/convert
 import ./minc/prep
 
 when isMainModule:
+  # Init the logger
+  logger.init()
   # Get the arguments
   let cli  = commandLineParams()
   let src  = cli[0]

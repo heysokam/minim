@@ -1,10 +1,12 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# std dependencies
+# @dependencies std
 import std/strutils
 import std/paths
 import std/sets
+# @dependencies minc
+import ./logger
 
 
 func isInclude (line :string) :bool=  line.startsWith("include") and '\"' notin line and '<' notin line and '>' notin line
@@ -15,13 +17,14 @@ var includedFiles :HashSet[string]
   ## Processed include files state
 proc getInclude (line :string; root :Path) :tuple[code:string, root:Path]=
   ## Gets the contents of the file referenced by the include line
+  ## The compiler logger object must be initialized before running this function.
   let path    = line[8..^1].strip().strip( leading=false, chars={'\n'} ).Path
   let file    = root/path.addFileExt("cm")
   result.root = file.splitFile.dir
   try         : result.code = readFile(file.string)
-  except      : quit("Tried to include a file, but failed reading it.\n  "&file.string)
+  except      : fail "Tried to include a file, but failed reading it.\n  ", file.string
   finally     :
-    if includedFiles.containsOrIncl(file.string): quit("Tried to include a file that was already included. Recursive includes are not supported.\n  "&file.string)
+    if includedFiles.containsOrIncl(file.string): dbg "Skipped recursive include for file: ", file.string
 
 proc processIncludes *(code :string; root :Path) :string=
   ## Recursively add all of the includes that should be preprocessed
