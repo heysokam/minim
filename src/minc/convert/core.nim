@@ -377,7 +377,7 @@ proc mincCallGetArgs (code :PNode; indent :int= 0) :string=
 proc mincCallRaw (code :PNode; indent :int= 0) :string=
   assert code.kind in {nkCall, nkCommand}
   # Union special case
-  if code.sons.len == 2 and code[0].kind == nkIdent and code[1].kind == nkInfix and code[1].strValue in ValidUnionOperators:
+  if code.sons.len == 2 and code[0].kind == nkIdent and code[1].kind == nkInfix and code[1][0].strValue in ValidUnionOperators:
     return &"{mincGetObjectValue(code,indent)}"
   # Other cases
   let name = mincCallGetName(code)
