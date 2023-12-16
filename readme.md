@@ -30,11 +30,14 @@ if [[ -d "$HOME/.cnim/bin" ]] ; then export PATH="$PATH:$HOME/.cnim/bin" ; fi
 ```
 ```md
 # TODO !!# Platform specific quirks
-# Gentoo
-Gentoo doesn't have a global libubsan link stored in the folders that ZigCC searches for it.
+Some Linux systems don't have a global libubsan link stored in any of the folders that ZigCC searches for it.
 Will need to create a symbolic link for libubsan to be able to compile applications in debug mode.
+# Gentoo
 `ln -s /usr/lib/gcc/x86_64-pc-linux-gnu/13/libubsan.so /usr/local/lib64/libubsan.so`
 Change the `../13/..` to whatever version of gcc your system is using.
+# Ubuntu
+`sudo ln -s /usr/lib/gcc/x86_64-linux-gnu/12/libubsan.so /usr/lib64/libubsan.so`
+Change the `../12/..` to whatever version of gcc your system is using.
 ```
 
 ### Compiler
