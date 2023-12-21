@@ -33,16 +33,16 @@ Effort on supporting the entire feature-set of C continues until 0.9.0
 # 0.9.0 Crash-Test to prepare for v1.0.0
 ```
 ```md
-- [ ] Complete ./todo/0_basic.md
-- [ ] Complete ./todo/1_compiler.md
-- [ ] Complete ./todo/C_features.md
+- [ ] Complete ./todo/0_basic.rst
+- [ ] Complete ./todo/1_compiler.rst
+- [ ] Complete ./todo/C_features.rst
 # 1.0.0 Complete C support
 Focused Work on extensions can be started
 ```
 ```md
-- [ ] Complete ./todo/2_extend.md
-- [ ] Complete ./todo/3_parser.md
-- [ ] Solve    ./todo/problems.md
+- [ ] Complete ./todo/2_extend.rst
+- [ ] Complete ./todo/3_parser.rst
+- [ ] Solve    ./todo/problems.rst
 # 2.0.0 Complete MinC Features
 ```
 ```md
