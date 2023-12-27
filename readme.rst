@@ -32,6 +32,8 @@ Build requirements
 
 .. code:: bash
 
+   bash <(curl -fsSL https://raw.githubusercontent.com/heysokam/minc/master/src/build/clone.ps1)
+
    # Optional: Add `~/.minc/bin` and `~/.cmin/bin` to your PATH variable
    # For Bash Shell: Add this to your `~/.bashrc`
    if [[ -d "$HOME/.minc/bin" ]] ; then export PATH="$PATH:$HOME/.minc/bin" ; fi
