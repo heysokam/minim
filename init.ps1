@@ -23,7 +23,7 @@ thisDir=$(dirname "$(realpath "$BASH_SOURCE")")
 rootDir="$thisDir"        # Find the root folder of the repository
 binDir="$rootDir/bin"     # Binaries output folder
 srcDir="$rootDir/src"     # Source code folder
-nimDir="$binDir/nim"      # nim submodule folder (absolute)
+nimDir="$binDir/.nim"     # nim submodule folder (absolute)
 nimBranch="version-$nimMaj-$nimMin"  # Name of the Nim branch that MinC tracks
 nim="$nimDir/bin/nim"     # Nim binary result after it has been bootstrapped
 echo "$Prefix Initializing MinC binaries from Bash ..."
@@ -49,7 +49,7 @@ git clone --depth=1 -b $nimBranch https://github.com/nim-lang/Nim.git $nimDir
 cd $nimDir
 sh ./build_all.sh
 cd $prevDir
-$nimDir/bin/nim $srcDir/build/init.nims
+$nimDir/bin/nim c -r --outDir:$binDir $srcDir/build/init.nim
 
 echo "$Prefix Finished initializing MinC binaries."
 #____________________________

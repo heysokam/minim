@@ -38,11 +38,11 @@ while :
 do
   while :
   do
-    msg="$Prefix Do you want to install MinC into $thisDir/.minc ?"$'\n'$"  [Recommended (yes)]  (y/n)?"
+    msg="$Prefix Do you want to install MinC into $HOME/.minc ?  (Choose 'n' to select a folder)"$'\n'$"  [Recommended (yes)]  (y/n)?"
     read -rep "$msg"  -n 1 answer
     case "$answer" in
       "y" | "Y" | "" )
-        clone "$thisDir/.minc"
+        clone "$HOME/.minc"
         ;;
       "n" | "N" | *  )
         break
