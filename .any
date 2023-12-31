@@ -1,0 +1,8 @@
+#!/bin/bash
+set -u # error on undefined variables
+set -e # exit on first error
+file=$1
+outf=./bin/tmp
+clear
+./bin/.nim/bin/nim c -d:release --hints:off --path:./src/lib/nstd/src/ --path:./src/lib/confy/src/ --path:./src/lib/zippy/src/ --path:./src/lib/jsony/src/ -o:$outf $file
+$outf
