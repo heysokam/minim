@@ -5,20 +5,19 @@
 import std/cmdline
 import std/os
 import std/paths
-# @dependencies submodules
-import nstd/opts
 # @dependencies MinC
 import ./minc/logger
 import ./minc/convert
 import ./minc/prep
+import ./minc/cli as opts
 
 when isMainModule:
   # Init the logger
   logger.init()
   # Get the arguments
-  let cli  = opts.getCli()
-  let src  = cli.args[0]
-  let trg  = cli.args[1]
+  let cli  = opts.init()
+  let src  = cli.input
+  let trg  = cli.output
   # Preprocess
   let root = src.splitFile.dir.Path
   let code = src.readFile()
