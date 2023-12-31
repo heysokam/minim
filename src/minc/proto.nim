@@ -1,9 +1,9 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# std dependencies
+# @deps std
 import std/paths
-# *Slate dependencies
+# @deps *Slate
 import slate/gen/proto
 
 # Write the generator prototype code

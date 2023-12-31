@@ -1,11 +1,11 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# @dependencies std
+# @deps std
 import std/cmdline
 import std/os
 import std/paths
-# @dependencies MinC
+# @deps MinC
 import ./minc/logger
 import ./minc/convert
 import ./minc/prep

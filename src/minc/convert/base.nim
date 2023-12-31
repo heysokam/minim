@@ -3,11 +3,11 @@
 #:______________________________________________________
 # Base module used by all of the minc elements  |
 #_______________________________________________|
-# *Slate dependencies
+# @deps *Slate
 import slate/nimc
 
 #_______________________________________
-# Helpers
+# @section Helpers
 #___________________
 type TODO = object of CatchableError
 template todo *(code :PNode) :void=

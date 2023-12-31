@@ -1,26 +1,26 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# std dependencies
+# @deps std
 import std/strformat
-# *Slate dependencies
+# @deps *Slate
 import slate/nimc
 import slate/format
-# minc dependencies
+# @deps minc
 import ./base
 
 #_______________________________________
-# Main Code Generator
+# @section Main Code Generator
 #_____________________________
 proc MinC *(code :PNode; indent :int= 0) :string
 
 #_____________________________
-# Custom Tools
+# @section Custom Tools
 proc mincGetValueRaw (code :PNode; indent :int= 0) :string
 proc mincCallRaw     (code :PNode; indent :int= 0) :string # Format-less version of an nkCall. Used for arguments
 
 #_______________________________________
-# Generator Cases for MinC
+# @section Generator Cases for MinC
 #_____________________________
 # Process
 proc mincProcDef          (code :PNode; indent :int= 0) :string

@@ -1,10 +1,10 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# std dependencies
+# @deps std
 import std/os except `/`
 import std/[ strformat,strutils ]
-# confy dependencies
+# @deps confy
 import confy
 
 let nimDir          = cfg.binDir/".nim"
