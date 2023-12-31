@@ -9,6 +9,7 @@ description   = "ᛟ minc | Minimalistic C Language"
 license       = "MIT"
 srcDir        = "src"
 skipFiles     = @["build.nim", "nim.cfg"]
+skipDirs      = @["build", "lib"]
 installExt    = @["nim"]
 bin           = @[packageName]
 # Dependencies
