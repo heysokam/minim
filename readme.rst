@@ -37,7 +37,7 @@ Build requirements
    # Optional: Add `~/.minc/bin` and `~/.cmin/bin` to your PATH variable
    # For Bash Shell: Add this to your `~/.bashrc`
    if [[ -d "$HOME/.minc/bin" ]] ; then export PATH="$PATH:$HOME/.minc/bin" ; fi
-   if [[ -d "$HOME/.cnim/bin" ]] ; then export PATH="$PATH:$HOME/.cnim/bin" ; fi
+   if [[ -d "$HOME/.minc/bin/.nim/bin" ]] ; then export PATH="$PATH:$HOME/.minc/bin/.nim/bin" ; fi
 
 .. code:: md
 
