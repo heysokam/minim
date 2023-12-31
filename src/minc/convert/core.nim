@@ -1,16 +1,17 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# This file should be divided into separate modules.    |____________
-# But the `MinC` function is recursive and called from many of them  |
-# which creates a cyclic dependency :_(                              |
+# @note
+#  This file should be divided into separate modules.
+#  But the `MinC` function is recursive and called from many of them
+#  which creates a cyclic dependency :_(
 #____________________________________________________________________|
-# std dependencies
+# @deps std
 import std/strutils
 import std/tables
 import std/sets
 import std/sequtils
-# *Slate dependencies
+# @deps *Slate
 import slate/element/base as slateBase
 import slate/element/procdef
 import slate/element/error
@@ -20,12 +21,12 @@ import slate/element/calls
 # import slate/element/loops
 import slate/element/types
 import slate/element/affixes
-# minc dependencies
+# @deps minc
 import ../cfg
 include ./fwdecl
 
 #______________________________________________________
-# Codegen: Errors
+# @section Codegen: Errors
 #_____________________________
 type AffixCodegenError     = object of CatchableError
 type CallsCodegenError     = object of CatchableError
@@ -36,7 +37,7 @@ type ObjectCodegenError    = object of CatchableError
 type AssignCodegenError    = object of CatchableError
 
 #______________________________________________________
-# Codegen: Types
+# @section Codegen: Types
 #_____________________________
 type  VarKind {.pure.}= enum Const, Let, Var
 type  Renames         = Table[string, string]
@@ -69,7 +70,7 @@ const KnownForInfix          = ["..", "..<"]
 const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 
 #______________________________________________________
-# General tools
+# @section General tools
 #_____________________________
 proc isCustomTripleStrLitRaw (code :PNode) :bool= (code.kind in {nkCallStrLit} and code[0].strValue in ValidRawStrPrefixes and code[1].kind == nkTripleStrLit)
 proc isTripleStrLit (code :PNode) :bool=  code.kind == nkTripleStrLit or code.isCustomTripleStrLitRaw
@@ -247,7 +248,7 @@ proc mincGetValueRaw (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Affixes
+# @section Affixes
 #_____________________________
 proc mincPrefix (code :PNode; indent :int= 0; raw :bool= false) :string=
   assert code.kind == nkPrefix
@@ -309,7 +310,7 @@ proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
 
 
 #______________________________________________________
-# Procedures
+# @section Procedures
 #_____________________________
 proc mincProcDefGetArgs (code :PNode) :string=
   ## Returns the code for all arguments of the given ProcDef node.
@@ -366,7 +367,7 @@ proc mincProcDef  (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Function Calls
+# @section Function Calls
 #_____________________________
 proc mincCallGetName (call :PNode) :string=
   assert call.kind in {nkCall, nkCommand}
@@ -405,7 +406,7 @@ proc mincCommand (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Variables
+# @section Variables
 #_____________________________
 proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent :int= 0) :string=
   ## Gets the value of a variable entry, based on its value node.
@@ -478,7 +479,7 @@ proc mincVarSection (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Modules
+# @section Modules
 #_____________________________
 proc mincIncludeStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkIncludeStmt
@@ -487,7 +488,7 @@ proc mincIncludeStmt (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Pragmas
+# @section Pragmas
 #_____________________________
 proc mincPragmaDefine (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma
@@ -547,7 +548,7 @@ proc mincPragma (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Conditions
+# @section Conditions
 #_____________________________
 proc mincGetCondition (code :PNode; indent :int= 0) :string=
   # TODO: Unconfuse this total mess. Remove hardcoded numbers. Should be names and a loop.
@@ -562,7 +563,7 @@ proc mincGetCondition (code :PNode; indent :int= 0) :string=
   else: assert false, &"Only Ident/DotExpr/Call/!Prefix/Infix conditions are currently supported.\n{code.treeRepr}\n{code.renderTree}\n"
 
 #______________________________________________________
-# Loops
+# @section Loops
 #_____________________________
 proc mincWhileStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkWhileStmt
@@ -594,7 +595,7 @@ proc mincForStmt (code :PNode; indent :int= 0) :string=
   result.add &"{indent*Tab}for({init};{cond};{iter}){body}"
 
 #______________________________________________________
-# Control Flow
+# @section Control Flow
 #_____________________________
 proc mincReturnStmt (code :PNode; indent :int= 1) :string=
   assert code.kind == nkReturnStmt
@@ -675,7 +676,7 @@ proc mincWhenStmt (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Types
+# @section Types
 #_____________________________
 proc mincGetObjectFieldDef *(code :PNode; indent :int= 1) :string=
   assert code.kind == nkIdentDefs
@@ -747,7 +748,7 @@ proc mincTypeSection (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Assignment
+# @section Assignment
 #_____________________________
 proc mincAsgn (code :PNode; indent :int= 0) :string=
   assert code.kind == nkAsgn
@@ -779,7 +780,7 @@ proc mincAsgn (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Comments
+# @section Comments
 #_____________________________
 proc mincCommentStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkCommentStmt
@@ -789,7 +790,7 @@ proc mincCommentStmt (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Other tools
+# @section Other tools
 #_____________________________
 proc mincDiscardStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkDiscardStmt
@@ -800,7 +801,7 @@ proc mincDiscardStmt (code :PNode; indent :int= 0) :string=
 
 
 #______________________________________________________
-# Source-to-Source Generator
+# @section Source-to-Source Generator
 #_____________________________
 proc MinC *(code :PNode; indent :int= 0) :string=
   ## Node selector function. Sends the node into the relevant codegen function.

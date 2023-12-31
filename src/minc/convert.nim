@@ -1,14 +1,14 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# std dependencies
+# @deps std
 import std/paths
-# *Slate dependencies
+# @deps *Slate
 import slate/nimc
-# minc dependencies
+# @deps minc
 import ./convert/core
 
 proc toMinC *(code :string|Path) :string=
-  ## Converts a block of Nim code into the Min C Language
+  ## @descr Converts a block of Nim code into the Min C Language
   when code is Path: MinC( nimc.readAST(code) ) & "\n"
   else:              MinC( nimc.getAST(code)  ) & "\n"

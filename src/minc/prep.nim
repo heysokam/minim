@@ -4,23 +4,23 @@
 ## @fileoverview
 ## Defines the minc compiler preprocessor functionality
 #_______________________________________________________|
-# @dependencies std
+# @deps std
 import std/strutils
 import std/paths
 import std/sets
-# @dependencies minc
+# @deps minc
 import ./logger
 
 
 func isInclude (line :string) :bool=  line.startsWith("include") and '\"' notin line and '<' notin line and '>' notin line
-  ## @description Checks if the line contains a file include that should be processed
-  ## @notes Lines that match start with `include` and contain a path without any " < > characters
+  ## @descr Checks if the line contains a file include that should be processed
+  ## @note Lines that match start with `include` and contain a path without any " < > characters
 
 var includedFiles :HashSet[string]
-  ## @description Processed include files state
+  ## @descr Processed include files state
 proc getInclude (line :string; root :Path) :tuple[code:string, root:Path]=
-  ## @description Gets the contents of the file referenced by the include line
-  ## @requires The compiler logger object must be initialized before running this function.
+  ## @descr Gets the contents of the file referenced by the include line
+  ## @req The compiler logger object must be initialized before running this function.
   let path     :Path= line[8..^1].strip().strip( leading=false, chars={'\n'} ).Path
   let file     :Path= root/path.addFileExt("cm")
   let included :bool= includedFiles.containsOrIncl(file.string)
@@ -30,7 +30,7 @@ proc getInclude (line :string; root :Path) :tuple[code:string, root:Path]=
   except : fail "Tried to include a file, but failed reading it.\n  ", file.string
 
 proc processIncludes *(code :string; root :Path) :string=
-  ## @description Recursively add all of the includes that should be preprocessed
+  ## @descr Recursively add all of the includes that should be preprocessed
   for line in code.splitLines:
     if line.isInclude:
       var tmp = line.getInclude(root)

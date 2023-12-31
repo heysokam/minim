@@ -1,5 +1,14 @@
+#:______________________________________________________
+#  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#:______________________________________________________
+# @deps std
 import std/[ os,strutils,strformat ]
+# @deps minc
 import ../minc/cfg
+
+#_______________________________________
+# @section Configuration
+#___________________
 const rootDir = os.parentDir( currentSourcePath() )/".."/".."
 const binDir  = rootDir/"bin"
 const srcDir  = rootDir/"src"
