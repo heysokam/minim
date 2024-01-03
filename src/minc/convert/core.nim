@@ -273,10 +273,11 @@ proc mincInfix (code :PNode; indent :int= 0; raw :bool= false) :string=
   of "++","--":
     if data.right == "": raise newException(AffixCodegenError,
       &"Using ++ or -- as postfixes is currently not possible. The default Nim parser interprets them as infix, and breaks the code written afterwards. Please convert them to prefixes. The code that triggered this is:\n{code.renderTree}\n")
-  of "+=", "-=", "/=", "*=", "%=", "&=", "|=", "^=", "<<=", ">>=", "==", "<=", ">=", "!=":
+  of "+=", "-=", "/=", "*=", "%=", "&=", "|=", "^=", "<<=", ">>=", "==", "<=", ">=", "!=", "->":
+    # TODO: Check that `->` is in a complex assignment line. Doesn't break now, but will break something eventually.
     # Known Infixes. Do nothing, the line after this caseof will add their code
     discard
-  of "+", "-", "*", "/", "%", "&", "|", "^", ">>", "<<", "->",
+  of "+", "-", "*", "/", "%", "&", "|", "^", ">>", "<<",
      "and", "or", "xor", "shr", "shl", "div", "mod":
     # Known infixes that cannot be standalone
     if not raw: raise newException(AffixCodegenError, &"Found an infix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}")
