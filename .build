@@ -2,6 +2,5 @@
 set -u # error on undefined variables
 set -e # exit on first error
 file="build"
-clear
 ./bin/.nim/bin/nim c -d:release --hints:off --path:./src/lib/confy/src/ --path:./src/lib/zippy/src/ --path:./src/lib/jsony/src/ --outDir:bin ./src/$file.nim
 ./bin/$file

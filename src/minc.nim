@@ -2,7 +2,6 @@
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # @deps std
-import std/cmdline
 import std/os
 import std/paths
 # @deps MinC
@@ -16,8 +15,8 @@ when isMainModule:
   logger.init()
   # Get the arguments
   let cli  = opts.init()
-  let src  = cli.input
-  let trg  = cli.output
+  let src  = cli.input.string
+  let trg  = cli.output.string
   # Preprocess
   let root = src.splitFile.dir.Path
   let code = src.readFile()

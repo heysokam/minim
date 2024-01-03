@@ -42,14 +42,14 @@ const Help = """
 proc stopAndHelp= quit fmt Help
 proc stopAndVersion= quit fmt """
 {cfg.Prefix}  Version  {cfg.Version}"""
-proc check=
+proc check (cli :opts.CLI) :void=
   if "h" in cli.opts.short      : stopAndHelp()
   if "version" in cli.opts.long : stopAndVersion()
   if cli.args.len != 2          : stopAndHelp()
 
 proc init *() :Cfg=
   let cli = opts.getCli()
-  check()
+  cli.check()
   result.verbose = "v" in cli.opts.short
   result.input   = cli.args[0].Path
   result.output  = cli.args[1].Path
