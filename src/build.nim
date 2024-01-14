@@ -1,24 +1,23 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# @deps std
-import std/os except `/`
-import std/[ strformat,strutils ]
 # @deps confy
 import confy
 
-let nimDir          = cfg.binDir/".nim"
-let libdir          = cfg.srcDir/"lib"
-let nstdPath        = libDir/"nstd"/"src"
-let slatePath       = libDir/"slate"/"src"
-cfg.zigcc.systemBin = off
-cfg.nim.cc          = string( nimDir/"bin"/"nim" )
+cfg.quiet  = on
+cfg.libdir = cfg.srcDir/"lib"
 
 var mincGen = Program.new(cfg.srcDir/"minc"/"gen"/"proto.nim", "mincGen")
-os.removeFile( string cfg.binDir/mincGen.trg )
+rm cfg.binDir/mincGen.trg
 mincGen.build( @[mincGen.trg.string], run=true, force=true )
 
-var minc = Program.new(cfg.srcDir/"minc.nim", "minc", args="$1 $2 $3" % [
-  "--noNimblePath", &"--path:{nstdPath}", &"--path:{slatePath}" ])
-os.removeFile( string cfg.binDir/minc.trg )
-minc.build( @["all", minc.trg.string], run=false, force=false )
+var minc = Program.new(
+  src  = cfg.srcDir/"minc.nim",
+  deps = Dependencies.new(
+    submodule( "nstd",  "https://github.com/heysokam/nstd"  ),
+    submodule( "slate", "https://github.com/heysokam/slate" ),
+    ) # << Dependencies.new( ... )
+  ) # << Program.new( ... )
+rm cfg.binDir/minc.trg
+minc.build( run=false, force=false )
+

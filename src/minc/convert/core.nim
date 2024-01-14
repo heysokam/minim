@@ -537,7 +537,8 @@ proc mincPragma (code :PNode; indent :int= 0) :string=
   ## Codegen for standalone pragmas
   ## Context-specific pragmas are handled inside each section
   assert code.kind == nkPragma
-  assert code[0].kind == nkExprColonExpr and code[0].len == 2, &"Only pragmas with the shape {{.key:val.}} are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
+  assert code[0].kind == nkExprColonExpr and code[0].len == 2,
+    &"Only pragmas with the shape {{.key:val.}} are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
   let key = code[0][0].strValue
   case key
   of "define"    : result = mincPragmaDefine(code,indent)
