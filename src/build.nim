@@ -4,8 +4,9 @@
 # @deps confy
 import confy
 
-cfg.quiet  = on
-cfg.libdir = cfg.srcDir/"lib"
+cfg.quiet         = on
+cfg.libdir        = cfg.srcDir/"lib"
+cfg.nim.systemBin = off
 
 var mincGen = Program.new(cfg.srcDir/"minc"/"gen"/"proto.nim", "mincGen")
 rm cfg.binDir/mincGen.trg
