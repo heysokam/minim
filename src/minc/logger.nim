@@ -6,7 +6,7 @@ import pkg/nstd/logger as nstd_log
 # @deps minc
 import ./cfg
 
-proc init *() :void=  nstd_log.setDefaultLogger( nstd_log.newConLogger( cfg.Prefix & "Preprocessor") )  ## TODO: Change to initialize multiple loggers when more processes are executed
+proc init *() :void=  nstd_log.setDefaultLogger( nstd_log.newConLogger( cfg.Prefix ) )  ## TODO: Change to initialize multiple loggers when more processes are executed
   ## @descr Initializes the logger for the MinC compiler process.
 proc info *(args :varargs[string, `$`]) :void {.inline.}=  nstd_log.inf(args)
   ## @descr Logs an information message.

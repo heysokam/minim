@@ -4,30 +4,40 @@
 # @deps std
 import std/strformat
 import std/sets
+from std/sequtils import toSeq
+from std/strutils import join
 # @deps ndk
 import nstd/opts
 import nstd/paths
 # @deps minc
 from ./cfg import nil
+# @section Forward/export functionality from std/*
+export sets.contains
+export sets.items
+# @section Extra support for std types
+func `$` *(list :HashSet[Path]) :string=  list.toSeq.join(" ")
 
-type Cmd * = enum Compile, Codegen
+# @section CLI related types
+type BuildMode * = enum Debug, Release
+type Cmd * = enum Unknown, Compile, Codegen
 type Cfg * = object
-  cmd     *:Cmd
-  input   *:Path
-  output  *:Path
-  verbose *:bool
+  cmd      *:Cmd
+  input    *:Path
+  output   *:Path
+  verbose  *:bool
+  run      *:bool
+  zigBin   *:Path
+  cacheDir *:Path
+  codedir  *:Path
+  outDir   *:Path
+  mode     *:BuildMode
+  os       *:string
+  cpu      *:string
+  paths    *:HashSet[Path]
+  cfiles   *:HashSet[Path]
 const KnownCmds  :HashSet[string]=  ["c","cc"].toHashSet
 const KnownShort :HashSet[string]=  ["v","h","r"].toHashSet
-const KnownLong  :HashSet[string]=  ["help","version","verbose","zigBin","codeDir","os","cpu"].toHashSet
-
-# TODO: Options
-# --codeDir: (aka mincCache)
-# --zigBin:
-# c
-# cc
-# --os:
-# --cpu:
-
+const KnownLong  :HashSet[string]=  ["help","version","verbose", "zigBin", "outDir","cacheDir","codeDir","path", "cfile", "os","cpu"].toHashSet
 
 const Help = """
 {cfg.Prefix}  Usage
@@ -42,7 +52,8 @@ const Help = """
   --version       : Print the version and quit
   --verbose       : Activate verbose mode
   --zigBin:path   : Changes the default path of the ZigCC binary
-  --codeDir:path  : Defined the path where the C code will be output (default: mincCache)
+  --cacheDir:path : Defined the path where the temporary/intermediate files will be output (default: mincCache)
+  --codeDir:path  : Define the path where the C code will be output  (default: mincCache)
 
  Usage  Compilation
           --=|=--
@@ -74,18 +85,40 @@ proc err (msg :string) :void=
 proc check (cli :opts.CLI) :void=
   if "version" in cli.opts.long  : stopAndVersion()
   if "h" in cli.opts.short       : stopAndHelp()
-  for opt in cli.opts.long:
+  for opt in cli.opts.long       :
     if opt notin KnownLong       : err "Found an unknown long option: "&opt
-  for opt in cli.opts.short:
+  for opt in cli.opts.short      :
     if opt notin KnownShort      : err "Found an unknown short option: "&opt
   if cli.args.len < 1            : err "MinC was called without arguments."
   if cli.args.len != 3           : err "MinC was called with an incorrect number of arguments: " & $cli.args.len
   if cli.args[0] notin KnownCmds : err "Found an unknown command: "&cli.args[0]
+proc getCmd (cli :opts.CLI) :Cmd=
+  case cli.args[0]
+  of "c"  : Cmd.Compile
+  of "cc" : Cmd.Codegen
+  else    : Cmd.Unknown
 
 proc init *() :Cfg=
   let cli = opts.getCli()
   cli.check()
-  result.verbose = "v" in cli.opts.short or "verbose" in cli.opts.long
-  result.input   = cli.args[1].Path
-  result.output  = cli.args[2].Path
+  result.cmd      = cli.getCmd()
+  result.input    = cli.args[1].Path
+  result.output   = cli.args[2].Path
+  result.verbose  = "v" in cli.opts.short or "verbose" in cli.opts.long
+  result.run      = "r" in cli.opts.short
+  result.cacheDir = cli.getLong("cacheDir").Path
+  result.outDir   = cli.getLong("outDir").Path
+  result.codeDir  = cli.getLong("codeDir").Path
+  let zig         = cli.getLong("zigBin").Path
+  result.zigBin   = if zig != Path"": zig else: cfg.zigBin
+  result.mode     = if "release" in cli.opts.long: Release else: Debug
+  result.os       = cli.getLong("os")
+  result.cpu      = cli.getLong("cpu")
+  for path in cli.getLongIter("path")  : result.paths.incl path.Path
+  for path in cli.getLongIter("cfile") : result.cfiles.incl path.Path
+
+# TODO: Options
+# --os:
+# --cpu:
+
 
