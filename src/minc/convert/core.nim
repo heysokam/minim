@@ -323,13 +323,15 @@ proc mincProcDefGetArgs (code :PNode) :string=
   # Find all arguments
   for arg in procdef.args(code): # For every individual argument -> args can be single or grouped arguments. this expands them
     let tname =
-      if arg.typ.name == "pointer" : "void*"
-      else                         : arg.typ.name
+      if   arg.typ.name == "pointer" : "void*"
+      elif arg.typ.isArr             : arg.node[1][^1].strValue
+      else                           : arg.typ.name
     let mut   = if not arg.typ.isMut : " const"     else: ""  # Add const by default, when arg is not marked as var
     let typ   = if arg.typ.isPtr     : &"{tname}*"  else: tname
     let sep   = if arg.last          : ""           else: ", "
+    let arr   = if arg.typ.isArr     : "[]"         else: ""
     let ronly = if arg.node[0].kind == nkPragmaExpr and arg.node[0][1].kind == nkPragma and arg.node[0][1][0].strValue == "readonly": "const " else: ""
-    result.add( fmt "{ronly}{typ}{mut} {arg.name}{sep}" )
+    result.add( fmt "{ronly}{typ}{mut} {arg.name}{arr}{sep}" )
 #_____________________________
 proc mincFuncDef  (code :PNode; indent :int= 0) :string=
   assert false, "proc and func are identical in C"  # TODO : Sideffects checks

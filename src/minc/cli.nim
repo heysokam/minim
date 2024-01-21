@@ -33,11 +33,18 @@ type Cfg * = object
   mode     *:BuildMode
   os       *:string
   cpu      *:string
-  paths    *:HashSet[Path]
   cfiles   *:HashSet[Path]
+  paths    *:HashSet[Path]
+  passL    *:HashSet[string]
 const KnownCmds  :HashSet[string]=  ["c","cc"].toHashSet
 const KnownShort :HashSet[string]=  ["v","h","r"].toHashSet
-const KnownLong  :HashSet[string]=  ["help","version","verbose", "zigBin", "outDir","cacheDir","codeDir","path", "cfile", "os","cpu"].toHashSet
+const KnownLong  :HashSet[string]=  [
+  "help","version","verbose",
+  "zigBin",
+  "outDir","cacheDir","codeDir",
+  "cfile","path","passL",
+  "os","cpu",
+  ].toHashSet
 
 const Help = """
 {cfg.Prefix}  Usage
@@ -116,6 +123,7 @@ proc init *() :Cfg=
   result.cpu      = cli.getLong("cpu")
   for path in cli.getLongIter("path")  : result.paths.incl path.Path
   for path in cli.getLongIter("cfile") : result.cfiles.incl path.Path
+  for pass in cli.getLongIter("passL") : result.passL.incl pass
 
 # TODO: Options
 # --os:
