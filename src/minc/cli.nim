@@ -56,11 +56,18 @@ const Help = """
   -r   : Run the final binary after compilation finishes
 
  Usage  Options (word)
+  --help          : Print this notice and quit
   --version       : Print the version and quit
   --verbose       : Activate verbose mode
   --zigBin:path   : Changes the default path of the ZigCC binary
+  --outDir:path   : Define the path where the compiled binaries will be output
   --cacheDir:path : Defined the path where the temporary/intermediate files will be output (default: mincCache)
   --codeDir:path  : Define the path where the C code will be output  (default: mincCache)
+  --cfile:path    : Extra C source code file that should be added to the compilation command for building the final binary.
+  --path:path     : Defines a path that will be `-Ipath` included in the compilation command for building the final binary.
+  --passL:"arg"   : Defines an extra argument that will be passed to the linking command when building the final binary.
+  --os:value      : Defines the target OS that the final binary will be built for.
+  --cpu:value     : Defines the target CPU architecture that the final binary will be built for.
 
  Usage  Compilation
           --=|=--
@@ -126,7 +133,9 @@ proc init *() :Cfg=
   for pass in cli.getLongIter("passL") : result.passL.incl pass
 
 # TODO: Options
+# -r
 # --os:
 # --cpu:
+# --passC:
 
 
