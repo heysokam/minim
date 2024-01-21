@@ -32,6 +32,7 @@ const FilterFlags = [
   "-Wno-error=vla",                   # Explicitly avoid erroring on VLA usage, but keep the warning (todo: only for debug)
   "-Wno-error=padded",                # Warn when structs are automatically padded, but don't error.
   "-Wno-error=unused-macros",         # Macros cannot be declared public to not trigger this, so better to not error and keep the warning
+  "-Wno-error=documentation-unknown-command",  # Ignore Documentation errors for our custom syntax
   # Ignore C++ flags. We build C
   "-Wno-c++-compat",
   "-Wno-c++0x-compat",                   "-Wno-c++0x-extensions",                         "-Wno-c++0x-narrowing",

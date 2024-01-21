@@ -5,6 +5,8 @@ Replace #ifdef -> When
 Replace C Macros:
 - Generics
 - Typed Templates
+Better doc strictness
+- https://clang.llvm.org/docs/UsersManual.html#comment-parsing-options
 ```
 
 ```md
