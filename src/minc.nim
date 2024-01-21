@@ -41,4 +41,8 @@ when isMainModule:
       let cc     = &"{cli.zigBin.string} cc {verb} {flags} {linkFl} {paths} {cacheFile.string} {cli.cfiles} -o {binFile.string}"
       dbg "Compiling into binary with command:  ",cc
       discard os.execShellCmd cc
+      # Run the final binary when requested
+      if cli.run:
+        dbg "Running the resulting binary:  ",binFile.string
+        discard os.execShellCmd binFile.string
 
