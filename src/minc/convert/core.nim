@@ -160,7 +160,7 @@ proc mincDotExprList (code :PNode) :seq[string]=
 proc mincInfixList *(code :PNode; indent :int= 0; renames :Renames= Renames()) :string=
   # TODO: Merge with mincInfix
   if code.kind != nkInfix: report code
-  assert code.kind == nkInfix
+  assert code.kind == nkInfix, &"Unknown kind {code.kind} in:\n{code.renderTree}"
   let fix   = code[0]
   let left  = code[1]
   let right = code[2]
@@ -719,7 +719,7 @@ proc mincGetObjectBody (code :PNode; indent :int= 0) :string=
   assert code[^1].kind == nkObjectTy
   if code.isStub: return mincGetStubBody(code)
   # Get the body normally
-  assert code[^1][^1].kind == nkRecList
+  assert code[^1][^1].kind == nkRecList, &"Unknown kind {code[^1][^1].kind} in:\n{code.renderTree}"
   let tab1 = (indent+1)*Tab
   if code[1].kind != nkEmpty: result.add &"({code[1].strValue})"
   result.add "{\n"
