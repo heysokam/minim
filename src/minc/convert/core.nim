@@ -677,6 +677,19 @@ proc mincWhenStmt (code :PNode; indent :int= 0) :string=
     # Add to the result
     result.add &"{pfx}{condition}\n{body}"
   result.add &"{tab}#endif\n"
+#_____________________________
+proc mincCaseStmt (code :PNode; indent :int= 0) :string=
+  assert code.kind == nkCaseStmt
+  let tab  :string= indent*Tab
+  let tab1 :string= (indent+1)*Tab
+  let tab2 :string= (indent+2)*Tab
+  result.add &"{tab}switch ({mincGetValueRaw(code[0])}) {{\n"
+  for entry in code.sons[1..^1]: # For every of/else entry. [0] is the condition itself
+    if entry.kind == nkOfBranch:
+      result.add &"{tab1}{mincGetValueRaw(entry[0])}:\n{tab2}{MinC(entry[1], indent)}{tab2}break;\n"
+    elif entry.kind == nkElse:
+      result.add &"{tab1}default:\n{tab2}{MinC(entry[0], indent)}{tab2}break;\n"
+  result.add &"{tab}}}\n"
 
 
 #______________________________________________________
@@ -838,14 +851,15 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkIfStmt           : result = mincIfStmt(code, indent)
   of nkWhenStmt         : result = mincWhenStmt(code, indent)
   of nkElifBranch       : result = mincElifBranch(code)
-  #   Comments
-  of nkCommentStmt      : result = mincCommentStmt(code, indent)
-  #   Assignment
-  of nkAsgn             : result = mincAsgn(code, indent)
+  of nkCaseStmt         : result = mincCaseStmt(code)
   #   Control flow
   of nkReturnStmt       : result = mincReturnStmt(code, indent)
   of nkBreakStmt        : result = mincBreakStmt(code, indent)
   of nkContinueStmt     : result = mincContinueStmt(code, indent)
+  #   Comments
+  of nkCommentStmt      : result = mincCommentStmt(code, indent)
+  #   Assignment
+  of nkAsgn             : result = mincAsgn(code, indent)
   #   Pragmas
   of nkPragma           : result = mincPragma(code, indent)
   #   Pre-In-Post.fix
@@ -907,7 +921,6 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkAsmStmt          : result = mincAsmStmt(code)
   of nkPragmaBlock      : result = mincPragmaBlock(code)
 
-  of nkCaseStmt         : result = mincCaseStmt(code)
   of nkOfBranch         : result = mincOfBranch(code)
   of nkElse             : result = mincElse(code)
 
