@@ -686,7 +686,7 @@ proc mincCaseStmt (code :PNode; indent :int= 0) :string=
   result.add &"{tab}switch ({mincGetValueRaw(code[0])}) {{\n"
   for entry in code.sons[1..^1]: # For every of/else entry. [0] is the condition itself
     if entry.kind == nkOfBranch:
-      result.add &"{tab1}{mincGetValueRaw(entry[0])}:\n{tab2}{MinC(entry[1], indent)}{tab2}break;\n"
+      result.add &"{tab1}case {mincGetValueRaw(entry[0])}:\n{tab2}{MinC(entry[1], indent)}{tab2}break;\n"
     elif entry.kind == nkElse:
       result.add &"{tab1}default:\n{tab2}{MinC(entry[0], indent)}{tab2}break;\n"
   result.add &"{tab}}}\n"
