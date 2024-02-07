@@ -4,6 +4,7 @@
 # @deps confy
 import confy
 
+cfg.verbose       = off
 cfg.quiet         = on
 cfg.libdir        = cfg.srcDir/"lib"
 cfg.nim.systemBin = off
