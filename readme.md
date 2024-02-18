@@ -29,8 +29,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/heysokam/minc/master/src/bui
 
 # Optional: Add `~/.minc/bin` and `~/.cmin/bin` to your PATH variable
 # For Bash Shell: Add this to your `~/.bashrc`
-if [[ -d "$HOME/.minc/bin" ]] ; then export PATH="$PATH:$HOME/.minc/bin" ; fi
-if [[ -d "$HOME/.minc/bin/.nim/bin" ]] ; then export PATH="$PATH:$HOME/.minc/bin/.nim/bin" ; fi
+[[ -d "$HOME/.minc/bin" ]] && export PATH="$PATH:$HOME/.minc/bin"
+[[ -d "$HOME/.minc/bin/.nim/bin" ]] && export PATH="$PATH:$HOME/.minc/bin/.nim/bin"
 ```
 
 ```md
