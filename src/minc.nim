@@ -18,7 +18,7 @@ when isMainModule:
   # Get the arguments
   let cli = opts.init()
   if cli.cmd in {Compile, Codegen}:
-    block:
+    block BinSection:
       let relFile   = cli.output.addFileExt("c")
       let cacheFile = cli.cacheDir/relFile
       let binFile   = cli.outDir/cli.output
@@ -31,7 +31,7 @@ when isMainModule:
       # Copy the C code into the user-defined --codeDir folder
       if cli.codeDir != Path"": copyFile cacheFile, cli.codeDir/relFile
       # Compile the C code into binaries
-      if cli.cmd != Compile: break  # Exit the block when not compiling in to binaries
+      if cli.cmd != Compile: break BinSection # Exit the block when not compiling in to binaries
       let flags = if cli.mode in {Release}: cfg.flags.release else: cfg.flags.debug
       var paths :string
       for path in cli.paths: paths.add &"-I{path.string} "

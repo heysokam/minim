@@ -9,8 +9,6 @@
 # @deps std
 import std/strutils
 import std/tables
-import std/sets
-import std/sequtils
 # @deps *Slate
 import slate/element/base as slateBase
 import slate/element/procdef
