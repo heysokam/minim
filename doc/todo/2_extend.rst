@@ -57,6 +57,7 @@
    - [ ] Multi-Types
      - [ ] Type Unions        (nim/ts)  ->  type Thing = One or  Two    # Accepts either One or Two, but not both
      - [ ] Type Intersections (ts)      ->  type Thing = One and Two    # Inherits all properties of One and Two (including methods)
+           (WRN: Be careful with type intersections. They can become type-gymnastics combined with Generics, and we really want generics first)
    - [ ] Literal types  (Typescript)   type Thing = 50 | 100;   # Accepts only the literal values given and nothing else. (could map to C enums? something else?)
    - [ ] Explicitly Nullable types. Forbid implicit nulls unless specified otherwise
          (maybe through Option? :think:  also remember (ts)  thing?.one()  syntax)
