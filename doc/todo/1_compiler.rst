@@ -1,6 +1,7 @@
 .. code:: md
 
    # Internal C compiler todo
+   - [ ] Support includes with comments
    - [ ] --verbose-cc
    - [ ] Bundle zigcc
    - [ ] Provide an interface for zigcc in the minc binary
