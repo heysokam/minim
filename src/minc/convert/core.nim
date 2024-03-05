@@ -370,9 +370,9 @@ proc mincProcDef  (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # @section Function Calls
 #_____________________________
-proc mincCallGetName (call :PNode) :string=
-  assert call.kind in {nkCall, nkCommand}, code.renderTree
-  result = call[0].strValue
+proc mincCallGetName (code :PNode) :string=
+  assert code.kind in {nkCall, nkCommand}, code.renderTree
+  result = code[0].strValue
   case result
   of "addr" : result = "&"
 #_____________________________
