@@ -8,6 +8,7 @@
 import std/strutils
 import std/paths
 import std/sets
+import std/symlinks
 # @deps minc
 import ./logger
 
@@ -22,7 +23,8 @@ proc getInclude (line :string; root :Path) :tuple[code:string, root:Path]=
   ## @descr Gets the contents of the file referenced by the include line
   ## @req The compiler logger object must be initialized before running this function.
   let path     :Path= line[8..^1].strip().strip( leading=false, chars={'\n'} ).Path
-  let file     :Path= root/path.addFileExt("cm")
+  let cm       :Path= absolutePath root/path.addFileExt("cm")
+  let file     :Path= if symlinkExists(cm): expandSymlink(cm).absolutePath(root) else: cm
   let included :bool= includedFiles.containsOrIncl(file.string)
   if included: dbg "Skipped recursive include for file: ", file.string; return
   result.root = file.splitFile.dir
