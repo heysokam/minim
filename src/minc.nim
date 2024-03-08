@@ -18,20 +18,20 @@ when isMainModule:
   # Get the arguments
   let cli = opts.init()
   if cli.cmd in {Compile, Codegen}:
-    block BinSection:
+    block SectionBin:
       let relFile   = cli.output.addFileExt("c")
       let cacheFile = cli.cacheDir/relFile
       let binFile   = cli.outDir/cli.output
       # Preprocess
       let root = cli.input.splitFile.dir
       let code = cli.input.readFile()
-        .processIncludes(root)  # Preprocess includes
+        .processIncludes(root, cli.input)  # Preprocess includes
       # Codegen the C code
       cacheFile.writeFile(convert.toMinC(code))
       # Copy the C code into the user-defined --codeDir folder
       if cli.codeDir != Path"": copyFile cacheFile, cli.codeDir/relFile
       # Compile the C code into binaries
-      if cli.cmd != Compile: break BinSection # Exit the block when not compiling in to binaries
+      if cli.cmd != Compile: break SectionBin # Exit the block when not compiling in to binaries
       let flags = if cli.mode in {Release}: cfg.flags.release else: cfg.flags.debug
       var paths :string
       for path in cli.paths: paths.add &"-I{path.string} "
