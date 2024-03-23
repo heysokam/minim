@@ -601,7 +601,7 @@ proc mincForStmt (code :PNode; indent :int= 0) :string=
 #_____________________________
 proc mincReturnStmt (code :PNode; indent :int= 1) :string=
   assert code.kind == nkReturnStmt, code.renderTree
-  assert indent != 0, "Return statements cannot exist at the top level in C.\n" & code.renderTree
+  assert indent != 0, "Return statements cannot exist at the top level in C.\n" & code.treeRepr & "\n" & code.renderTree
   let val =
     if code[0].kind == nkInfix : mincInfixList(code[0],  indent+1, ConditionAffixRenames)
     else                       : mincGetValueRaw(code[0],indent+1)
@@ -683,10 +683,14 @@ proc mincCaseStmt (code :PNode; indent :int= 0) :string=
   let tab2 :string= (indent+2)*Tab
   result.add &"{tab}switch ({mincGetValueRaw(code[0])}) {{\n"
   for entry in code.sons[1..^1]: # For every of/else entry. [0] is the condition itself
+    var shouldBreak :bool= true
     if entry.kind == nkOfBranch:
-      result.add &"{tab1}case {mincGetValueRaw(entry[0])}:\n{tab2}{MinC(entry[1], indent)}{tab2}break;\n"
+      result.add &"{tab1}case {mincGetValueRaw(entry[0])}:\n{tab2}{MinC(entry[1], indent+1)}"
+      if entry[1][0].kind == nkReturnStmt: shouldBreak = false
     elif entry.kind == nkElse:
-      result.add &"{tab1}default:\n{tab2}{MinC(entry[0], indent)}{tab2}break;\n"
+      result.add &"{tab1}default:\n{tab2}{MinC(entry[0], indent+1)}"
+    if shouldBreak: result.add &"{tab2}break;"
+    result.add "\n"
   result.add &"{tab}}}\n"
 
 
