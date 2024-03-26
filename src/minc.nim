@@ -19,7 +19,7 @@ when isMainModule:
   let cli = opts.init()
   if cli.cmd in {Compile, Codegen}:
     block SectionBin:
-      let relFile   = cli.output.addFileExt("c")
+      let relFile   = cli.output.changeFileExt("c")
       let cacheFile = cli.cacheDir/relFile
       let binFile   = cli.outDir/cli.output
       # Preprocess
