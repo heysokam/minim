@@ -433,7 +433,10 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
 #_____________________________
 proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
   assert entry.kind in [nkConstDef, nkIdentDefs], entry.treeRepr
-  let priv  = if vars.isPrivate(entry,indent): "static " else: ""
+  let priv  =
+    if vars.isPrivate(entry,indent) or
+       vars.isPersist(entry,indent) : "static "
+    else                            : ""
   let mut   = case kind
     of VarKind.Const : "" # constants become constexpr, they don't need type mutability
     of VarKind.Let   : "const "
