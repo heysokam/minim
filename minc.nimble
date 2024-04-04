@@ -3,7 +3,7 @@
 #:______________________________________________________
 # Package
 packageName   = "minc"
-version       = "0.4.8"
+version       = "0.4.9"
 author        = "sOkam"
 description   = "ᛟ minc | Minimalistic C Language"
 license       = "MIT"

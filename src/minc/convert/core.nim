@@ -744,15 +744,33 @@ proc mincGetObjectBody (code :PNode; indent :int= 0) :string=
     result.add mincGetObjectFieldDef(field, indent+1)
   result.add &"{tab1}}}"
 #_____________________________
+proc mincGetProcTypeDefArgs (code :PNode; indent :int= 0) :string=
+  assert types.isProc(code), &"Tried to get the proc typedef args of a node that is not an nkProcTy:\n{code.treeRepr}\n{code.renderTree}\n"
+  const ArgType = 1
+  let args = types.procArgs(code)
+  for id,arg in args.pairs:
+    result.add mincGetValueRaw( arg[ArgType], indent )
+    if id != args.high: result.add ","
+#_____________________________
+proc mincGetProcTypedef (code :PNode; indent :int= 0) :string=
+  assert types.isProc(code), &"Tried to get the proc typedef of a node that is not an nkProcTy:\n{code.treeRepr}\n{code.renderTree}\n"
+  let name = types.getName(code)
+  let ret  = mincGetValueRaw( types.procRetT(code), indent )
+  let args = mincGetProcTypeDefArgs(code, indent)
+  result = &"{indent*Tab}typedef {ret} (*{name})({args});\n"
+#_____________________________
 proc mincTypeDef (code :PNode; indent :int= 0) :string=
   assert code.kind == nkTypeDef, code.renderTree
+  let info = types.getType(code, KnownMultiwordPrefixes)
+  # Proc special case
+  if info.isProc: return mincGetProcTypeDef(code, indent)
+  # Other cases
   let stub = code.isStub
   var name = if stub: mincGetStubName(code) else: &"{types.getName(code)}"
-  let info = types.getType(code, KnownMultiwordPrefixes)
   let mut  = if stub: "" elif info.isRead: " const" else: ""
   var typ  =
-    if info.isObj : &"struct {name}{mut}"
-    else          : info.name & mut
+    if info.isObj    : &"struct {name}{mut}"
+    else             : info.name & mut
   if info.isPtr: typ.add "*"
   var body :string= ""
   # var other :string= ""
@@ -774,12 +792,7 @@ proc mincAsgn (code :PNode; indent :int= 0) :string=
   let sym   = code[0]
   let value = code[^1]
   let val   = mincGetValueRaw(value,indent)
-  # if value.kind == nkBracket : report value
-  # let val   =
-  #   if value.kind == nkBracket : mincGetArrayValue(value, indent)
-  #   else                       : mincGetValueRaw(value,indent)
-
-  assert val != "", &"Tried to create an asignment, but its value ( {val} ) is invalid. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+  assert val != "", &"Tried to create an asignment, but its value is invalid. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
   if val == "" and value.kind == nkBracketExpr: raise newException(AssignCodegenError,
     &"Tried to create dereferencing code for a node, but it has no value asignment. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n")
   let isDeref     = sym.kind == nkBracketExpr and sym.sons.len == 1
