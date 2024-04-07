@@ -590,7 +590,7 @@ proc mincForStmt (code :PNode; indent :int= 0) :string=
     &"Tried to generate the code of a for loop, but its definition syntax is not supported. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
   # Name the outputs
   let init = if sentry.isEmpty: ""
-    else: &"size_t {sentry.strValue} = {value.strValue}"  # TODO: Remove hardcoded size_t. Should be coming from exprs[1].T
+    else: &"size_t {sentry.strValue} = {mincGetValueStr(value)}"  # TODO: Remove hardcoded size_t. Should be coming from exprs[1].T
   let fix  = if infix.strValue[2..^1] == "": "<=" else: infix.strValue[2..^1]
   let cond = if exprs.isEmpty : ""
     else: &" {mincGetValueStr(sentry)} {fix} {mincGetValueStr(final)}"
