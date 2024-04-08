@@ -21,8 +21,7 @@ Note:
   but will keep thinking of a better solution while progress continues
 # 0.1.0 First Publishable
 The language works, and can create complete applications.
-Effort on supporting the entire feature-set of C continues until 0.9.0
-# ?.?.? Organize Road-to-1.0
+Effort on supporting the entire feature-set of C continues until the last version before v1.0.0
 ```
 ```md
 # 0.2.0 Arbitrary Raise to 0.2.0 to reflect the changes from one of the BIG commits
@@ -31,12 +30,18 @@ Effort on supporting the entire feature-set of C continues until 0.9.0
 # 0.5.0 `proc` Typedefs and `{.persist.}` pragma
 ```
 ```md
+# 0.?.0 Unions
+# 0.?.0 Enums
+# 0.?.0 Varargs
+# 0.?.0 Advanced For Loops
+# 0.?.0 General Fixes   (leftovers at ./todo/0_basic.md)
+# 0.?.0 Compiler Ergonomics
 # ?.?.? ...
 ```
 
 ---
 ```md
-# 0.9.0 Crash-Test to prepare for v1.0.0
+# 0.?.0 Crash-Test to prepare for v1.0.0
 ```
 ```md
 - [ ] Complete ./todo/0_basic.rst
