@@ -17,7 +17,7 @@ installExt    = @["nim"]
 bin           = @[packageName]
 
 # Dependencies
-requires "nim >= 2.0.0"
+requires "nim >= 1.9.1" # Technically 2.0, but boostrapped nimble gets confused
 requires "https://github.com/heysokam/slate#head"
 requires "https://github.com/heysokam/confy#head"
 requires "https://github.com/heysokam/nstd#head"
