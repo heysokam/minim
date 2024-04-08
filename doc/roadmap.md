@@ -25,6 +25,12 @@ Effort on supporting the entire feature-set of C continues until 0.9.0
 # ?.?.? Organize Road-to-1.0
 ```
 ```md
+# 0.2.0 Arbitrary Raise to 0.2.0 to reflect the changes from one of the BIG commits
+# 0.3.0 Binary Compilation Support
+# 0.4.0 CaseOf Support
+# 0.5.0 `proc` Typedefs and `{.persist.}` pragma
+```
+```md
 # ?.?.? ...
 ```
 
