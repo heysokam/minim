@@ -6,9 +6,10 @@ import std/paths
 # @deps *Slate
 import slate/nimc
 # @deps minc
-import ./convert/core
+# import ./convert/core
 
 proc toMinC *(code :string|Path) :string=
-  ## @descr Converts a block of Nim code into the Min C Language
-  when code is Path: MinC( nimc.readAST(code) ) & "\n"
-  else:              MinC( nimc.getAST(code)  ) & "\n"
+  ## @descr Converts a block of Nim code into the MinC lang
+  result = "12342"
+  # when code is Path: MinC( nimc.readAST(code) ) & "\n"
+  # else:              MinC( nimc.getAST(code)  ) & "\n"
