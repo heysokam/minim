@@ -2,7 +2,6 @@
 # @deps tests
 template tName:string= currentSourcePath.parentDir.lastPathPart()
 include ../base
-resetID()
 #_______________________________________
 
 

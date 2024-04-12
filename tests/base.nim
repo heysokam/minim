@@ -1,17 +1,13 @@
+# @warning MUST be `include`d, not `import`ed
+#_______________________________________
+# @section Dependencies used by all tests
 # @deps std
 import std/unittest
 from std/os import parentDir, lastPathPart
 from std/strformat import `&`
-# @section Forward Imports used by all tests
-export unittest
-export os.parentDir
-export os.lastPathPart
 
 #_______________________________________
 # @section Tests Tools
-#_____________________________
-var ID = int.high
-proc resetID *() :void= ID = int.high
 #_____________________________
 template name *(
     descr : string;
@@ -24,3 +20,4 @@ template name *(
   n&": " & (
     if t != "" : t&" | " else: ""
     ) & descr
+
