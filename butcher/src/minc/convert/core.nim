@@ -23,16 +23,16 @@ import slate/element/affixes
 import ../cfg
 include ./fwdecl
 
-#______________________________________________________
-# @section Codegen: Errors
-#_____________________________
-type AffixCodegenError     = object of CatchableError
-type CallsCodegenError     = object of CatchableError
-type VariableCodegenError  = object of CatchableError
-type PragmaCodegenError    = object of CatchableError
-type ConditionCodegenError = object of CatchableError
-type ObjectCodegenError    = object of CatchableError
-type AssignCodegenError    = object of CatchableError
+# #______________________________________________________
+# # @section Codegen: Errors
+# #_____________________________
+# type AffixCodegenError     = object of CatchableError
+# type CallsCodegenError     = object of CatchableError
+# type VariableCodegenError  = object of CatchableError
+# type PragmaCodegenError    = object of CatchableError
+# type ConditionCodegenError = object of CatchableError
+# type ObjectCodegenError    = object of CatchableError
+# type AssignCodegenError    = object of CatchableError
 
 #______________________________________________________
 # @section Codegen: Types
@@ -343,7 +343,7 @@ proc mincProcDefGetBody  (code :PNode; indent :int= 1) :string=
   result.add MinC(code[procdef.Elem.Body], indent)
 #_____________________________
 proc mincProcDef  (code :PNode; indent :int= 0) :string=
-  ## Converts a nkProcDef into the Min C Language
+  ## Converts a nkProcDef into the MinC Language
   # note: stored in core because of MinC in getbody
   assert code.kind == nkProcDef, code.renderTree
   var pragma :string
@@ -848,8 +848,8 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   #   Modules
   of nkIncludeStmt      : result = mincIncludeStmt(code, indent)
   #   Procedures
-  of nkProcDef          : result = mincProcDef(code, indent)
-  of nkFuncDef          : result = mincProcDef(code, indent)
+  # of nkProcDef          : result = mincProcDef(code, indent)
+  # of nkFuncDef          : result = mincProcDef(code, indent)
   #   Other Tools
   of nkDiscardStmt      : result = mincDiscardStmt(code, indent)
   #   Function calls
@@ -871,7 +871,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkElifBranch       : result = mincElifBranch(code)
   of nkCaseStmt         : result = mincCaseStmt(code)
   #   Control flow
-  of nkReturnStmt       : result = mincReturnStmt(code, indent)
+  # of nkReturnStmt       : result = mincReturnStmt(code, indent)
   of nkBreakStmt        : result = mincBreakStmt(code, indent)
   of nkContinueStmt     : result = mincContinueStmt(code, indent)
   #   Comments

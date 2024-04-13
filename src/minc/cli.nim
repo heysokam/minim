@@ -2,14 +2,14 @@
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
 # @deps std
-import std/strformat
 import std/sets
 from std/sequtils import toSeq
-from std/strutils import join
 # @deps ndk
 import nstd/opts
 import nstd/paths
+import nstd/strings
 # @deps minc
+import ./types
 from ./cfg import nil
 # @section Forward/export functionality from std/*
 export sets.contains
@@ -26,10 +26,11 @@ type Cfg * = object
   output   *:Path
   verbose  *:bool
   run      *:bool
+  clangFmt *:ClangFormat
   zigBin   *:Path
   cacheDir *:Path
   codedir  *:Path
-  outDir   *:Path
+  binDir   *:Path
   mode     *:BuildMode
   os       *:string
   cpu      *:string
@@ -40,8 +41,8 @@ const KnownCmds  :HashSet[string]=  ["c","cc"].toHashSet
 const KnownShort :HashSet[string]=  ["v","h","r"].toHashSet
 const KnownLong  :HashSet[string]=  [
   "help","version","verbose",
-  "zigBin",
-  "outDir","cacheDir","codeDir",
+  "zigBin", "clangFmtBin",
+  "binDir","cacheDir","codeDir",
   "cfile","path","passL",
   "os","cpu",
   ].toHashSet
@@ -56,18 +57,24 @@ const Help = """
   -r   : Run the final binary after compilation finishes
 
  Usage  Options (word)
-  --help          : Print this notice and quit
-  --version       : Print the version and quit
-  --verbose       : Activate verbose mode
-  --zigBin:path   : Changes the default path of the ZigCC binary
-  --outDir:path   : Define the path where the compiled binaries will be output
-  --cacheDir:path : Defined the path where the temporary/intermediate files will be output (default: mincCache)
-  --codeDir:path  : Define the path where the C code will be output  (default: mincCache)
-  --cfile:path    : Extra C source code file that should be added to the compilation command for building the final binary.
-  --path:path     : Defines a path that will be `-Ipath` included in the compilation command for building the final binary.
-  --passL:"arg"   : Defines an extra argument that will be passed to the linking command when building the final binary.
-  --os:value      : Defines the target OS that the final binary will be built for.
-  --cpu:value     : Defines the target CPU architecture that the final binary will be built for.
+  --help              : Print this notice and quit
+  --version           : Print the version and quit
+  --verbose           : Activate verbose mode
+
+  --binDir:path       : Changes the default bin path where other paths will be searched for when relevant (default:  {cfg.binDir})
+  --binDir:path       : Define the path where the compiled content will be output  (default:  {cfg.binDir})
+  --cacheDir:path     : Defined the path where the temporary/intermediate files will be output  (default:  {cfg.mincCache})
+  --codeDir:path      : Define the folder where the C code will be output  (default:  {getCurrentDir()})
+
+  --zigBin:path       : Changes the default path of the ZigCC binary  (default:  {cfg.zigBin})
+  --clangFmtBin:path  : Changes the default path of the clang-format binary  (default:  {cfg.clangFmtBin})
+  --clangFmtFile:path : Sets the path of the clang-format options file. Will not be passed to clang-format when omitted.
+
+  --cfile:path        : Extra C source code file that should be added to the compilation command for building the final binary.
+  --path:path         : Defines a path that will be `-Ipath` included in the compilation command for building the final binary.
+  --passL:"arg"       : Defines an extra argument that will be passed to the linking command when building the final binary.
+  --os:value          : Defines the target OS that the final binary will be built for.
+  --cpu:value         : Defines the target CPU architecture that the final binary will be built for.
 
  Usage  Compilation
           --=|=--
@@ -115,17 +122,25 @@ proc getCmd (cli :opts.CLI) :Cmd=
 proc init *() :Cfg=
   let cli = opts.getCli()
   cli.check()
+  # Arguments
   result.cmd      = cli.getCmd()
   result.input    = cli.args[1].Path
   result.output   = cli.args[2].Path
+  # Single Flags
   result.verbose  = "v" in cli.opts.short or "verbose" in cli.opts.long
   result.run      = "r" in cli.opts.short
-  result.cacheDir = cli.getLong("cacheDir").Path
-  result.outDir   = cli.getLong("outDir").Path
-  result.codeDir  = cli.getLong("codeDir").Path
-  let zig         = cli.getLong("zigBin").Path
-  result.zigBin   = if zig != Path"": zig else: cfg.zigBin
-  result.mode     = if "release" in cli.opts.long: Release else: Debug
+  # Folders
+  result.cacheDir = if "cacheDir" in cli.opts.long : cli.getLong("cacheDir").Path else: cfg.mincCache
+  result.binDir   = if "binDir"   in cli.opts.long : cli.getLong("binDir").Path   else: cfg.binDir
+  result.codeDir  = if "codeDir"  in cli.opts.long : cli.getLong("codeDir").Path  else: getCurrentDir()
+  # Binaries
+  result.zigBin   = if "zigBin"   in cli.opts.long : cli.getLong("zigBin").Path else: cfg.zigBin
+  result.clangFmt = ClangFormat(
+    bin  : if "clangFmtBin"  in cli.opts.long : cli.getLong("clangFmtBin").Path  else: cfg.clangFmtBin.Path,
+    file : cli.getLong("clangFmtFile").Path,
+    ) # << ClangFormat( ... )
+  # Compile Options
+  result.mode     = if "release" in cli.opts.long : Release else: Debug
   result.os       = cli.getLong("os")
   result.cpu      = cli.getLong("cpu")
   for path in cli.getLongIter("path")  : result.paths.incl path.Path

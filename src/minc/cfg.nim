@@ -11,15 +11,28 @@ const Version *{.strdefine.}= "dev." & gorge "git --no-pager log -n 1 --pretty=f
 
 #_______________________________________
 # @section Format
-const Tab     *{.strdefine.}= "  "
-const Prefix  *{.strdefine.}= "ᛟ minc"
+const Tab         *{.strdefine.}= "  "
+const Prefix      *{.strdefine.}= "ᛟ minc"
+const Sep         *{.strdefine.}= "  "
 
 #_______________________________________
-# @section ZigCC
-let zigBin *:Path= getCurrentDir()/"bin"/".zig"/"zig"
+# @section Configuration Defaults
+let binDir *:Path= getCurrentDir()/"bin"
   ## @descr
-  ##  Default zig binary will be searched in "./bin/.zig/zig"
+  ##  Default binary folder
+  ##  Can be changed with --binDir:path from cli
+let mincCache *:Path= cfg.binDir/".cache"/"minc"
+  ## @descr
+  ##  Default folder where the MinC compiler will store its temporary output files
+  ##  Can be changed with --cacheDir:path from cli
+let zigBin *:Path= cfg.binDir/".zig"/"zig"
+  ## @descr
+  ##  Default zig binary will be searched for in "cfg.binDir/.zig/zig"
   ##  Can be changed with --zigBin:path from cli
+const clangFmtBin *{.strdefine.}= "clang-format"
+  ## @descr
+  ##  Default clang-format binary will be used from $PATH
+  ##  Can be changed with --clangFmtBin:path from cli
 
 #_______________________________________
 # @section Compile Flags
