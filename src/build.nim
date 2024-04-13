@@ -14,7 +14,8 @@ var minc = Program.new(
   deps = Dependencies.new(
     submodule( "nstd",  "https://github.com/heysokam/nstd"  ),
     submodule( "slate", "https://github.com/heysokam/slate" ),
-    ) # << Dependencies.new( ... )
+    ), # << Dependencies.new( ... )
+  args = "--warning:DotLikeOps:off",
   ) # << Program.new( ... )
 rm cfg.binDir/minc.trg
 minc.build( run=false, force=false )

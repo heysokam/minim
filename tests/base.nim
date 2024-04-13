@@ -12,10 +12,10 @@ from std/strutils import join
 # @section General Tools
 #_____________________________
 type UnitTestError = object of CatchableError
-template err *(msg :string) :void= raise newException(UnitTestError, msg)
+template err *(msg :varargs[string, `$`]) :void= raise newException(UnitTestError, msg.join(""))
 proc sh *(cmd :string) :void=
   try: os.execShellCmd(cmd)
-  except: err "Failed to execute the command:\n  "&cmd
+  except CatchableError: err "Failed to execute the command:\n  ",cmd
 
 #_______________________________________
 # @section Tests Tools
@@ -32,7 +32,13 @@ template name *(
     if t != "" : t&" | " else: ""
     ) & descr
 #_____________________________
-proc minc *(args :varargs[string, `$`]) :void= sh "minc " & args.join(" ")
-proc compile *(file :string) :string=
-  minc "cc", file, "tmp.c"
-  result = readFile("tmp.c")
+proc minc *(args :varargs[string, `$`]) :void=  sh "minc " & args.join(" ")
+proc compile *(file :string; outDir :string) :string=
+  let tmp = outDir/"tmp.c"
+  try    : minc "cc", file, "tmp.c", "--codeDir:"&outDir
+  except : err "Something went wrong when compiling a tmp file:  ", tmp
+  try    : result = readFile(tmp)
+  except : err "Something went wrong when reading the resulting tmp file:  ", tmp
+#_____________________________
+template compile *(file :string) :string=  compile file, thisDir
+

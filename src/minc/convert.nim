@@ -1,15 +1,39 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-# @deps std
-import std/paths
+# @deps ndk
+import nstd/paths
+import nstd/strings
 # @deps *Slate
-import slate/nimc
+import slate/nimc as nim
 # @deps minc
-# import ./convert/core
+import ./convert/core
+import ./types
 
-proc toMinC *(code :string|Path) :string=
+#_______________________________________
+# @section Converter: Entry Point
+#_____________________________
+proc toMinC_singleFile *(code :string|Path) :string=
   ## @descr Converts a block of Nim code into the MinC lang
-  result = "12342"
-  # when code is Path: MinC( nimc.readAST(code) ) & "\n"
-  # else:              MinC( nimc.getAST(code)  ) & "\n"
+  var C :CFilePair
+  when code is Path: C = core.MinC( nim.readAST(code) )
+  else:              C = core.MinC( nim.getAST(code)  )
+  if C.h != "":
+    result.add C.h
+    result.add "\n"
+    result.add "//__________________________________________________________________________________________________\n"
+    result.add "//__________________________________________________________________________________________________\n"
+  result.add C.c
+  result.add "\n"
+#_____________________________
+# TODO: Multi-File Output
+#proc toMinC *(code :seq[string|Path]) :CFilePair=
+#proc toMinC *(list :seq[string|Path]) :seq[CFilePair]=
+#  for code in list: result.add code.toMinC()
+
+
+const ProcDef = """
+proc `thing` *[T :SomeInteger=1](x :int= 3; y :float32) :int {.pragma1, inline.}= discard
+"""
+# echo ProcDef.toMinC()
+

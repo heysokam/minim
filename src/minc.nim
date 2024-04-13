@@ -11,6 +11,7 @@ import ./minc/prep
 import ./minc/cli as opts
 from   ./minc/cfg import nil
 from   ./minc/convert import nil
+from   ./minc/format import nil
 
 when isMainModule:
   # Init the logger
@@ -21,13 +22,16 @@ when isMainModule:
     block SectionBin:
       let relFile   = cli.output.changeFileExt("c")
       let cacheFile = cli.cacheDir/relFile
-      let binFile   = cli.outDir/cli.output
+      let binFile   = cli.binDir/cli.output
       # Preprocess
       let root = cli.input.splitFile.dir
       let code = cli.input.readFile()
         .processIncludes(root, cli.input)  # Preprocess includes
       # Codegen the C code
-      cacheFile.writeFile(convert.toMinC(code))
+      cacheFile.writeFile format.clang(
+        cli  = cli,
+        code = convert.toMinC_singleFile(code), # TODO: Support for Multi-file
+        ) # << format.clang( ... )
       # Copy the C code into the user-defined --codeDir folder
       if cli.codeDir != Path"": cp cacheFile, cli.codeDir/relFile
       # Compile the C code into binaries
