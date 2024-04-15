@@ -224,21 +224,27 @@ proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
 # @section Literals
 #_____________________________
 proc mincChar *(code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Char
   discard
 #___________________
 proc mincFloat *(code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Float
   result.c = $code.floatVal
 #___________________
 proc mincInt *(code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Int
   result.c = $code.intVal
 #___________________
 proc mincUInt *(code :PNode; indent :int= 0) :CFilePair=
+  ensure code, UInt
   discard
 #___________________
 proc mincStr *(code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Str
   result.c = code.strVal
 #___________________
 proc mincNil *(code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Nil
   result.c = "NULL"
 #___________________
 proc mincLiteral *(code :PNode; indent :int= 0) :CFilePair=
