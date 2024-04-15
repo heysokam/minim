@@ -29,7 +29,7 @@ proc clang *(
   if fileExists(tmpFile): rm tmpFile
   # Write the temporary file
   tmpFile.writeFile code
-  # Format it
+  # Format it in-place
   cli.clangFmt.run(tmpFile)
   # Return the formatted result as a string
   result = tmpFile.readFile
