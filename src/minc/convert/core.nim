@@ -237,7 +237,7 @@ proc mincInt *(code :PNode; indent :int= 0) :CFilePair=
 #___________________
 proc mincUInt *(code :PNode; indent :int= 0) :CFilePair=
   ensure code, UInt
-  discard
+  result.c = $code.intVal
 #___________________
 proc mincStr *(code :PNode; indent :int= 0) :CFilePair=
   ensure code, Str
