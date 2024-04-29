@@ -53,7 +53,7 @@ when isMainModule:
   # @deps std
   submodule "nim", "https://github.com/nim-lang/Nim"
   # @deps treeform
-  submodule "zippy", "https://github.com/treeform/zippy"
+  submodule "zippy", "https://github.com/guzba/zippy"
   submodule "jsony", "https://github.com/treeform/jsony"
   # @deps ndk
   submodule "nstd", "https://github.com/heysokam/nstd"
