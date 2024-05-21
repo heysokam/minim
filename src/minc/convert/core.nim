@@ -265,8 +265,8 @@ proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
 #_______________________________________
 # @section Variables
 #_____________________________
-const VarDeclTempl = "{qual}{T} {name};\n"
-const VarDefTempl  = "{qual}{T} {name} = {value};\n"
+const VarDeclTempl = "{indent*Tab}extern {qual}{T} {name};\n"
+const VarDefTempl  = "{indent*Tab}{qual}{T} {name} = {value};\n"
 proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
   ensure code, Const, Let, Var, msg="Tried to generate code for a variable, but its kind is incorrect"
   let name  = code.:name
