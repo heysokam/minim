@@ -1,8 +1,9 @@
+const Title = "DummyTemplate"
 #_______________________________________
 # @deps tests
 include ../base
 const thisDir = currentSourcePath.parentDir()
-template tName:string= thisDir.lastPathPart()
+template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 
 

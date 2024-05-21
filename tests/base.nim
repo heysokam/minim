@@ -3,7 +3,9 @@
 # @section Dependencies used by all tests
 # @deps std
 import std/unittest
-from std/os import parentDir, lastPathPart, `/`, execShellCmd
+from std/paths import Path, parentDir, lastPathPart, `/`, changeFileExt
+from std/files import removeFile, fileExists
+from std/os import execShellCmd
 from std/osproc import execProcess
 from std/strformat import `&`
 from std/strutils import join
@@ -18,6 +20,12 @@ proc sh *(cmd :string) :void=
   except CatchableError: err "Failed to execute the command:\n  ",cmd
 
 #_______________________________________
+# @section Paths
+#_____________________________
+converter toPath *(s :string) :Path= s.Path
+proc readFile *(p :Path) :string {.borrow.}
+
+#_______________________________________
 # @section Tests Tools
 #_____________________________
 template name *(
@@ -28,17 +36,21 @@ template name *(
   ## @descr Confusing syntax. Returns the correct prefix for the given test information
   let t = when declared(Title): Title else: title
   let n = when declared(tName): tName else: testN
-  n&": " & (
+  n.string&": " & (
     if t != "" : t&" | " else: ""
     ) & descr
 #_____________________________
 proc minc *(args :varargs[string, `$`]) :void=  sh "minc " & args.join(" ")
-proc compile *(file :string; outDir :string) :string=
+proc compile *(file,outDir :Path) :string=
   let tmp = outDir/"tmp.c"
-  try    : minc "cc", file, "tmp.c", "--codeDir:"&outDir
-  except : err "Something went wrong when compiling a tmp file:  ", tmp
+  if fileExists(tmp): tmp.removeFile
+  try    : minc "cc", file.string, "tmp.c", "--codeDir:"&outDir.string
+  except : err "Something went wrong when compiling a tmp file:  ", tmp.string
   try    : result = readFile(tmp)
-  except : err "Something went wrong when reading the resulting tmp file:  ", tmp
+  except : err "Something went wrong when reading the resulting tmp file:  ", tmp.string
 #_____________________________
-template compile *(file :string) :string=  compile file, thisDir
+template compile *(file :Path) :string=  compile file, thisDir
+#_____________________________
+template check *(cm,C :Path) :void=  check cm.compile == C.readFile
+template check *(file :string) :void=  check thisDir/file.Path.changeFileExt(".cm"), thisDir/file.Path.changeFileExt(".c")
 
