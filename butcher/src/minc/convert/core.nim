@@ -469,9 +469,9 @@ proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
     result.add &"{indent*Tab}extern {qualif}{T} {mut}{name}{arr}; " # TODO: Write Extern decl to header
   result.add &"{indent*Tab}{qualif}{T} {mut}{name}{arr}{asign};\n"
 #_____________________________
-proc mincConstSection (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkConstSection, code.renderTree # Let and Const are identical in C
-  for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Const)
+# proc mincConstSection (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkConstSection, code.renderTree # Let and Const are identical in C
+#   for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Const)
 #_____________________________
 proc mincLetSection (code :PNode; indent :int= 0) :string=
   assert code.kind == nkLetSection, code.renderTree # Let and Const are identical in C
@@ -858,10 +858,10 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # Types
   of nkTypeSection      : result = mincTypeSection(code, indent)
   of nkTypeDef          : result = mincTypeDef(code, indent) # Accessed by nkTypeSection
-  #   Variables
-  of nkConstSection     : result = mincConstSection(code, indent)
-  of nkLetSection       : result = mincLetSection(code, indent)
-  of nkVarSection       : result = mincVarSection(code, indent)
+  # #   Variables
+  # of nkConstSection     : result = mincConstSection(code, indent)
+  # of nkLetSection       : result = mincLetSection(code, indent)
+  # of nkVarSection       : result = mincVarSection(code, indent)
   #   Loops
   of nkWhileStmt        : result = mincWhileStmt(code, indent)
   of nkForStmt          : result = mincForStmt(code, indent)
