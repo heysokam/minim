@@ -54,38 +54,75 @@ proc ensure *(
     code : PNode;
     args : varargs[TNodeKind];
     msg  : string = DefaultErrorMsg,
-  ) :void=
+  ) :bool {.discardable.}=
   ## @descr Raises a {@link NodeAccessError} when none of the {@arg args} kinds match the {@link TNodeKind} of {@arg code}
   for kind in args:
-    if code.kind == kind: return
+    if code.kind == kind: return true
   code.err msg&cfg_Sep&fmt"Node {code.kind} is not of type:  {args}."
 #___________________
 proc ensure *(
     code : PNode;
     list : set[TNodeKind];
     msg  : string = DefaultErrorMsg,
-  ) :void=
+  ) :bool {.discardable.}=
   for kind in list:
-    if code.kind == kind: return
+    if code.kind == kind: return true
   code.err msg&cfg_Sep&fmt"Node {code.kind} is not of type:  {list}."
 #___________________
 proc ensure *(
     code  : PNode;
     kinds : varargs[Kind];
     msg   : string = DefaultErrorMsg,
-  ) :void=
+  ) :bool {.discardable.}=
   ## @descr Raises a {@link NodeAccessError} when none of the {@arg args} {@link Kind}s match the {@link TNodeKind} of {@arg code}.
   for kind in kinds:
     case kind
-    of Proc    : ensure code, nkProcDef
-    of Return  : ensure code, nkReturnStmt
-    of Literal : ensure code, nim.Literals
-    of Func    : ensure code, nkFuncDef
+    of Proc:
+      if ensure(code, nkProcDef, msg=msg): return true else: continue
+    of Return:
+      if ensure(code, nkReturnStmt, msg=msg): return true else: continue
+    of Literal:
+      if ensure(code, nim.Literals, msg=msg): return true else: continue
+    of Func:
+      if ensure(code, nkFuncDef, msg=msg): return true else: continue
+    of Const:
+      if ensure(code, nkConstSection, nkConstDef, msg=msg): return true else: continue
+    of Let:
+      if ensure(code, nkLetSection, nkIdentDefs, msg=msg): return true else: continue
+    of Var:
+      if ensure(code, nkVarSection, nkIdentDefs, msg=msg): return true else: continue
     # of "variable": ensure code, nkVarDef, nkLet  ???
     else: code.err &"Tried to access an unmapped Node kind:  {kind}"
 #___________________
 proc ensure *(code :PNode; field :string) :void=  ensure code, field.toKind
 
+
+#_______________________________________
+# @section Node Access: General
+#_____________________________
+proc isPublic *(code :PNode) :bool=
+  ## @descr Returns true if the name of the {@arg code} is marked as public
+  const (Name, Publ, PublName) = (0, 0, 1)
+  code[Name].kind != nkIdent and code[Name][Publ].strValue == "*"
+#___________________
+proc isMutable *(kind :Kind) :bool=
+  assert kind in {Const, Let, Var}, "Tried to check for mutability of a kind that doesn't support it:  {kind}"
+  result = kind == Kind.Var
+proc isMutable *(code :PNode) :bool=
+  ensure code, Const, Let, Var, msg="Tried to check for mutability of a node that doesn't support it:  {code.kind}"
+  result = code.kind != nkConstDef
+#___________________
+proc getName *(code :PNode) :PNode=
+  const (Name, Publ, PublName) = (0, 0, 1)
+  let name = code[Name]
+  if   name.kind == nkIdent   : return code[Name]
+  elif name.kind == nkPostFix : return code[Name][PublName]
+  else: code.err &"Something went wrong when accessing the Name of a {code.kind}. The name field is:  " & $code[Name].kind
+#___________________
+proc getType *(code :PNode) :PNode=
+  const (Type,) = (1,)
+  if code[Type].kind == nkIdent : return code[Type]
+  else: code.err &"Something went wrong when accessing the Type of a {code.kind}. The type field is:  " & $code[Type].kind
 
 
 #_______________________________________
@@ -96,11 +133,6 @@ proc getStmt (code :PNode; id :SomeInteger) :PNode=  code[id]
 
 #_______________________________________
 # @section Node Access: Procs
-#_____________________________
-proc isPublic *(code :PNode) :bool=
-  ## @descr Returns true if the name of the {@arg code} is marked as public
-  const (Name, Publ, PublName) = (0, 0, 1)
-  code[Name].kind != nkIdent and code[Name][Publ].strValue == "*"
 #_____________________________
 const UnknownID :int= int.high
 proc procs_get (code :PNode; field :string; id :SomeInteger= UnknownID) :PNode=
@@ -121,11 +153,7 @@ proc procs_get (code :PNode; field :string; id :SomeInteger= UnknownID) :PNode=
   const Body = 6
   # Access the requested field
   case field
-  of "name":
-    let name = code[Name]
-    if   name.kind == nkIdent   : return code[Name]
-    elif name.kind == nkPostFix : return code[Name][PublName]
-    else: code.err "Something went wrong when accessing the Name of a nkProcDef. The name argument is:  " & $code[Name].kind
+  of "name"     : return code.getName()
   of "generics" : return code[Generics]
   of "returnT"  : return code[Args][RetT]
   of "args"     : return code[Args]
@@ -138,6 +166,18 @@ proc procs_get (code :PNode; field :string; id :SomeInteger= UnknownID) :PNode=
     return code[Pragmas][id]
   of "body"     : return code[Body]
   else: code.err "Tried to access an unmapped field of nkProcDef: " & field
+
+#_______________________________________
+# @section Node Access: Variables
+#_____________________________
+proc vars_get (code :PNode; field :string; id :SomeInteger= UnknownID) :PNode=
+  # 2. Variable's Body  (aka Statement List)
+  const Body = 2
+  case field
+  of "name" : return code.getName()
+  of "type" : return code.getType()
+  of "body" : return code[Body]
+  else: code.err &"Tried to access an unmapped field of {code.kind}: " & field
 
 #_______________________________________
 # @section Node Access
@@ -158,6 +198,8 @@ template `.:`*(code :PNode; prop :untyped) :string=
       try : id = field.split("_")[1].parseInt
       except NodeAccessError: code.err "Tried to access an Argument ID for a nkProcDef, but the keyword passed has an incorrect format:  "&field
     strValue( procs_get(code, property, id) )
+  of nkConstDef, nkIdentDefs:
+    strValue( vars_get(code, field) )
   else: code.err "Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
 
 
@@ -221,6 +263,39 @@ proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
 
 
 #_______________________________________
+# @section Variables
+#_____________________________
+const VarDeclTempl = "{qual}{T} {name};\n"
+const VarDefTempl  = "{qual}{T} {name} = {value};\n"
+proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
+  ensure code, Const, Let, Var, msg="Tried to generate code for a variable, but its kind is incorrect"
+  let name  = code.:name
+  var qual  = if not code.isPublic: "static " else: ""
+  if kind == Const: qual.add " /*constexpr*/"
+  var T     = code.:type
+  if not kind.isMutable: T.add " const"
+  let value = MinC(vars_get(code, "body"), indent+1).c
+  # Generate the result
+  result.h =
+    if code.isPublic : fmt VarDeclTempl
+    else             : ""
+  result.c = fmt VarDefTempl
+
+#___________________
+proc mincConstSection (code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Const
+  for entry in code.sons: result.add mincVariable(entry, indent, Kind.Const)
+#___________________
+proc mincLetSection (code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Let
+  for entry in code.sons: result.add mincVariable(entry, indent, Kind.Let)
+#___________________
+proc mincVarSection (code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Var
+  for entry in code.sons: result.add mincVariable(entry, indent, Kind.Var)
+
+
+#_______________________________________
 # @section Literals
 #_____________________________
 proc mincChar *(code :PNode; indent :int= 0) :CFilePair=
@@ -274,6 +349,10 @@ proc MinC *(code :PNode; indent :int= 0) :CFilePair=
   of nkReturnStmt       : result = mincReturnStmt(code, indent)
   # of nkBreakStmt        : result = mincBreakStmt(code, indent)
   # of nkContinueStmt     : result = mincContinueStmt(code, indent)
+  #   Variables
+  of nkConstSection     : result = mincConstSection(code, indent)
+  # of nkLetSection       : result = mincLetSection(code, indent)
+  # of nkVarSection       : result = mincVarSection(code, indent)
   # Terminal cases
   of nim.Literals       : result = mincLiteral(code, indent)
   else: code.err &"Translating {code.kind} to MinC is not supported yet."
