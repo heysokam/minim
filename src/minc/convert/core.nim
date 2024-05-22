@@ -50,14 +50,27 @@ func toKind (name :string) :Kind=
   of "return"           : result = Kind.Return
   else: err "Tried to access and unmapped Node Kind:  " & name
 #___________________
+func check *(
+    code : PNode;
+    args : varargs[TNodeKind];
+  ) :bool {.discardable.}=
+  for kind in args:
+    if code.kind == kind: return true
+#___________________
+func check *(
+    code : PNode;
+    list : set[TNodeKind];
+  ) :bool {.discardable.}=
+  for kind in list:
+    if code.kind == kind: return true
+#___________________
 proc ensure *(
     code : PNode;
     args : varargs[TNodeKind];
     msg  : string = DefaultErrorMsg,
   ) :bool {.discardable.}=
   ## @descr Raises a {@link NodeAccessError} when none of the {@arg args} kinds match the {@link TNodeKind} of {@arg code}
-  for kind in args:
-    if code.kind == kind: return true
+  if check(code, args): return true
   code.err msg&cfg_Sep&fmt"Node {code.kind} is not of type:  {args}."
 #___________________
 proc ensure *(
@@ -65,8 +78,7 @@ proc ensure *(
     list : set[TNodeKind];
     msg  : string = DefaultErrorMsg,
   ) :bool {.discardable.}=
-  for kind in list:
-    if code.kind == kind: return true
+  if check(code, list): return true
   code.err msg&cfg_Sep&fmt"Node {code.kind} is not of type:  {list}."
 #___________________
 proc ensure *(
@@ -78,21 +90,22 @@ proc ensure *(
   for kind in kinds:
     case kind
     of Proc:
-      if ensure(code, nkProcDef, msg=msg): return true else: continue
+      if check(code, nkProcDef): return true else: continue
     of Return:
-      if ensure(code, nkReturnStmt, msg=msg): return true else: continue
+      if check(code, nkReturnStmt): return true else: continue
     of Literal:
-      if ensure(code, nim.Literals, msg=msg): return true else: continue
+      if check(code, nim.Literals): return true else: continue
     of Func:
-      if ensure(code, nkFuncDef, msg=msg): return true else: continue
+      if check(code, nkFuncDef): return true else: continue
     of Const:
-      if ensure(code, nkConstSection, nkConstDef, msg=msg): return true else: continue
+      if check(code, nkConstSection, nkConstDef): return true else: continue
     of Let:
-      if ensure(code, nkLetSection, nkIdentDefs, msg=msg): return true else: continue
+      if check(code, nkLetSection, nkIdentDefs): return true else: continue
     of Var:
-      if ensure(code, nkVarSection, nkIdentDefs, msg=msg): return true else: continue
+      if check(code, nkVarSection, nkIdentDefs): return true else: continue
     # of "variable": ensure code, nkVarDef, nkLet  ???
     else: code.err &"Tried to access an unmapped Node kind:  {kind}"
+  code.err msg&cfg_Sep&fmt"Node {code.kind} is not a valid kind:  {kinds}."
 #___________________
 proc ensure *(code :PNode; field :string) :void=  ensure code, field.toKind
 
