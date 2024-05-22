@@ -118,6 +118,27 @@ proc isPublic *(code :PNode) :bool=
   const (Name, Publ, PublName) = (0, 0, 1)
   code[Name].kind != nkIdent and code[Name][Publ].strValue == "*"
 #___________________
+proc isPersist *(
+    code   : PNode;
+    indent : SomeInteger;
+    crash  : bool = true;
+  ) :bool=
+  ## @descr
+  ##  Returns true if the {@arg code} is marked with the persist pragma.
+  ##  Crashes the compiler on unexpected behavior when {@arg crash} is active or is omitted  (default: true)
+  const (Name,Pragma) = (0,1)
+  if code.kind notin {nkConstDef, nkIdentDefs, nkPragmaExpr}:  # TODO: Do other things need the {.persist.} pragma?
+    if crash: code.err "Tried to get the persist pragma for an unmapped kind."
+    return false
+  if indent < 1: return false
+  let name = code[Name]
+  if name.kind notin {nkIdent, nkPostfix, nkPragmaExpr}:
+    if crash: name.err "Tried to get the persist pragma from an unmapped name node kind."
+    return false
+  return name.kind == nkPragmaExpr and
+         name[Pragma][Name].kind != nkEmpty and
+         name[Pragma][Name].strValue == "persist"
+#___________________
 proc isMutable *(kind :Kind) :bool=
   assert kind in {Const, Let, Var}, "Tried to check for mutability of a kind that doesn't support it:  {kind}"
   result = kind == Kind.Var
@@ -126,10 +147,11 @@ proc isMutable *(code :PNode) :bool=
   result = code.kind != nkConstDef
 #___________________
 proc getName *(code :PNode) :PNode=
-  const (Name, Publ, PublName) = (0, 0, 1)
+  const (Name, Publ, PublName, Pragma) = (0, 0, 1, 0)
   let name = code[Name]
-  if   name.kind == nkIdent   : return code[Name]
-  elif name.kind == nkPostFix : return code[Name][PublName]
+  if   name.kind == nkIdent      : return code[Name]
+  elif name.kind == nkPostFix    : return code[Name][PublName]
+  elif name.kind == nkPragmaExpr : return code[Pragma].getName()
   else: code.err &"Something went wrong when accessing the Name of a {code.kind}. The name field is:  " & $code[Name].kind
 #___________________
 proc getType *(code :PNode) :PNode=
@@ -283,7 +305,8 @@ const VarDefTempl  = "{indent*Tab}{qual}{T} {name} = {value};\n"
 proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
   ensure code, Const, Let, Var, msg="Tried to generate code for a variable, but its kind is incorrect"
   let name  = code.:name
-  var qual  = if not code.isPublic: "static " else: ""
+  var qual :string
+  if not code.isPublic or code.isPersist(indent) : qual.add "static "
   if kind == Const: qual.add " /*constexpr*/"
   var T     = code.:type
   if not kind.isMutable: T.add " const"
