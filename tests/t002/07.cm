@@ -1,0 +1,3 @@
+var arr0 :array[2,int]= [39,40]
+var arr1 :array[1,int]= [41]
+var arr2 :array[_,int]= [42]

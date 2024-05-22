@@ -15,6 +15,7 @@ import ./cfg
 type LiteralError   * = object of CatchableError
 type VariableError  * = object of CatchableError
 type BracketError   * = object of CatchableError
+type IdentError     * = object of CatchableError
 # TODO
 type ProcError      * = object of CatchableError
 type AffixError     * = object of CatchableError
@@ -25,9 +26,9 @@ type ObjectError    * = object of CatchableError
 type AssignError    * = object of CatchableError
 #_____________________________
 type SomeCodegenError =
-  AffixError     | CallsError  | VariableError | PragmaError |
-  ConditionError | ObjectError | AssignError   | ProcError   |
-  LiteralError   | BracketError
+  AffixError     | CallsError   | VariableError | PragmaError |
+  ConditionError | ObjectError  | AssignError   | ProcError   |
+  LiteralError   | BracketError | IdentError
 #_____________________________
 proc trigger *(
     code : PNode;
