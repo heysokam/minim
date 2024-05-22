@@ -14,8 +14,9 @@ test name "Const: Normal definition"  : check "01"
 test name "Const: Private definition" : check "02"
 test name "Let: Private definition"   : check "03"
 test name "Var: Private definition"   : check "04"
-test name "Pragma: Persist"           : check "05"
-test name "Arrays: Definition"        : check "06"
+test name "Return: Identifier"        : check "05"
+test name "Pragma: Persist"           : check "06"
+test name "Arrays: Definition"        : check "07"
 
 #  TODO: Convert  _  to  {0}  and  {}
 #  TODO: Multiline strings

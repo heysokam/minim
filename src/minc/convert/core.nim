@@ -358,7 +358,7 @@ proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
     &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{code.renderTree}\n"
   # Get the qualifier
   var qual :string
-  if not code.isPublic or code.isPersist(indent) : qual.add "static "
+  if code.isPersist(indent) or (indent < 1 and not code.isPublic) : qual.add "static "
   if kind == Const: qual.add " /*constexpr*/"  # TODO: clang.19
   # Get the type
   var T = code.:type
@@ -446,6 +446,14 @@ proc mincBracket *(code :PNode; indent :int= 0; special :SpecialContext= None) :
       result.c.add if id != code.sons.high: "," else: "\n"
     result.c.add &"{indent*Tab}}}"
   else: code.trigger BracketError, &"Found an unmapped kind for interpreting Bracket code:  {special}"
+#___________________
+proc mincIdent *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  let val = code.strValue
+  case special
+  of Object:
+    if val == "_": result.c = "{0}"
+  of None: result.c = val
+  else: code.trigger IdentError, &"Found an unmapped kind for interpreting Indent code:  {special}"
 
 
 #______________________________________________________
@@ -471,5 +479,6 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   # Terminal cases
   of nim.Literals       : result = mincLiteral(code, indent, special)
   of nkBracket          : result = mincBracket(code, indent, special)
+  of nkIdent            : result = mincIdent(code, indent, special)
   else: code.err &"Translating {code.kind} to MinC is not supported yet."
 

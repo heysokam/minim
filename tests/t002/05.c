@@ -1,4 +1,4 @@
 int main(void) {
-  static int persisted = 8;
-  return 42;
+  int const forty2 = 42;
+  return forty2;
 }
