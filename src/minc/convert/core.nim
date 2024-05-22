@@ -387,8 +387,8 @@ proc MinC *(code :PNode; indent :int= 0) :CFilePair=
   # of nkContinueStmt     : result = mincContinueStmt(code, indent)
   #   Variables
   of nkConstSection     : result = mincConstSection(code, indent)
-  # of nkLetSection       : result = mincLetSection(code, indent)
-  # of nkVarSection       : result = mincVarSection(code, indent)
+  of nkLetSection       : result = mincLetSection(code, indent)
+  of nkVarSection       : result = mincVarSection(code, indent)
   # Terminal cases
   of nim.Literals       : result = mincLiteral(code, indent)
   else: code.err &"Translating {code.kind} to MinC is not supported yet."
