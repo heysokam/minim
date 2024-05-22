@@ -15,3 +15,7 @@ type ClangFormat * = object
   bin   *:Path
   file  *:Path
 
+#_______________________________________
+type SpecialContext *{.pure.}= enum None, Array, Object, Variable
+  ## @descr The same syntax can be interpreted differently depending on its SpecialContext usage
+

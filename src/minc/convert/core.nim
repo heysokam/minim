@@ -5,6 +5,7 @@
 #_____________________________
 # @deps ndk
 import nstd/strings
+import nstd/errors
 # @deps *Slate
 import slate/nimc as nim
 import slate/format
@@ -12,8 +13,9 @@ import slate/format
 #_______________________________________
 # @section Slate Configuration
 #_____________________________
-const cfg_Sep    *{.strdefine.}= "  "
-const cfg_Prefix *{.strdefine.}= "*Slate" & cfg_Sep # TODO: Change functions to take 2 formatting parameters
+const slate_cfg_Sep    *{.strdefine.}= "  "
+const slate_cfg_Prefix *{.strdefine.}= "*Slate" & slate_cfg_Sep # TODO: Change functions to take 2 formatting parameters
+
 
 
 #_______________________________________
@@ -23,10 +25,17 @@ const echo = debugEcho
 const DefaultErrorMsg = "Something went wrong."
 #___________________
 type NodeAccessError = object of CatchableError
-func err *(msg :string; pfx :string= cfg_Prefix) :void= raise newException(NodeAccessError, pfx&msg)
+func err *(msg :string; pfx :string= slate_cfg_Prefix) :void= raise newException(NodeAccessError, pfx&msg)
   ## @descr Raises a {@link NodeAccessError} with a formatted {@arg msg}
-proc err *(code :PNode; msg :string; pfx :string= cfg_Prefix) :void= err &"\n{code.treeRepr}\n{code.renderTree}\n{pfx}{msg}", pfx=""
+proc err *(code :PNode; msg :string; pfx :string= slate_cfg_Prefix) :void= err &"\n{code.treeRepr}\n{code.renderTree}\n{pfx}{msg}", pfx=""
   ## @descr Raises a {@link NodeAccessError} with a formatted {@arg msg}, with debugging information about the {@arg code}
+proc err *(
+    code : PNode;
+    excp : typedesc[CatchableError];
+    msg  : string;
+    pfx  : string = slate_cfg_Prefix;
+  ) :void= trigger excp, &"\n{code.treeRepr}\n{code.renderTree}\n{pfx}{msg}", pfx
+  ## @descr Raises the {@arg excp} with a formatted {@arg msg} and debugging information about the {@arg code}
 #___________________
 type Kind *{.pure.}= enum
   None, Empty,
@@ -71,7 +80,7 @@ proc ensure *(
   ) :bool {.discardable.}=
   ## @descr Raises a {@link NodeAccessError} when none of the {@arg args} kinds match the {@link TNodeKind} of {@arg code}
   if check(code, args): return true
-  code.err msg&cfg_Sep&fmt"Node {code.kind} is not of type:  {args}."
+  code.err msg&slate_cfg_Sep&fmt"Node {code.kind} is not of type:  {args}."
 #___________________
 proc ensure *(
     code : PNode;
@@ -79,7 +88,7 @@ proc ensure *(
     msg  : string = DefaultErrorMsg,
   ) :bool {.discardable.}=
   if check(code, list): return true
-  code.err msg&cfg_Sep&fmt"Node {code.kind} is not of type:  {list}."
+  code.err msg&slate_cfg_Sep&fmt"Node {code.kind} is not of type:  {list}."
 #___________________
 proc ensure *(
     code  : PNode;
@@ -105,13 +114,32 @@ proc ensure *(
       if check(code, nkVarSection, nkIdentDefs): return true else: continue
     # of "variable": ensure code, nkVarDef, nkLet  ???
     else: code.err &"Tried to access an unmapped Node kind:  {kind}"
-  code.err msg&cfg_Sep&fmt"Node {code.kind} is not a valid kind:  {kinds}."
+  code.err msg&slate_cfg_Sep&fmt"Node {code.kind} is not a valid kind:  {kinds}."
 #___________________
 proc ensure *(code :PNode; field :string) :void=  ensure code, field.toKind
 
 
 #_______________________________________
-# @section Node Access: General
+# @section Node Access: General Fields
+#_____________________________
+proc getName *(code :PNode) :PNode=
+  const (Name, Publ, PublName, Pragma) = (0, 0, 1, 0)
+  let name = code[Name]
+  if   name.kind == nkIdent      : return code[Name]
+  elif name.kind == nkPostFix    : return code[Name][PublName]
+  elif name.kind == nkPragmaExpr : return code[Pragma].getName()
+  else: code.err &"Something went wrong when accessing the Name of a {code.kind}. The name field is:  " & $code[Name].kind
+#___________________
+proc getType *(code :PNode) :PNode=
+  const (Type,ArrayType) = (1,2)
+  if   code.kind == nkIdent             : return code
+  elif code[Type].kind == nkIdent       : return code[Type]
+  elif code[Type].kind == nkBracketExpr : return code[Type][ArrayType].getType()
+  else: code.err &"Something went wrong when accessing the Type of a {code.kind}. The type field is:  " & $code[Type].kind
+
+
+#_______________________________________
+# @section Node Access: General Kinds
 #_____________________________
 proc isPublic *(code :PNode) :bool=
   ## @descr Returns true if the name of the {@arg code} is marked as public
@@ -139,25 +167,24 @@ proc isPersist *(
          name[Pragma][Name].kind != nkEmpty and
          name[Pragma][Name].strValue == "persist"
 #___________________
-proc isMutable *(kind :Kind) :bool=
-  assert kind in {Const, Let, Var}, "Tried to check for mutability of a kind that doesn't support it:  {kind}"
+proc isMutable *(code :PNode; kind :Kind) :bool=
+  ## @descr Returns true if the {@arg code} defines a mutable kind
+  ensure code, Const, Let, Var, msg= &"Tried to check for mutability of a kind that doesn't support it:  {kind}"
   result = kind == Kind.Var
-proc isMutable *(code :PNode) :bool=
-  ensure code, Const, Let, Var, msg="Tried to check for mutability of a node that doesn't support it:  {code.kind}"
-  result = code.kind != nkConstDef
 #___________________
-proc getName *(code :PNode) :PNode=
-  const (Name, Publ, PublName, Pragma) = (0, 0, 1, 0)
-  let name = code[Name]
-  if   name.kind == nkIdent      : return code[Name]
-  elif name.kind == nkPostFix    : return code[Name][PublName]
-  elif name.kind == nkPragmaExpr : return code[Pragma].getName()
-  else: code.err &"Something went wrong when accessing the Name of a {code.kind}. The name field is:  " & $code[Name].kind
+proc isPtr *(code :PNode) :bool=
+  ## @descr Returns true if the {@arg code} defines a ptr type
+  result = code.kind == nkPtrTy
 #___________________
-proc getType *(code :PNode) :PNode=
-  const (Type,) = (1,)
-  if code[Type].kind == nkIdent : return code[Type]
-  else: code.err &"Something went wrong when accessing the Type of a {code.kind}. The type field is:  " & $code[Type].kind
+proc isArr *(code :PNode) :bool=
+  ## @descr Returns true if the {@arg code} defines an array type
+  const (Name,Type) = (0,1)
+  if   code.kind == nkIdent       : result = code.strValue == "array"
+  elif code.kind in nim.SomeLit   : result = false
+  elif code.kind == nkIdentDefs   : result = code[Type].isArr()
+  elif code.kind == nkConstDef    : result = code[Type].isArr()
+  elif code.kind == nkBracketExpr : result = code[Name].isArr()
+  else: code.err &"Tried to check if a node is an array, but found an unmapped kind:  {code.kind}"
 
 
 #_______________________________________
@@ -205,9 +232,8 @@ proc procs_get (code :PNode; field :string; id :SomeInteger= UnknownID) :PNode=
 #_______________________________________
 # @section Node Access: Variables
 #_____________________________
-proc vars_get (code :PNode; field :string; id :SomeInteger= UnknownID) :PNode=
-  # 2. Variable's Body  (aka Statement List)
-  const Body = 2
+proc vars_get (code :PNode; field :string) :PNode=
+  const Body = 2  # 2. Variable's Body  (aka Statement List)
   case field
   of "name" : return code.getName()
   of "type" : return code.getType()
@@ -252,21 +278,39 @@ import ../types
 #_______________________________________
 # @section Forward Declares
 #_____________________________
-proc MinC *(code :PNode; indent :int= 0) :CFilePair
+proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair
+
+
+#_______________________________________
+# @section Array tools
+#_____________________________
+proc mincArrSize *(code :PNode; indent :int= 0) :CFilePair=
+  ## @descr Returns the array size defined by {@arg code}
+  const (Type,ArraySize) = (1,1)
+  let typ =
+    if   code.kind == nkIdent     : code
+    elif code.kind == nkIdentDefs : code[Type]
+    else                          : code.getType()
+  if   typ.kind in {nkIdent}+nim.Literals : result.c = typ.strValue
+  elif typ.kind == nkBracketExpr          : result.c = typ[ArraySize].strValue
+  elif typ.kind == nkInfix                : result = MinC(typ, indent)
+  else: code.err &"Tried to access the array size of an unmapped kind:  {typ.kind}" # TODO: Better infix resolution
+  # Correct the `_` empty array size case
+  if result.c == "_": result.c = ""
 
 
 #_______________________________________
 # @section Return
 #_____________________________
 const ReturnTempl = "{ind}return{body};"
-proc mincReturnStmt (code :PNode; indent :int= 1) :CFilePair=
+proc mincReturnStmt (code :PNode; indent :int= 1; special :SpecialContext= None) :CFilePair=
   ensure code, Return
   if indent < 1: code.err &"Found an incorrect indentation level for a Return statement:  {indent}"
   let ind = indent*Tab
   # Generate the Body
   var body :string
   if code.sons.len > 0: body.add " "
-  for entry in code: body.add MinC(entry).c # TODO: Could Header stuff happen inside a body ??
+  for entry in code: body.add MinC(entry, indent+1, special).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
   result.c = fmt ReturnTempl
 
@@ -301,20 +345,43 @@ proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
 # @section Variables
 #_____________________________
 const VarDeclTempl = "{indent*Tab}extern {qual}{T} {name};\n"
-const VarDefTempl  = "{indent*Tab}{qual}{T} {name} = {value};\n"
+const VarDefTempl  = "{indent*Tab}{qual}{T} {name}{eq}{value};\n"
 proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
+  const Type = 2
+  # Error check
   ensure code, Const, Let, Var, msg="Tried to generate code for a variable, but its kind is incorrect"
-  let name  = code.:name
+  let typ  = vars_get(code, "type")
+  let body = vars_get(code, "body")
+  if typ.kind == nkEmpty: trigger VariableError,
+    &"Declaring a variable without a type is forbidden. The illegal code is:\n{code.renderTree}\n"
+  if kind == Const and body.kind == nkEmpty: trigger VariableError,
+    &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{code.renderTree}\n"
+  # Get the qualifier
   var qual :string
   if not code.isPublic or code.isPersist(indent) : qual.add "static "
-  if kind == Const: qual.add " /*constexpr*/"
-  var T     = code.:type
-  if not kind.isMutable: T.add " const"
-  let value = MinC(vars_get(code, "body"), indent+1).c
+  if kind == Const: qual.add " /*constexpr*/"  # TODO: clang.19
+  # Get the type
+  var T = code.:type
+  if T == "pointer": T = "void*" # Rename `pointer` to `void*`
+  if typ.isPtr: T.add "*"
+  if not code.isMutable(kind): T.add " const"
+  # TODO: {.readonly.} variable without explicit typedef
+  # Get the Name
+  var name = code.:name
+  # Name: Array special case extras
+  let isArr = code.isArr
+  let arrSz = mincArrSize(code, indent).c
+  let arr   = if isArr: &"[{arrSz}]" else: ""
+  if isArr and arr == "": code.trigger VariableError,
+    "Found an array type, but its code has not been correctly generated."
+  name.add arr
+  # Get the body (aka variable value)
+  let value = MinC(body, indent+1, SpecialContext.Variable).c
+  let eq    = if value != "": " = " else: ""
   # Generate the result
   result.h =
-    if code.isPublic : fmt VarDeclTempl
-    else             : ""
+    if code.isPublic and indent == 0 : fmt VarDeclTempl
+    else:""
   result.c = fmt VarDefTempl
 
 #___________________
@@ -334,31 +401,31 @@ proc mincVarSection (code :PNode; indent :int= 0) :CFilePair=
 #_______________________________________
 # @section Literals
 #_____________________________
-proc mincChar *(code :PNode; indent :int= 0) :CFilePair=
+proc mincChar *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Char
   discard
 #___________________
-proc mincFloat *(code :PNode; indent :int= 0) :CFilePair=
+proc mincFloat *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Float
   result.c = $code.floatVal
 #___________________
-proc mincInt *(code :PNode; indent :int= 0) :CFilePair=
+proc mincInt *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Int
   result.c = $code.intVal
 #___________________
-proc mincUInt *(code :PNode; indent :int= 0) :CFilePair=
+proc mincUInt *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, UInt
   result.c = $code.intVal
 #___________________
-proc mincStr *(code :PNode; indent :int= 0) :CFilePair=
+proc mincStr *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Str
   result.c = code.strVal
 #___________________
-proc mincNil *(code :PNode; indent :int= 0) :CFilePair=
+proc mincNil *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Nil
   result.c = "NULL"
 #___________________
-proc mincLiteral *(code :PNode; indent :int= 0) :CFilePair=
+proc mincLiteral *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Literal
   case code.kind
   of nim.Char  : result = mincChar(code, indent)
@@ -367,29 +434,42 @@ proc mincLiteral *(code :PNode; indent :int= 0) :CFilePair=
   of nim.UInt  : result = mincUInt(code, indent)
   of nim.Str   : result = mincStr(code, indent)
   of nim.Nil   : result = mincNil(code, indent)
-  else: trigger LiteralError, "Found an unmapped Literal kind:  " & $code.kind
+  else: code.trigger LiteralError, &"Found an unmapped Literal kind:  {code.kind}"
+#___________________
+proc mincBracket *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  case special
+  of Variable:
+    result.c.add "{ "
+    for id,value in code.sons.pairs:
+      result.c.add &"\n{indent*Tab}[{id}]= "
+      result.c.add MinC(value, indent+1, special).c
+      result.c.add if id != code.sons.high: "," else: "\n"
+    result.c.add &"{indent*Tab}}}"
+  else: code.trigger BracketError, &"Found an unmapped kind for interpreting Bracket code:  {special}"
+
 
 #______________________________________________________
 # @section Source-to-Source Generator
 #_____________________________
-proc MinC *(code :PNode; indent :int= 0) :CFilePair=
+proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   case code.kind
   # Recursive Cases
   of nkStmtList:
-    for child in code   : result.add MinC( child, indent )
+    for child in code   : result.add MinC( child, indent, special )
   # Intermediate cases
   # └─ Procedures
   of nkProcDef          : result = mincProcDef(code, indent)
   of nkFuncDef          : result = mincProcDef(code, indent)
   # └─ Control flow
-  of nkReturnStmt       : result = mincReturnStmt(code, indent)
-  # of nkBreakStmt        : result = mincBreakStmt(code, indent)
-  # of nkContinueStmt     : result = mincContinueStmt(code, indent)
+  of nkReturnStmt       : result = mincReturnStmt(code, indent, special)
+  # of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
+  # of nkContinueStmt     : result = mincContinueStmt(code, indent, special)
   #   Variables
   of nkConstSection     : result = mincConstSection(code, indent)
   of nkLetSection       : result = mincLetSection(code, indent)
   of nkVarSection       : result = mincVarSection(code, indent)
   # Terminal cases
-  of nim.Literals       : result = mincLiteral(code, indent)
+  of nim.Literals       : result = mincLiteral(code, indent, special)
+  of nkBracket          : result = mincBracket(code, indent, special)
   else: code.err &"Translating {code.kind} to MinC is not supported yet."
 

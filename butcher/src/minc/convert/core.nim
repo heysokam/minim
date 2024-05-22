@@ -431,43 +431,43 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
     result.add mincGetObjectValue(value, indent)
   # if result == "": report entry; report value; assert false
 #_____________________________
-proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
-  assert entry.kind in [nkConstDef, nkIdentDefs], entry.treeRepr
-  let priv  =
-    if vars.isPrivate(entry,indent) or
-       vars.isPersist(entry,indent) : "static "
-    else                            : ""
-  let mut   = case kind
-    of VarKind.Const : "" # constants become constexpr, they don't need type mutability
-    of VarKind.Let   : "const "
-    of VarKind.Var   : ""
-  if entry[^2].kind == nkEmpty: raise newException(VariableCodegenError,
-    &"Declaring a variable without a type is forbidden. The illegal code is:\n{entry.renderTree}\n")
-  let typ = vars.getType(entry)
-  var T   = if typ.name == "pointer": "void*" else: typ.name
-  # if typ.isArr and typ.arrSize == "_": raise newException(VariableCodegenError,  # TODO: When -Wunsafe-buffer-usage becomes stable
-  #   &"MinC uses the Safe Buffers programming model exclusively. Declaring arrays of an unknown size is disabled. The illegal code is:\n{entry.renderTree}\n")
-  var arr :string=
-    if   typ.isArr and typ.arrSize == "_": "[]"
-    elif typ.isArr and typ.arrSize != "_": &"[{typ.arrSize}]"
-    else:""
-  assert not (typ.isArr and arr == ""), "Found an array type, but its code has not been correctly generated.\n{entry.treeRepr}\n{entry.renderTree}\n"
-  if typ.isPtr: T &= "*"  # T = Type Name
-  let name  = vars.getName(entry)
-  # Value asignment
-  let value = entry[^1] # Value Node
-  if value.kind == nkEmpty and kind == VarKind.Const: raise newException(VariableCodegenError, # TODO : unbounded support
-    &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{entry.renderTree}")
-  let val   = mincVariableGetValue(entry, value, typ, indent)
-  let asign = if val == "": "" else: &" ={val}"
-  # Apply to the result
-  let qualif = case kind
-    of VarKind.Const : &"const/*comptime*/ {priv}"  # TODO:clang.18->   &"constexpr {priv}"
-    of VarKind.Let   : &"{priv}"
-    of VarKind.Var   : &"{priv}"
-  if not vars.isPrivate(entry,indent) and indent == 0:
-    result.add &"{indent*Tab}extern {qualif}{T} {mut}{name}{arr}; " # TODO: Write Extern decl to header
-  result.add &"{indent*Tab}{qualif}{T} {mut}{name}{arr}{asign};\n"
+# proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
+#   assert entry.kind in [nkConstDef, nkIdentDefs], entry.treeRepr
+#   let priv  =
+#     if vars.isPrivate(entry,indent) or
+#        vars.isPersist(entry,indent) : "static "
+#     else                            : ""
+#   let mut   = case kind
+#     of VarKind.Const : "" # constants become constexpr, they don't need type mutability
+#     of VarKind.Let   : "const "
+#     of VarKind.Var   : ""
+#   if entry[^2].kind == nkEmpty: raise newException(VariableCodegenError,
+#     &"Declaring a variable without a type is forbidden. The illegal code is:\n{entry.renderTree}\n")
+#   let typ = vars.getType(entry)
+#   var T   = if typ.name == "pointer": "void*" else: typ.name
+#   if typ.isArr and typ.arrSize == "_": raise newException(VariableCodegenError,  # TODO: When -Wunsafe-buffer-usage becomes stable
+#     &"MinC uses the Safe Buffers programming model exclusively. Declaring arrays of an unknown size is disabled. The illegal code is:\n{entry.renderTree}\n")
+#   var arr :string=
+#     if   typ.isArr and typ.arrSize == "_": "[]"
+#     elif typ.isArr and typ.arrSize != "_": &"[{typ.arrSize}]"
+#     else:""
+#   assert not (typ.isArr and arr == ""), "Found an array type, but its code has not been correctly generated.\n{entry.treeRepr}\n{entry.renderTree}\n"
+#   if typ.isPtr: T &= "*"  # T = Type Name
+#   let name  = vars.getName(entry)
+#   # Value asignment
+#   let value = entry[^1] # Value Node
+#   if value.kind == nkEmpty and kind == VarKind.Const: raise newException(VariableCodegenError, # TODO : unbounded support
+#     &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{entry.renderTree}")
+#   let val   = mincVariableGetValue(entry, value, typ, indent)
+#   let asign = if val == "": "" else: &" ={val}"
+#   Apply to the result
+#   let qualif = case kind
+#     of VarKind.Const : &"const/*comptime*/ {priv}"  # TODO:clang.18->   &"constexpr {priv}"
+#     of VarKind.Let   : &"{priv}"
+#     of VarKind.Var   : &"{priv}"
+#   if not vars.isPrivate(entry,indent) and indent == 0:
+#     result.add &"{indent*Tab}extern {qualif}{T} {mut}{name}{arr}; " # TODO: Write Extern decl to header
+#   result.add &"{indent*Tab}{qualif}{T} {mut}{name}{arr}{asign};\n"
 #_____________________________
 # proc mincConstSection (code :PNode; indent :int= 0) :string=
 #   assert code.kind == nkConstSection, code.renderTree # Let and Const are identical in C
