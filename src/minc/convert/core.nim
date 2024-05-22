@@ -40,7 +40,7 @@ proc err *(
 type Kind *{.pure.}= enum
   None, Empty,
   Proc, Func,
-  Var, Let, Const,
+  Var, Let, Const, Asgn
   Literal,
   Return,
 #___________________
@@ -55,6 +55,7 @@ func toKind (name :string) :Kind=
   of "var"              : result = Kind.Var
   of "let"              : result = Kind.Let
   of "const"            : result = Kind.Const
+  of "assign"           : result = Kind.Asgn
   of "literal"          : result = Kind.Literal
   of "return"           : result = Kind.Return
   else: err "Tried to access and unmapped Node Kind:  " & name
@@ -112,7 +113,8 @@ proc ensure *(
       if check(code, nkLetSection, nkIdentDefs): return true else: continue
     of Var:
       if check(code, nkVarSection, nkIdentDefs): return true else: continue
-    # of "variable": ensure code, nkVarDef, nkLet  ???
+    of Asgn:
+      if check(code, nkAsgn): return true else: continue
     else: code.err &"Tried to access an unmapped Node kind:  {kind}"
   code.err msg&slate_cfg_Sep&fmt"Node {code.kind} is not a valid kind:  {kinds}."
 #___________________
@@ -132,9 +134,9 @@ proc getName *(code :PNode) :PNode=
 #___________________
 proc getType *(code :PNode) :PNode=
   const (Type,ArrayType) = (1,2)
-  if   code.kind == nkIdent             : return code
-  elif code[Type].kind == nkIdent       : return code[Type]
-  elif code[Type].kind == nkBracketExpr : return code[Type][ArrayType].getType()
+  if   code.kind in {nkIdent,nkEmpty}       : return code
+  elif code[Type].kind in {nkIdent,nkEmpty} : return code[Type]
+  elif code[Type].kind == nkBracketExpr     : return code[Type][ArrayType].getType()
   else: code.err &"Something went wrong when accessing the Type of a {code.kind}. The type field is:  " & $code[Type].kind
 
 
@@ -396,6 +398,14 @@ proc mincLetSection (code :PNode; indent :int= 0) :CFilePair=
 proc mincVarSection (code :PNode; indent :int= 0) :CFilePair=
   ensure code, Var
   for entry in code.sons: result.add mincVariable(entry, indent, Kind.Var)
+#___________________
+const AsgnTempl = "{indent*Tab}{left} = {right};"
+proc mincAsgn *(code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Asgn
+  const (Left, Right) = (0,1)
+  let left  = MinC(code[Left], indent).c
+  let right = MinC(code[Right], indent).c
+  result.c = fmt AsgnTempl
 
 
 #_______________________________________
@@ -476,9 +486,11 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkConstSection     : result = mincConstSection(code, indent)
   of nkLetSection       : result = mincLetSection(code, indent)
   of nkVarSection       : result = mincVarSection(code, indent)
+  of nkAsgn             : result = mincAsgn(code, indent)
   # Terminal cases
   of nim.Literals       : result = mincLiteral(code, indent, special)
   of nkBracket          : result = mincBracket(code, indent, special)
   of nkIdent            : result = mincIdent(code, indent, special)
+  of nkEmpty            : result = CFilePair()
   else: code.err &"Translating {code.kind} to MinC is not supported yet."
 
