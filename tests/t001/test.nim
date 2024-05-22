@@ -10,5 +10,4 @@ template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 # @section Test
 #_____________________________
-test name "Basic Code Generation":
-  check thisDir/"entry.cm", thisDir/"ref.c"
+test name "Basic Code Generation" : check "01"
