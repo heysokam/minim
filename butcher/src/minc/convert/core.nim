@@ -472,14 +472,14 @@ proc mincVariable (entry :PNode; indent :int; kind :VarKind) :string=
 # proc mincConstSection (code :PNode; indent :int= 0) :string=
 #   assert code.kind == nkConstSection, code.renderTree # Let and Const are identical in C
 #   for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Const)
-#_____________________________
-proc mincLetSection (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkLetSection, code.renderTree # Let and Const are identical in C
-  for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Let)
-#_____________________________
-proc mincVarSection (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkVarSection, code.renderTree
-  for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Var)
+# #_____________________________
+# proc mincLetSection (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkLetSection, code.renderTree # Let and Const are identical in C
+#   for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Let)
+# #_____________________________
+# proc mincVarSection (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkVarSection, code.renderTree
+#   for entry in code.sons: result.add mincVariable(entry,indent, VarKind.Var)
 
 
 #______________________________________________________
