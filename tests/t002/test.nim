@@ -10,6 +10,9 @@ template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 # @section Test
 #_____________________________
-test name "Constants: Normal definition"  : check "01"
-test name "Constants: Private definition" : check "02"
+test name "Const: Normal definition"  : check "01"
+test name "Const: Private definition" : check "02"
+test name "Let: Private definition"   : check "03"
+test name "Var: Private definition"   : check "04"
+test name "Pragma: Persist"           : check "05"
 
