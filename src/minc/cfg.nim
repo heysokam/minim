@@ -11,9 +11,14 @@ const Version *{.strdefine.}= "dev." & gorge "git --no-pager log -n 1 --pretty=f
 
 #_______________________________________
 # @section Format
-const Tab         *{.strdefine.}= "  "
-const Prefix      *{.strdefine.}= "ᛟ minc"
-const Sep         *{.strdefine.}= "  "
+const Tab    *{.strdefine.}= "  "
+const Prefix *{.strdefine.}= "ᛟ minc"
+const Sep    *{.strdefine.}= "  "
+
+#_______________________________________
+# @section C values
+const NilValue *{.strdefine.}= "nullptr" #"NULL"
+const PtrValue *{.strdefine.}= "void*"   ## `pointer` will become `void*`
 
 #_______________________________________
 # @section Configuration Defaults

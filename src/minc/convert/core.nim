@@ -365,7 +365,7 @@ proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
   # Get the type
   var T = code.:type
   if T == "pointer": T = "void*" # Rename `pointer` to `void*`
-  if typ.isPtr: T.add "*"
+  if T == "pointer": T = PtrValue # Rename `pointer` to `void*`
   if not code.isMutable(kind): T.add " const"
   # TODO: {.readonly.} variable without explicit typedef
   # Get the Name
@@ -411,6 +411,10 @@ proc mincAsgn *(code :PNode; indent :int= 0) :CFilePair=
 #_______________________________________
 # @section Literals
 #_____________________________
+proc mincNil *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Nil
+  result.c = NilValue
+#___________________
 proc mincChar *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Char
   discard
@@ -430,10 +434,6 @@ proc mincUInt *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFi
 proc mincStr *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Str
   result.c = code.strVal
-#___________________
-proc mincNil *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
-  ensure code, Nil
-  result.c = "NULL"
 #___________________
 proc mincLiteral *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Literal
