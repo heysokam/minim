@@ -22,15 +22,17 @@ when isMainModule:
     block SectionBin:
       let relFile   = cli.output.changeFileExt("c")
       let cacheFile = cli.cacheDir/relFile
+      let rawFile   = cacheFile.changeFileExt(".raw.c")
       let binFile   = cli.binDir/cli.output
       # Preprocess
       let root = cli.input.splitFile.dir
       let code = cli.input.readFile()
         .processIncludes(root, cli.input)  # Preprocess includes
       # Codegen the C code
+      rawFile.writeFile convert.toMinC_singleFile(code)
       cacheFile.writeFile format.clang(
         cli  = cli,
-        code = convert.toMinC_singleFile(code), # TODO: Support for Multi-file
+        code = rawFile.readFile, # TODO: Support for Multi-file
         ) # << format.clang( ... )
       # Copy the C code into the user-defined --codeDir folder
       if cli.codeDir != Path"": cp cacheFile, cli.codeDir/relFile
