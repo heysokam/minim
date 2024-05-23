@@ -39,9 +39,9 @@ proc err *(
 #___________________
 type Kind *{.pure.}= enum
   None, Empty,
-  Proc, Func,
+  Proc, Func, Call,
   Var, Let, Const, Asgn
-  Literal,
+  Literal, RawStr,
   Return,
 #___________________
 func toKind (name :string) :Kind=
@@ -101,12 +101,12 @@ proc ensure *(
     case kind
     of Proc:
       if check(code, nkProcDef): return true else: continue
-    of Return:
-      if check(code, nkReturnStmt): return true else: continue
-    of Literal:
-      if check(code, nim.Literals): return true else: continue
     of Func:
       if check(code, nkFuncDef): return true else: continue
+    of Return:
+      if check(code, nkReturnStmt): return true else: continue
+    of Call:
+      if check(code, nim.SomeCall): return true else: continue
     of Const:
       if check(code, nkConstSection, nkConstDef): return true else: continue
     of Let:
@@ -115,6 +115,10 @@ proc ensure *(
       if check(code, nkVarSection, nkIdentDefs): return true else: continue
     of Asgn:
       if check(code, nkAsgn): return true else: continue
+    of Literal:
+      if check(code, nim.SomeLit): return true else: continue
+    of RawStr:
+      if check(code, nkCallStrLit): return true else: continue
     else: code.err &"Tried to access an unmapped Node kind:  {kind}"
   code.err msg&slate_cfg_Sep&fmt"Node {code.kind} is not a valid kind:  {kinds}."
 #___________________
@@ -133,10 +137,11 @@ proc getName *(code :PNode) :PNode=
   else: code.err &"Something went wrong when accessing the Name of a {code.kind}. The name field is:  " & $code[Name].kind
 #___________________
 proc getType *(code :PNode) :PNode=
+  const TypeSlotKinds = {nkIdent, nkEmpty, nkCommand, nkPtrTy}  # Kinds that contain a valid type at slot [Type]
   const (Type,ArrayType) = (1,2)
-  if   code.kind in {nkIdent,nkEmpty}       : return code
-  elif code[Type].kind in {nkIdent,nkEmpty} : return code[Type]
-  elif code[Type].kind == nkBracketExpr     : return code[Type][ArrayType].getType()
+  if   code.kind in {nkIdent,nkEmpty}   : return code
+  elif code[Type].kind in TypeSlotKinds : return code[Type]
+  elif code[Type].kind == nkBracketExpr : return code[Type][ArrayType].getType()
   else: code.err &"Something went wrong when accessing the Type of a {code.kind}. The type field is:  " & $code[Type].kind
 
 
@@ -180,12 +185,14 @@ proc isPtr *(code :PNode) :bool=
 #___________________
 proc isArr *(code :PNode) :bool=
   ## @descr Returns true if the {@arg code} defines an array type
+  const TypeSlotKinds = {nkIdentDefs, nkConstDef}  # Kinds that contain a valid type at slot [Type]
+  const NameSlotKinds = {nkBracketExpr, nkPtrTy}   # Kinds that contain a valid type at slot [Name]
   const (Name,Type) = (0,1)
   if   code.kind == nkIdent       : result = code.strValue == "array"
   elif code.kind in nim.SomeLit   : result = false
-  elif code.kind == nkIdentDefs   : result = code[Type].isArr()
-  elif code.kind == nkConstDef    : result = code[Type].isArr()
-  elif code.kind == nkBracketExpr : result = code[Name].isArr()
+  elif code.kind == nkCommand     : result = false  # Commands are considered literals (multi-word types)
+  elif code.kind in TypeSlotKinds : result = code[Type].isArr()
+  elif code.kind in NameSlotKinds : result = code[Name].isArr()
   else: code.err &"Tried to check if a node is an array, but found an unmapped kind:  {code.kind}"
 
 
@@ -242,8 +249,20 @@ proc vars_get (code :PNode; field :string) :PNode=
   of "body" : return code[Body]
   else: code.err &"Tried to access an unmapped field of {code.kind}: " & field
 
+
+
+#____________________________________________________________________________________________________________
+#____________________________________________________________________________________________________________
+#____________________________________________________________________________________________________________
+#____________________________________________________________________________________________________________
+# @deps minc
+import ../cfg
+import ../errors
+import ../types
+
+
 #_______________________________________
-# @section Node Access
+# @section MinC+Slate Node Access
 #_____________________________
 template `.:`*(code :PNode; prop :untyped) :string=
   let field = astToStr(prop)
@@ -262,25 +281,23 @@ template `.:`*(code :PNode; prop :untyped) :string=
       except NodeAccessError: code.err "Tried to access an Argument ID for a nkProcDef, but the keyword passed has an incorrect format:  "&field
     strValue( procs_get(code, property, id) )
   of nkConstDef, nkIdentDefs:
-    strValue( vars_get(code, field) )
+    let typ = vars_get(code, field)
+    case typ.kind
+    of nkCommand,nkPtrTy:
+      var tmp :string
+      for field in typ: tmp.add strValue( field ) & " "
+      if typ.isPtr: tmp = tmp.strip & "*"
+      tmp
+    else: strValue( typ )
   else: code.err "Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
 
-
-
-#____________________________________________________________________________________________________________
-#____________________________________________________________________________________________________________
-#____________________________________________________________________________________________________________
-#____________________________________________________________________________________________________________
-# @deps minc
-import ../cfg
-import ../errors
-import ../types
 
 
 #_______________________________________
 # @section Forward Declares
 #_____________________________
 proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair
+proc mincLiteral *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair
 
 
 #_______________________________________
@@ -341,6 +358,12 @@ proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
     if code.isPublic and name != "main" : fmt ProcProtoTempl
     else                                : ""
   result.c = fmt ProcDefTempl
+#___________________
+proc mincCall *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Call
+  if code.kind == nkCallStrLit: return mincLiteral(code, indent, special)
+  NodeAccessError.trigger "Calls are not supported yet"
+
 
 
 #_______________________________________
@@ -361,18 +384,17 @@ proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
   # Get the qualifier
   var qual :string
   if code.isPersist(indent) or (indent < 1 and not code.isPublic) : qual.add "static "
-  if kind == Const: qual.add " /*constexpr*/"  # TODO: clang.19
+  if kind == Const: qual.add "/*constexpr*/ "  # TODO: clang.19
   # Get the type
   var T = code.:type
-  if T == "pointer": T = "void*" # Rename `pointer` to `void*`
-  if T == "pointer": T = PtrValue # Rename `pointer` to `void*`
+  if T == "pointer": T = PtrValue # Rename `pointer` to `void*`  ## TODO: configurable based on c23 option
   if not code.isMutable(kind): T.add " const"
   # TODO: {.readonly.} variable without explicit typedef
   # Get the Name
   var name = code.:name
   # Name: Array special case extras
   let isArr = code.isArr
-  let arrSz = mincArrSize(code, indent).c
+  let arrSz = if isArr: mincArrSize(code, indent).c else: ""
   let arr   = if isArr: &"[{arrSz}]" else: ""
   if isArr and arr == "": code.trigger VariableError,
     "Found an array type, but its code has not been correctly generated."
@@ -400,12 +422,15 @@ proc mincVarSection (code :PNode; indent :int= 0) :CFilePair=
   for entry in code.sons: result.add mincVariable(entry, indent, Kind.Var)
 #___________________
 const AsgnTempl = "{indent*Tab}{left} = {right};"
-proc mincAsgn *(code :PNode; indent :int= 0) :CFilePair=
+proc mincAsgn *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Asgn
   const (Left, Right) = (0,1)
   let left  = MinC(code[Left], indent).c
   let right = MinC(code[Right], indent).c
   result.c = fmt AsgnTempl
+  case special
+  of None: result.c.add "\n"
+  else: discard
 
 
 #_______________________________________
@@ -417,11 +442,15 @@ proc mincNil *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFil
 #___________________
 proc mincChar *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Char
-  discard
+  result.c = &"'{code.strValue}'"
 #___________________
 proc mincFloat *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Float
   result.c = $code.floatVal
+  case code.kind
+  of nkFloat32Lit  : result.c.add "f"
+  of nkFloat128Lit : result.c.add "L"
+  else: discard
 #___________________
 proc mincInt *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Int
@@ -431,19 +460,36 @@ proc mincUInt *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFi
   ensure code, UInt
   result.c = $code.intVal
 #___________________
+const StrKinds = nim.Str+{nkCallStrLit}
+const ValidRawStrPrefixes = ["raw"]
+proc isCustomTripleStrLitRaw (code :PNode) :bool= (code.kind in {nkCallStrLit} and code[0].strValue in ValidRawStrPrefixes and code[1].kind == nkTripleStrLit)
+proc isTripleStrLit (code :PNode) :bool=  code.kind == nkTripleStrLit or code.isCustomTripleStrLitRaw
+proc getTripleStrLit (code :PNode; indent :int= 0; special :SpecialContext= None) :string=
+  ensure code, StrKinds, "Called getTripleStrLit with an incorrect node kind."
+  let tab  = indent*Tab
+  let val  = if code.kind == nkTripleStrLit: code else: code[1]
+  var body = val.strValue
+  let multiline = "\n" in body
+  if code.isCustomTripleStrLitRaw : body = body.replace( "\n" , &"\"\n{tab}\""  )   # turn every \n character into  \n"\nTAB"  to use C's "" concatenation
+  else                            : body = body.replace( "\n" , &"\\n\"\n{tab}\"" ) # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
+  if multiline: result.add &"\n{tab}"
+  result.add &"\"{body}\""
+  result = result.replace( &"\n{tab}\"\"", "" ) # Remove empty lines  (eg: the last empty line)
+#___________________
 proc mincStr *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
-  ensure code, Str
-  result.c = code.strVal
+  ensure code, StrKinds, "Called mincStr with an incorrect node kind."
+  if code.isTripleStrLit : result.c = code.getTripleStrLit(indent, special)
+  else                   : result.c = &"\"{code.strVal}\""
 #___________________
 proc mincLiteral *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
-  ensure code, Literal
+  ensure code, Literal, RawStr, "Called mincLiteral with an incorrect node kind."
   case code.kind
-  of nim.Char  : result = mincChar(code, indent)
-  of nim.Float : result = mincFloat(code, indent)
-  of nim.Int   : result = mincInt(code, indent)
-  of nim.UInt  : result = mincUInt(code, indent)
-  of nim.Str   : result = mincStr(code, indent)
-  of nim.Nil   : result = mincNil(code, indent)
+  of nim.Nil      : result = mincNil(code, indent, special)
+  of nim.Char     : result = mincChar(code, indent, special)
+  of nim.Float    : result = mincFloat(code, indent, special)
+  of nim.Int      : result = mincInt(code, indent, special)
+  of nim.UInt     : result = mincUInt(code, indent, special)
+  of StrKinds     : result = mincStr(code, indent, special)
   else: code.trigger LiteralError, &"Found an unmapped Literal kind:  {code.kind}"
 #___________________
 proc mincBracket *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
@@ -461,7 +507,7 @@ proc mincIdent *(code :PNode; indent :int= 0; special :SpecialContext= None) :CF
   let val = code.strValue
   case special
   of Object:
-    if val == "_": result.c = "{0}"
+    if val == "_": result.c = "{0}" # This is definitely incorrect for the Object SpecialContext
   of None: result.c = val
   else: code.trigger IdentError, &"Found an unmapped kind for interpreting Indent code:  {special}"
 
@@ -482,13 +528,14 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkReturnStmt       : result = mincReturnStmt(code, indent, special)
   # of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
   # of nkContinueStmt     : result = mincContinueStmt(code, indent, special)
-  #   Variables
+  # └─ Variables
   of nkConstSection     : result = mincConstSection(code, indent)
   of nkLetSection       : result = mincLetSection(code, indent)
   of nkVarSection       : result = mincVarSection(code, indent)
-  of nkAsgn             : result = mincAsgn(code, indent)
+  of nkAsgn             : result = mincAsgn(code, indent, special)
   # Terminal cases
-  of nim.Literals       : result = mincLiteral(code, indent, special)
+  of nim.SomeLit        : result = mincLiteral(code, indent, special)
+  of nim.SomeCall       : result = mincCall(code, indent, special)
   of nkBracket          : result = mincBracket(code, indent, special)
   of nkIdent            : result = mincIdent(code, indent, special)
   of nkEmpty            : result = CFilePair()

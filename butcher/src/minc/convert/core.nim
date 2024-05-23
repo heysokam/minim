@@ -39,15 +39,15 @@ include ./fwdecl
 #_____________________________
 type  VarKind {.pure.}= enum Const, Let, Var
 type  Renames         = Table[string, string]
-const SomeLit         = {nkCharLit..nkTripleStrLit}
-const SomeStrLit      = {nkStrLit..nkTripleStrLit}
-const SomeCall        = {nkCall,nkCommand}
+# const SomeLit         = {nkCharLit..nkTripleStrLit}
+# const SomeStrLit      = {nkStrLit..nkTripleStrLit}
+# const SomeCall        = {nkCall,nkCommand}
 const SomeValueNode   = {nkIdent, nkPtrTy, nkInfix}+SomeLit+{nkNilLit}
 # Special cases
 const Reserved            = ["pointer"]
 const NoSpacingInfixes    = ["->"]
 const ValidEmpty          = ["_", "{0}"]
-const ValidRawStrPrefixes = ["raw"]
+# const ValidRawStrPrefixes = ["raw"]
 const ValidInfixKind      = {nkIdent,nkInfix,nkPar,nkCast,nkBracketExpr,nkBracket,nkDotExpr,nkPtrTy} + SomeCall + SomeLit + {nkNilLit}
 const ValidCastOperators  = ["as", "@"]
 const ValidUnionOperators = [".:"]
@@ -70,15 +70,15 @@ const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 #______________________________________________________
 # @section General tools
 #_____________________________
-proc isCustomTripleStrLitRaw (code :PNode) :bool= (code.kind in {nkCallStrLit} and code[0].strValue in ValidRawStrPrefixes and code[1].kind == nkTripleStrLit)
-proc isTripleStrLit (code :PNode) :bool=  code.kind == nkTripleStrLit or code.isCustomTripleStrLitRaw
-proc mincGetTripleStrLit (code :PNode; indent :int= 0) :string=
-  let tab  = indent*Tab
-  let val  = if code.kind == nkTripleStrLit: code else: code[1]
-  var body = val.strValue
-  if code.isCustomTripleStrLitRaw : body = body.replace( "\n" , &"\"\n{tab}\""  ) # turn every \n character into  \n"\nTAB"  to use C's "" concatenation
-  else                            : body = body.replace( "\n" , &"\\n\"\n{tab}\"" ) # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
-  result = &"\n{tab}\"{body}\""
+# proc isCustomTripleStrLitRaw (code :PNode) :bool= (code.kind in {nkCallStrLit} and code[0].strValue in ValidRawStrPrefixes and code[1].kind == nkTripleStrLit)
+# proc isTripleStrLit (code :PNode) :bool=  code.kind == nkTripleStrLit or code.isCustomTripleStrLitRaw
+# proc mincGetTripleStrLit (code :PNode; indent :int= 0) :string=
+#   let tab  = indent*Tab
+#   let val  = if code.kind == nkTripleStrLit: code else: code[1]
+#   var body = val.strValue
+#   if code.isCustomTripleStrLitRaw : body = body.replace( "\n" , &"\"\n{tab}\""  ) # turn every \n character into  \n"\nTAB"  to use C's "" concatenation
+#   else                            : body = body.replace( "\n" , &"\\n\"\n{tab}\"" ) # turn every \n character into \\n"\nTAB"  to use C's "" concatenation
+#   result = &"\n{tab}\"{body}\""
 #_____________________________
 proc isEmpty (code :PNode) :bool= code.kind == nkEmpty or (code.kind == nkIdent and code.strValue == "_")
 proc mincGetValueStr (code :PNode; indent :int= 0) :string=
