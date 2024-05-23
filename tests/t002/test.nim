@@ -18,7 +18,7 @@ test name "Return: Identifier"        : check "05"
 test name "Pragma: Persist"           : check "06"
 test name "Assignment: Arrays"        : check "07"
 test name "Assignment: Identifiers"   : check "08"
-# test name "Assignment: Literals"      : check "09"
+test name "Assignment: Literals"      : check "09"
 
 #  TODO: Convert  _  to  {0}  and  {}
 #  TODO: Multiline strings
