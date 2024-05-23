@@ -49,5 +49,7 @@ Line2
   t18 = """inline TripleStrLit"""
   t18 = raw"""some raw inline TripleStrLit"""
 
+  var t19 :array[1,int]= _
+
   const forty2 :int= 42
   return forty2

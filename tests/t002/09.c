@@ -39,6 +39,7 @@ int main(void) {
                                    "Line2\n";
   t18                            = "inline TripleStrLit";
   t18                            = "some raw inline TripleStrLit";
+  int                     t19[1] = { 0 };
   /*constexpr*/ int const forty2 = 42;
   return forty2;
 }

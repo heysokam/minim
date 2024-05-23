@@ -436,15 +436,15 @@ proc mincAsgn *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFi
 #_______________________________________
 # @section Literals
 #_____________________________
-proc mincNil *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincNil (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Nil
   result.c = NilValue
 #___________________
-proc mincChar *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincChar (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Char
   result.c = &"'{code.strValue}'"
 #___________________
-proc mincFloat *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincFloat (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Float
   result.c = $code.floatVal
   case code.kind
@@ -452,11 +452,11 @@ proc mincFloat *(code :PNode; indent :int= 0; special :SpecialContext= None) :CF
   of nkFloat128Lit : result.c.add "L"
   else: discard
 #___________________
-proc mincInt *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincInt (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Int
   result.c = $code.intVal
 #___________________
-proc mincUInt *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincUInt (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, UInt
   result.c = $code.intVal
 #___________________
@@ -476,12 +476,12 @@ proc getTripleStrLit (code :PNode; indent :int= 0; special :SpecialContext= None
   result.add &"\"{body}\""
   result = result.replace( &"\n{tab}\"\"", "" ) # Remove empty lines  (eg: the last empty line)
 #___________________
-proc mincStr *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincStr (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, StrKinds, "Called mincStr with an incorrect node kind."
   if code.isTripleStrLit : result.c = code.getTripleStrLit(indent, special)
   else                   : result.c = &"\"{code.strVal}\""
 #___________________
-proc mincLiteral *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincLiteral (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Literal, RawStr, "Called mincLiteral with an incorrect node kind."
   case code.kind
   of nim.Nil      : result = mincNil(code, indent, special)
@@ -492,7 +492,7 @@ proc mincLiteral *(code :PNode; indent :int= 0; special :SpecialContext= None) :
   of StrKinds     : result = mincStr(code, indent, special)
   else: code.trigger LiteralError, &"Found an unmapped Literal kind:  {code.kind}"
 #___________________
-proc mincBracket *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincBracket (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   case special
   of Variable:
     result.c.add "{ "
@@ -503,10 +503,10 @@ proc mincBracket *(code :PNode; indent :int= 0; special :SpecialContext= None) :
     result.c.add &"{indent*Tab}}}"
   else: code.trigger BracketError, &"Found an unmapped kind for interpreting Bracket code:  {special}"
 #___________________
-proc mincIdent *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincIdent (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   let val = code.strValue
   case special
-  of Object:
+  of Variable:
     if val == "_": result.c = "{0}" # This is definitely incorrect for the Object SpecialContext
   of None: result.c = val
   else: code.trigger IdentError, &"Found an unmapped kind for interpreting Indent code:  {special}"

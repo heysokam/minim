@@ -414,19 +414,19 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
   # note: Just a blocked alias to avoid mincVariable complexity/readability from becoming absurd.
   let isObj = value.kind == nkObjConstr
   result =
-    if   value.kind == nkIdent and value.strValue == "_": " {0}"
-    elif value.kind == nkEmpty             : ""
-    elif value.kind == nkNilLit            : " NULL"
+    # if   value.kind == nkIdent and value.strValue == "_": " {0}"
+    # elif value.kind == nkEmpty             : ""
+    # elif value.kind == nkNilLit            : " NULL"
     elif value.kind in {nkCall,nkCommand}  : &" {mincCallRaw(value,indent)}"
-    elif value.kind in nkStrLit..nkRStrLit : &" \"{vars.getValue(entry)}\""
-    elif value.isTripleStrLit              : mincGetTripleStrLit(value,indent+1)
-    elif value.kind == nkCharLit           : &" '{vars.getValue(entry).parseInt().char}'"
-    elif value.kind in {nkBracketExpr,nkInfix,nkCast,nkDotExpr,nkIfExpr}:
-      &" {mincGetValueRaw(value,indent)}"
-    elif not (typ.isArr or isObj)          : &" {vars.getValue(entry)}"
-    else                                   : ""
-  if typ.isArr and value.kind != nkNilLit and value.kind != nkEmpty and value.kind notin SomeStrLit and not value.isTripleStrLit:
-    result.add mincGetArrayValue(entry, indent)
+    # elif value.kind in nkStrLit..nkRStrLit : &" \"{vars.getValue(entry)}\""
+    # elif value.isTripleStrLit              : mincGetTripleStrLit(value,indent+1)
+    # elif value.kind == nkCharLit           : &" '{vars.getValue(entry).parseInt().char}'"
+    # elif value.kind in {nkBracketExpr,nkInfix,nkCast,nkDotExpr,nkIfExpr}:
+      # &" {mincGetValueRaw(value,indent)}"
+    # elif not (typ.isArr or isObj)          : &" {vars.getValue(entry)}"
+    # else                                   : ""
+  # if typ.isArr and value.kind != nkNilLit and value.kind != nkEmpty and value.kind notin SomeStrLit and not value.isTripleStrLit:
+    # result.add mincGetArrayValue(entry, indent)
   elif isObj:
     result.add mincGetObjectValue(value, indent)
   # if result == "": report entry; report value; assert false
