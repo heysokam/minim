@@ -1,4 +1,29 @@
 ```md
+# Refactor Redo
+- [ ] Pragmas
+  - [ ] {.warning:"msg".}   (#warning from -std=c23)
+  - [ ] {.namespace: one.sub.}  and  {.namespace: _.}
+  - [ ] {.emit: " ... ".}  # Writes the contents of the pragma literally into the output without any checks.
+- [ ] Discard statement
+- [ ] Immutable data by default  (const unless marked as mutable)
+  - [ ] Function arguments
+- [ ] Private (aka static) symbols unless explicitly specified otherwise
+  - [ ] Function definitions
+  - [ ] Variable definitions
+- [ ] Function calls: Command syntax
+- [ ] noreturn pragma
+  - [ ] C23  {.noreturn.}       <- [[noreturn]]
+  - [ ] C11  {.noreturn_C11.}   <- _Noreturn
+  - [ ] GNU  {.noreturn_GNU.}   <- __attribute__((noreturn))
+- [ ] East-const rule always
+- [ ] Booleans without stdbool.h  (-std=c23)
+- [ ] Alternative type casting syntax
+  - [ ] val as Type
+  - [ ] val @ Type
+- [ ] Multi-discard:   discard (one,two)
+```
+
+```md
 # TODO: Extend C
 - [ ] Typed Pointer notation for function/array function arguments  (Modern C, page 19)
 - [ ] Compiler interface within the code:
