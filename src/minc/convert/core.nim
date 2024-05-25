@@ -91,6 +91,32 @@ proc mincReturnStmt (code :PNode; indent :int= 1; special :SpecialContext= None)
 
 
 #_______________________________________
+# @section Modules
+#_____________________________
+proc getModule *(code :PNode) :Module=
+  ensure code, Kind.Module # TODO: Support for Import
+  const Module = 0
+  let module = code[Module]
+  ensure module, nkStrLit, nkInfix, nkDotExpr, nkIdent, &"Tried to get the module of a {code.kind} from an unsupported field kind:  {module.kind}"
+  var line :string
+  if   code.kind == nkIncludeStmt : line = "include "
+  elif code.kind == nkImportStmt  : line = "import "
+  else: code.err "Only include/import statements are supported for getModule."
+  line.add module.renderTree.splitLines.join(" ").replace(" / ", "/")
+  result = tools.getModule( line )
+#___________________
+const IncludeTempl = "#include {module}\n"
+proc mincInclude (code :PNode; indent :int= 0) :CFilePair=
+  ensure code, Kind.Module, Kind.Ident, &"Tried to get the include of an unsupported kind:  {code.kind}"
+  if indent > 0: code.err "include statements are only allowed at the top level."
+  let M = code.getModule()
+  let module =
+    if M.local : M.path.string.wrapped
+    else       : "<" & M.path.string & ">"
+  result.c = fmt IncludeTempl
+
+
+#_______________________________________
 # @section Procedures
 #_____________________________
 proc mincFuncDef (code :PNode; indent :int= 0) :CFilePair=
@@ -294,5 +320,6 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkBracket          : result = mincBracket(code, indent, special)
   of nkIdent            : result = mincIdent(code, indent, special)
   of nkEmpty            : result = CFilePair()
+  of nkIncludeStmt      : result = mincInclude(code, indent)
   else: code.err &"Translating {code.kind} to MinC is not supported yet."
 

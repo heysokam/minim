@@ -485,10 +485,10 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
 #______________________________________________________
 # @section Modules
 #_____________________________
-proc mincIncludeStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkIncludeStmt, code.renderTree
-  if indent > 0: raise newException(IncludeError, &"Include statements are only allowed at the top level.\nThe incorrect code is:\n{code.renderTree}\n")
-  result.add &"#include {incldef.getModule(code)}\n"
+# proc mincIncludeStmt (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkIncludeStmt, code.renderTree
+#   if indent > 0: raise newException(IncludeError, &"Include statements are only allowed at the top level.\nThe incorrect code is:\n{code.renderTree}\n")
+#   result.add &"#include {incldef.getModule(code)}\n"
 
 
 #______________________________________________________
@@ -846,7 +846,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
 
   # Process this node
   #   Modules
-  of nkIncludeStmt      : result = mincIncludeStmt(code, indent)
+  # of nkIncludeStmt      : result = mincIncludeStmt(code, indent)
   #   Procedures
   # of nkProcDef          : result = mincProcDef(code, indent)
   # of nkFuncDef          : result = mincProcDef(code, indent)
