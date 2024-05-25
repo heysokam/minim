@@ -3,8 +3,6 @@
 - [ ] Support includes with comments
 - [ ] --verbose-cc
 - [ ] Bundle zigcc
-- [ ] Provide an interface for zigcc in the minc binary
-- [ ] Provide the `-c` option to just output C code and not build it.
 - [ ] Docs:
   - [ ] Link to an always-up-to-date list of natively supported cross-compilation targets
   - [ ] Reminder that nim is only required for building the compiler itself. Users don't need it
