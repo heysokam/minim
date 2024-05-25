@@ -32,5 +32,7 @@
     - [x] Initialization
     - [x] Designated Initialization
 - [x] Header include
+- [x] Standalone Pragmas
+  - [x] {.error:"msg".}
 ```
 

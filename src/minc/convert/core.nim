@@ -45,6 +45,8 @@ template `.:`*(code :PNode; prop :untyped) :string=
       if typ.isPtr: tmp = tmp.strip & "*"
       tmp
     else: strValue( typ )
+  of nkPragma:
+    strValue( pragmas.get(code, field) )
   else: code.err "Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
 
 
@@ -292,6 +294,32 @@ proc mincIdent (code :PNode; indent :int= 0; special :SpecialContext= None) :CFi
   of None: result.c = val
   else: code.trigger IdentError, &"Found an unmapped kind for interpreting Indent code:  {special}"
 
+#_______________________________________
+# @section Pragmas
+#_____________________________
+proc mincPragmaError (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ## @descr Codegen for {.error: "msg".} pragmas
+  ensure code, Pragma
+  let body = pragmas.get(code, "body")
+  ensure body, Str, &"Only {{.error: [[SomeString]].}} error pragmas are currently supported."
+  let msg = mincStr(body, indent, special).c
+  result.c = &"{indent*Tab}#error {msg}\n"
+#___________________
+const KnownPragmas = ["define", "error", "warning", "namespace", "emit"]
+proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ## @descr
+  ##  Codegen for all standalone pragmas
+  ##  Context-specific pragmas are handled inside each section
+  ensure code, Pragma
+  case code.:name
+  # of "define"    : result = mincPragmaDefine(code,indent)
+  of "error"     : result = mincPragmaError(code,indent)
+  # of "warning"   : result = mincPragmaWarning(code,indent)
+  # of "namespace" : result = mincPragmaNamespace(code,indent)
+  # of "emit"      : result = mincPragmaEmit(code,indent)
+  else: code.trigger PragmaError, &"Only {KnownPragmas} pragmas are currently supported."
+
+
 
 #______________________________________________________
 # @section Source-to-Source Generator
@@ -314,6 +342,8 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkLetSection       : result = mincLetSection(code, indent)
   of nkVarSection       : result = mincVarSection(code, indent)
   of nkAsgn             : result = mincAsgn(code, indent, special)
+  # └─ Pragmas
+  of nkPragma           : result = mincPragma(code, indent, special)
   # Terminal cases
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
   of nim.SomeCall       : result = mincCall(code, indent, special)

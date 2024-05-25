@@ -37,12 +37,12 @@ include ./fwdecl
 #______________________________________________________
 # @section Codegen: Types
 #_____________________________
-type  VarKind {.pure.}= enum Const, Let, Var
+# type  VarKind {.pure.}= enum Const, Let, Var
 type  Renames         = Table[string, string]
 # const SomeLit         = {nkCharLit..nkTripleStrLit}
 # const SomeStrLit      = {nkStrLit..nkTripleStrLit}
 # const SomeCall        = {nkCall,nkCommand}
-const SomeValueNode   = {nkIdent, nkPtrTy, nkInfix}+SomeLit+{nkNilLit}
+# const SomeValueNode   = {nkIdent, nkPtrTy, nkInfix}+SomeLit+{nkNilLit}
 # Special cases
 const Reserved            = ["pointer"]
 const NoSpacingInfixes    = ["->"]
@@ -63,7 +63,7 @@ const ConditionAffixRenames = {
   }.toTable()
 const KnownMainNames         = ["main", "WinMain"]
 const KnownKeywords          = ["addr", "sizeof"]
-const KnownPragmas           = ["define", "error", "warning", "namespace", "emit"]
+# const KnownPragmas           = ["define", "error", "warning", "namespace", "emit"]
 const KnownForInfix          = ["..", "..<"]
 const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 
@@ -504,12 +504,12 @@ proc mincPragmaDefine (code :PNode; indent :int= 0) :string=
       &"{code[0][1].strValue} {mincGetValueStr(code[1][1])}"
     else: code[0][1].strValue
   result.add &"{indent*Tab}#define {val}\n"
-#_____________________________
-proc mincPragmaError (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkPragma, code.renderTree
-  let data = code[0] # The data is inside an nkExprColonExpr node
-  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.error:\"msg\".}} error pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
-  result.add &"{indent*Tab}#error {data[1].strValue}\n"
+# #_____________________________
+# proc mincPragmaError (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkPragma, code.renderTree
+#   let data = code[0] # The data is inside an nkExprColonExpr node
+#   assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.error:\"msg\".}} error pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
+#   result.add &"{indent*Tab}#error {data[1].strValue}\n"
 #_____________________________
 proc mincPragmaWarning (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma, code.renderTree
@@ -535,21 +535,21 @@ proc mincPragmaEmit (code :PNode; indent :int= 0) :string=
   let text = code[0][1].strValue
   let emit = if text.endsWith("\n"): text[0..^2] else: text
   result = &"{indent*Tab}{text}\n"
-#_____________________________
-proc mincPragma (code :PNode; indent :int= 0) :string=
-  ## Codegen for standalone pragmas
-  ## Context-specific pragmas are handled inside each section
-  assert code.kind == nkPragma, code.renderTree
-  assert code[0].kind == nkExprColonExpr and code[0].len == 2,
-    &"Only pragmas with the shape {{.key:val.}} are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
-  let key = code[0][0].strValue
-  case key
-  of "define"    : result = mincPragmaDefine(code,indent)
-  of "error"     : result = mincPragmaError(code,indent)
-  of "warning"   : result = mincPragmaWarning(code,indent)
-  of "namespace" : result = mincPragmaNamespace(code,indent)
-  of "emit"      : result = mincPragmaEmit(code,indent)
-  else: raise newException(PragmaCodegenError, &"Only {KnownPragmas} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n")
+# #_____________________________
+# proc mincPragma (code :PNode; indent :int= 0) :string=
+#   ## Codegen for standalone pragmas
+#   ## Context-specific pragmas are handled inside each section
+#   assert code.kind == nkPragma, code.renderTree
+#   assert code[0].kind == nkExprColonExpr and code[0].len == 2,
+#     &"Only pragmas with the shape {{.key:val.}} are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
+#   let key = code[0][0].strValue
+#   case key
+#   of "define"    : result = mincPragmaDefine(code,indent)
+#   of "error"     : result = mincPragmaError(code,indent)
+#   of "warning"   : result = mincPragmaWarning(code,indent)
+#   of "namespace" : result = mincPragmaNamespace(code,indent)
+#   of "emit"      : result = mincPragmaEmit(code,indent)
+#   else: raise newException(PragmaCodegenError, &"Only {KnownPragmas} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n")
 
 
 #______________________________________________________

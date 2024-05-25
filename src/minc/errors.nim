@@ -16,11 +16,11 @@ type LiteralError   * = object of CatchableError
 type VariableError  * = object of CatchableError
 type BracketError   * = object of CatchableError
 type IdentError     * = object of CatchableError
+type PragmaError    * = object of CatchableError
 type CallError      * = object of CatchableError
 # TODO
 type ProcError      * = object of CatchableError
 type AffixError     * = object of CatchableError
-type PragmaError    * = object of CatchableError
 type ConditionError * = object of CatchableError
 type ObjectError    * = object of CatchableError
 type AssignError    * = object of CatchableError
