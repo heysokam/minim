@@ -1,6 +1,6 @@
 ```md
 # Refactor Redo
-- [ ] Pragmas
+- [ ] Standalone Pragmas
   - [ ] {.warning:"msg".}   (#warning from -std=c23)
   - [ ] {.namespace: one.sub.}  and  {.namespace: _.}
   - [ ] {.emit: " ... ".}  # Writes the contents of the pragma literally into the output without any checks.

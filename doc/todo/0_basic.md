@@ -1,6 +1,6 @@
 ```md
 # Refactor Redo
-- [ ] Pragmas
+- [ ] Standalone Pragmas
   - [ ] {.error:"msg".}
   - [ ] {.define: symbol.}   (note: remember when defined(...) )
 - [ ] Function calls: Call(syntax)
