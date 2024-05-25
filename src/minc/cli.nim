@@ -148,8 +148,6 @@ proc init *() :Cfg=
   for pass in cli.getLongIter("passL") : result.passL.incl pass
 
 # TODO: Options
-# --os:
-# --cpu:
 # --passC:
 
 
