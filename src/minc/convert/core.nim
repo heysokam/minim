@@ -1,264 +1,20 @@
-
-
-#_______________________________________
-# @section Slate Configuration
-#_____________________________
+#:______________________________________________________
+#  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#:______________________________________________________
 # @deps ndk
 import nstd/strings
-import nstd/errors
+import nstd/paths
 # @deps *Slate
 import slate/nimc as nim
 import slate/format
-
-#_______________________________________
-# @section Slate Configuration
-#_____________________________
-const slate_cfg_Sep    *{.strdefine.}= "  "
-const slate_cfg_Prefix *{.strdefine.}= "*Slate" & slate_cfg_Sep # TODO: Change functions to take 2 formatting parameters
-
-
-
-#_______________________________________
-# @section Node Access: Error Management
-#_____________________________
-const echo = debugEcho
-const DefaultErrorMsg = "Something went wrong."
-#___________________
-type NodeAccessError = object of CatchableError
-func err *(msg :string; pfx :string= slate_cfg_Prefix) :void= raise newException(NodeAccessError, pfx&msg)
-  ## @descr Raises a {@link NodeAccessError} with a formatted {@arg msg}
-proc err *(code :PNode; msg :string; pfx :string= slate_cfg_Prefix) :void= err &"\n{code.treeRepr}\n{code.renderTree}\n{pfx}{msg}", pfx=""
-  ## @descr Raises a {@link NodeAccessError} with a formatted {@arg msg}, with debugging information about the {@arg code}
-proc err *(
-    code : PNode;
-    excp : typedesc[CatchableError];
-    msg  : string;
-    pfx  : string = slate_cfg_Prefix;
-  ) :void= trigger excp, &"\n{code.treeRepr}\n{code.renderTree}\n{pfx}{msg}", pfx
-  ## @descr Raises the {@arg excp} with a formatted {@arg msg} and debugging information about the {@arg code}
-#___________________
-type Kind *{.pure.}= enum
-  None, Empty,
-  Proc, Func, Call,
-  Var, Let, Const, Asgn
-  Literal, RawStr,
-  Return,
-#___________________
-func toKind (name :string) :Kind=
-  ## @descr
-  ##  Converts the given {@arg name} into a known slate.Kind
-  ##  Raises a {@link NodeAccessError} when {@arg name} is not mapped to a kind
-  case name
-  of "empty"            : result = Kind.Empty
-  of "proc","procedure" : result = Kind.Proc
-  of "func","function"  : result = Kind.Func
-  of "var"              : result = Kind.Var
-  of "let"              : result = Kind.Let
-  of "const"            : result = Kind.Const
-  of "assign"           : result = Kind.Asgn
-  of "literal"          : result = Kind.Literal
-  of "return"           : result = Kind.Return
-  else: err "Tried to access and unmapped Node Kind:  " & name
-#___________________
-func check *(
-    code : PNode;
-    args : varargs[TNodeKind];
-  ) :bool {.discardable.}=
-  for kind in args:
-    if code.kind == kind: return true
-#___________________
-func check *(
-    code : PNode;
-    list : set[TNodeKind];
-  ) :bool {.discardable.}=
-  for kind in list:
-    if code.kind == kind: return true
-#___________________
-proc ensure *(
-    code : PNode;
-    args : varargs[TNodeKind];
-    msg  : string = DefaultErrorMsg,
-  ) :bool {.discardable.}=
-  ## @descr Raises a {@link NodeAccessError} when none of the {@arg args} kinds match the {@link TNodeKind} of {@arg code}
-  if check(code, args): return true
-  code.err msg&slate_cfg_Sep&fmt"Node {code.kind} is not of type:  {args}."
-#___________________
-proc ensure *(
-    code : PNode;
-    list : set[TNodeKind];
-    msg  : string = DefaultErrorMsg,
-  ) :bool {.discardable.}=
-  if check(code, list): return true
-  code.err msg&slate_cfg_Sep&fmt"Node {code.kind} is not of type:  {list}."
-#___________________
-proc ensure *(
-    code  : PNode;
-    kinds : varargs[Kind];
-    msg   : string = DefaultErrorMsg,
-  ) :bool {.discardable.}=
-  ## @descr Raises a {@link NodeAccessError} when none of the {@arg args} {@link Kind}s match the {@link TNodeKind} of {@arg code}.
-  for kind in kinds:
-    case kind
-    of Proc:
-      if check(code, nkProcDef): return true else: continue
-    of Func:
-      if check(code, nkFuncDef): return true else: continue
-    of Return:
-      if check(code, nkReturnStmt): return true else: continue
-    of Call:
-      if check(code, nim.SomeCall): return true else: continue
-    of Const:
-      if check(code, nkConstSection, nkConstDef): return true else: continue
-    of Let:
-      if check(code, nkLetSection, nkIdentDefs): return true else: continue
-    of Var:
-      if check(code, nkVarSection, nkIdentDefs): return true else: continue
-    of Asgn:
-      if check(code, nkAsgn): return true else: continue
-    of Literal:
-      if check(code, nim.SomeLit): return true else: continue
-    of RawStr:
-      if check(code, nkCallStrLit): return true else: continue
-    else: code.err &"Tried to access an unmapped Node kind:  {kind}"
-  code.err msg&slate_cfg_Sep&fmt"Node {code.kind} is not a valid kind:  {kinds}."
-#___________________
-proc ensure *(code :PNode; field :string) :void=  ensure code, field.toKind
-
-
-#_______________________________________
-# @section Node Access: General Fields
-#_____________________________
-proc getName *(code :PNode) :PNode=
-  const (Name, Publ, PublName, Pragma) = (0, 0, 1, 0)
-  let name = code[Name]
-  if   name.kind == nkIdent      : return code[Name]
-  elif name.kind == nkPostFix    : return code[Name][PublName]
-  elif name.kind == nkPragmaExpr : return code[Pragma].getName()
-  else: code.err &"Something went wrong when accessing the Name of a {code.kind}. The name field is:  " & $code[Name].kind
-#___________________
-proc getType *(code :PNode) :PNode=
-  const TypeSlotKinds = {nkIdent, nkEmpty, nkCommand, nkPtrTy}  # Kinds that contain a valid type at slot [Type]
-  const (Type,ArrayType) = (1,2)
-  if   code.kind in {nkIdent,nkEmpty}   : return code
-  elif code[Type].kind in TypeSlotKinds : return code[Type]
-  elif code[Type].kind == nkBracketExpr : return code[Type][ArrayType].getType()
-  else: code.err &"Something went wrong when accessing the Type of a {code.kind}. The type field is:  " & $code[Type].kind
-
-
-#_______________________________________
-# @section Node Access: General Kinds
-#_____________________________
-proc isPublic *(code :PNode) :bool=
-  ## @descr Returns true if the name of the {@arg code} is marked as public
-  const (Name, Publ, PublName) = (0, 0, 1)
-  code[Name].kind != nkIdent and code[Name][Publ].strValue == "*"
-#___________________
-proc isPersist *(
-    code   : PNode;
-    indent : SomeInteger;
-    crash  : bool = true;
-  ) :bool=
-  ## @descr
-  ##  Returns true if the {@arg code} is marked with the persist pragma.
-  ##  Crashes the compiler on unexpected behavior when {@arg crash} is active or is omitted  (default: true)
-  const (Name,Pragma) = (0,1)
-  if code.kind notin {nkConstDef, nkIdentDefs, nkPragmaExpr}:  # TODO: Do other things need the {.persist.} pragma?
-    if crash: code.err "Tried to get the persist pragma for an unmapped kind."
-    return false
-  if indent < 1: return false
-  let name = code[Name]
-  if name.kind notin {nkIdent, nkPostfix, nkPragmaExpr}:
-    if crash: name.err "Tried to get the persist pragma from an unmapped name node kind."
-    return false
-  return name.kind == nkPragmaExpr and
-         name[Pragma][Name].kind != nkEmpty and
-         name[Pragma][Name].strValue == "persist"
-#___________________
-proc isMutable *(code :PNode; kind :Kind) :bool=
-  ## @descr Returns true if the {@arg code} defines a mutable kind
-  ensure code, Const, Let, Var, msg= &"Tried to check for mutability of a kind that doesn't support it:  {kind}"
-  result = kind == Kind.Var
-#___________________
-proc isPtr *(code :PNode) :bool=
-  ## @descr Returns true if the {@arg code} defines a ptr type
-  result = code.kind == nkPtrTy
-#___________________
-proc isArr *(code :PNode) :bool=
-  ## @descr Returns true if the {@arg code} defines an array type
-  const TypeSlotKinds = {nkIdentDefs, nkConstDef}  # Kinds that contain a valid type at slot [Type]
-  const NameSlotKinds = {nkBracketExpr, nkPtrTy}   # Kinds that contain a valid type at slot [Name]
-  const (Name,Type) = (0,1)
-  if   code.kind == nkIdent       : result = code.strValue == "array"
-  elif code.kind in nim.SomeLit   : result = false
-  elif code.kind == nkCommand     : result = false  # Commands are considered literals (multi-word types)
-  elif code.kind in TypeSlotKinds : result = code[Type].isArr()
-  elif code.kind in NameSlotKinds : result = code[Name].isArr()
-  else: code.err &"Tried to check if a node is an array, but found an unmapped kind:  {code.kind}"
-
-
-#_______________________________________
-# @section Node Access: Statement List
-#_____________________________
-proc getStmt (code :PNode; id :SomeInteger) :PNode=  code[id]
-
-
-#_______________________________________
-# @section Node Access: Procs
-#_____________________________
-const UnknownID :int= int.high
-proc procs_get (code :PNode; field :string; id :SomeInteger= UnknownID) :PNode=
-  # 0. Name
-  const (Name, Publ, PublName) = (0, 0, 1)
-  # 1. Term Rewriting (only for macros/templates)
-  const TermRewrite = 1
-  # 2. Generics
-  const Generics = 2
-  # 3. Args
-  const Args = 3
-  const RetT = 0
-  # 4. Pragmas
-  const Pragmas = 4
-  # 5. Reserved
-  const Reserved = 5 # Field reserved for the future
-  # 6. Proc's Body  (aka Statement List)
-  const Body = 6
-  # Access the requested field
-  case field
-  of "name"     : return code.getName()
-  of "generics" : return code[Generics]
-  of "returnT"  : return code[Args][RetT]
-  of "args"     : return code[Args]
-  of "arg"      :
-    if id == UnknownID: code.err "Tried to access an Argument of a nkProcDef, but its ID was not passed."
-    return code[Args][id]
-  of "pragmas"  : return code[Pragmas]
-  of "pragma"   :
-    if id == UnknownID: code.err "Tried to access a Pragma of a nkProcDef, but its ID was not passed."
-    return code[Pragmas][id]
-  of "body"     : return code[Body]
-  else: code.err "Tried to access an unmapped field of nkProcDef: " & field
-
-#_______________________________________
-# @section Node Access: Variables
-#_____________________________
-proc vars_get (code :PNode; field :string) :PNode=
-  const Body = 2  # 2. Variable's Body  (aka Statement List)
-  case field
-  of "name" : return code.getName()
-  of "type" : return code.getType()
-  of "body" : return code[Body]
-  else: code.err &"Tried to access an unmapped field of {code.kind}: " & field
-
-
-
-#____________________________________________________________________________________________________________
-#____________________________________________________________________________________________________________
-#____________________________________________________________________________________________________________
-#____________________________________________________________________________________________________________
+import slate/elements
+import slate/errors as slateErr
+import slate/types as slate
 # @deps minc
 import ../cfg
 import ../errors
-import ../types
+import ../types as minc
+import ../tools
 
 
 #_______________________________________
@@ -271,7 +27,7 @@ template `.:`*(code :PNode; prop :untyped) :string=
     var id = int.high
     try : id = field.parseInt
     except NodeAccessError: code.err "Tried to access a Statement List, but the keyword passed was not a number:  "&field
-    strValue( code.getStmt(id) )
+    strValue( statement.get(code, id) )
   of nkProcDef:
     var id       = int.high
     var property = field
@@ -279,9 +35,9 @@ template `.:`*(code :PNode; prop :untyped) :string=
       property = field.split("_")[0]
       try : id = field.split("_")[1].parseInt
       except NodeAccessError: code.err "Tried to access an Argument ID for a nkProcDef, but the keyword passed has an incorrect format:  "&field
-    strValue( procs_get(code, property, id) )
+    strValue( procs.get(code, property, id) )
   of nkConstDef, nkIdentDefs:
-    let typ = vars_get(code, field)
+    let typ = vars.get(code, field)
     case typ.kind
     of nkCommand,nkPtrTy:
       var tmp :string
@@ -341,7 +97,7 @@ proc mincFuncDef (code :PNode; indent :int= 0) :CFilePair=
   # __attribute__ ((pure))
   # write-only memory idea from herose (like GPU write-only mem)
   ensure code, Func
-  trigger ProcError, "proc and func are identical in C"  # TODO : Sideffects checks
+  code.trigger ProcError, "proc and func are identical in C"  # TODO : Sideffects checks
 #_____________________________
 const ProcProtoTempl = "{qual}{T} {name} ({args});\n"
 const ProcDefTempl   = "{qual}{T} {name} ({args}) {{\n{body}\n}}\n"
@@ -352,7 +108,7 @@ proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
   if not code.isPublic: qual.add "static "
   let T    = code.:returnT
   let args = "void"
-  let body = MinC(procs_get(code,"body"), indent+1).c # TODO: Could Header stuff happen inside a body ??
+  let body = MinC(procs.get(code,"body"), indent+1).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
   result.h =
     if code.isPublic and name != "main" : fmt ProcProtoTempl
@@ -362,8 +118,7 @@ proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
 proc mincCall *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ensure code, Call
   if code.kind == nkCallStrLit: return mincLiteral(code, indent, special)
-  NodeAccessError.trigger "Calls are not supported yet"
-
+  code.trigger CallError, &"Calls are not supported yet\n{code.renderTree}"
 
 
 #_______________________________________
@@ -371,15 +126,16 @@ proc mincCall *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFi
 #_____________________________
 const VarDeclTempl = "{indent*Tab}extern {qual}{T} {name};\n"
 const VarDefTempl  = "{indent*Tab}{qual}{T} {name}{eq}{value};\n"
+#___________________
 proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
   const Type = 2
   # Error check
   ensure code, Const, Let, Var, msg="Tried to generate code for a variable, but its kind is incorrect"
-  let typ  = vars_get(code, "type")
-  let body = vars_get(code, "body")
-  if typ.kind == nkEmpty: trigger VariableError,
+  let typ  = vars.get(code, "type")
+  let body = vars.get(code, "body")
+  if typ.kind == nkEmpty: code.trigger VariableError,
     &"Declaring a variable without a type is forbidden. The illegal code is:\n{code.renderTree}\n"
-  if kind == Const and body.kind == nkEmpty: trigger VariableError,
+  if kind == Const and body.kind == nkEmpty: code.trigger VariableError,
     &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{code.renderTree}\n"
   # Get the qualifier
   var qual :string
@@ -407,7 +163,6 @@ proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
     if code.isPublic and indent == 0 : fmt VarDeclTempl
     else:""
   result.c = fmt VarDefTempl
-
 #___________________
 proc mincConstSection (code :PNode; indent :int= 0) :CFilePair=
   ensure code, Const
