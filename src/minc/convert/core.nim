@@ -77,19 +77,28 @@ proc mincArrSize *(code :PNode; indent :int= 0) :CFilePair=
 
 
 #_______________________________________
-# @section Return
+# @section Control Flow: Keywords
 #_____________________________
-const ReturnTempl = "{ind}return{body};"
+const ReturnTempl = "{indent*Tab}return{body};"
 proc mincReturnStmt (code :PNode; indent :int= 1; special :SpecialContext= None) :CFilePair=
   ensure code, Return
-  if indent < 1: code.err &"Found an incorrect indentation level for a Return statement:  {indent}"
-  let ind = indent*Tab
+  if indent < 1: code.trigger FlowCtrlError, "Return statements cannot exist at the top level in C."
   # Generate the Body
   var body :string
-  if code.sons.len > 0: body.add " "
+  if code.sons.len > 0: body.add " "  # Separate `return` and `body` with a space when there is a value
   for entry in code: body.add MinC(entry, indent+1, special).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
   result.c = fmt ReturnTempl
+#___________________
+proc mincContinueStmt (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Continue
+  if indent < 1: code.trigger FlowCtrlError, "Continue statements cannot exist at the top level in C."
+  result.c = &"{indent*Tab}continue;\n"
+#___________________
+proc mincBreakStmt (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Break
+  if indent < 1: code.trigger FlowCtrlError, "Break statements cannot exist at the top level in C."
+  result.c = &"{indent*Tab}break;\n"
 
 
 #_______________________________________
@@ -380,6 +389,7 @@ proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CF
   of "define"    : result = mincPragmaDefine(code, indent, special)
   else: code.trigger PragmaError, &"Only {KnownPragmas} pragmas are currently supported."
 
+
 #______________________________________________________
 # @section Discard
 #_____________________________
@@ -423,8 +433,6 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkFuncDef          : result = mincProcDef(code, indent)
   # └─ Control flow
   of nkReturnStmt       : result = mincReturnStmt(code, indent, special)
-  # of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
-  # of nkContinueStmt     : result = mincContinueStmt(code, indent, special)
   # └─ Variables
   of nkConstSection     : result = mincConstSection(code, indent)
   of nkLetSection       : result = mincLetSection(code, indent)
@@ -434,12 +442,15 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   # └─ Pragmas
   of nkPragma           : result = mincPragma(code, indent, special)
   # Terminal cases
+  of nkEmpty            : result = CFilePair()
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
   of nim.SomeCall       : result = mincCall(code, indent, special)
   of nkBracket          : result = mincBracket(code, indent, special)
   of nkIdent            : result = mincIdent(code, indent, special)
-  of nkEmpty            : result = CFilePair()
   of nkIncludeStmt      : result = mincInclude(code, indent)
   of nkCommentStmt      : result = mincComment(code, indent, special)
+  # └─ Control flow
+  of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
+  of nkContinueStmt     : result = mincContinueStmt(code, indent, special)
   else: code.err &"Translating {code.kind} to MinC is not supported yet."
 

@@ -610,15 +610,15 @@ proc mincForStmt (code :PNode; indent :int= 0) :string=
 #     else                       : mincGetValueRaw(code[0],indent+1)
 #   result.add &"{indent*Tab}return {val};\n"
 #_____________________________
-proc mincContinueStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkContinueStmt, code.renderTree
-  assert indent != 0, "Continue statements cannot exist at the top level in C.\n" & code.renderTree
-  result.add &"{indent*Tab}continue;\n"
-#_____________________________
-proc mincBreakStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkBreakStmt, code.renderTree
-  assert indent != 0, "Break statements cannot exist at the top level in C.\n" & code.renderTree
-  result.add &"{indent*Tab}break;\n"
+# proc mincContinueStmt (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkContinueStmt, code.renderTree
+#   assert indent != 0, "Continue statements cannot exist at the top level in C.\n" & code.renderTree
+#   result.add &"{indent*Tab}continue;\n"
+# #_____________________________
+# proc mincBreakStmt (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkBreakStmt, code.renderTree
+#   assert indent != 0, "Break statements cannot exist at the top level in C.\n" & code.renderTree
+#   result.add &"{indent*Tab}break;\n"
 #_____________________________
 proc mincIfStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkIfStmt, code.renderTree
@@ -872,14 +872,14 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkCaseStmt         : result = mincCaseStmt(code)
   #   Control flow
   # of nkReturnStmt       : result = mincReturnStmt(code, indent)
-  of nkBreakStmt        : result = mincBreakStmt(code, indent)
-  of nkContinueStmt     : result = mincContinueStmt(code, indent)
+  # of nkBreakStmt        : result = mincBreakStmt(code, indent)
+  # of nkContinueStmt     : result = mincContinueStmt(code, indent)
   #   Comments
   # of nkCommentStmt      : result = mincCommentStmt(code, indent)
   #   Assignment
   of nkAsgn             : result = mincAsgn(code, indent)
   #   Pragmas
-  of nkPragma           : result = mincPragma(code, indent)
+  # of nkPragma           : result = mincPragma(code, indent)
   #   Pre-In-Post.fix
   of nkInfix            : result = mincInfix(code, indent)
   of nkPrefix           : result = mincPrefix(code, indent)
