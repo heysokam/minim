@@ -2,9 +2,6 @@
 # Refactor Redo
 - [ ] Immutable data by default  (const unless marked as mutable)
   - [ ] Function arguments
-- [ ] Private (aka static) symbols unless explicitly specified otherwise
-  - [ ] Function definitions
-  - [ ] Variable definitions
 - [ ] Function calls: Command syntax
 - [ ] noreturn pragma
   - [ ] C23  {.noreturn.}       <- [[noreturn]]
