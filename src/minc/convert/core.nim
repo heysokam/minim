@@ -297,6 +297,14 @@ proc mincIdent (code :PNode; indent :int= 0; special :SpecialContext= None) :CFi
 #_______________________________________
 # @section Pragmas
 #_____________________________
+proc mincPragmaWarning (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ## @descr Codegen for {.warning: "msg".} pragmas
+  ensure code, Pragma
+  let body = pragmas.get(code, "body")
+  ensure body, Str, &"Only {{.warning: [[SomeString]].}} warning pragmas are currently supported."
+  let msg = mincStr(body, indent, special).c
+  result.c = &"{indent*Tab}#warning {msg}\n"
+#___________________
 proc mincPragmaError (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ## @descr Codegen for {.error: "msg".} pragmas
   ensure code, Pragma
@@ -314,7 +322,7 @@ proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CF
   case code.:name
   # of "define"    : result = mincPragmaDefine(code,indent)
   of "error"     : result = mincPragmaError(code,indent)
-  # of "warning"   : result = mincPragmaWarning(code,indent)
+  of "warning"   : result = mincPragmaWarning(code,indent)
   # of "namespace" : result = mincPragmaNamespace(code,indent)
   # of "emit"      : result = mincPragmaEmit(code,indent)
   else: code.trigger PragmaError, &"Only {KnownPragmas} pragmas are currently supported."

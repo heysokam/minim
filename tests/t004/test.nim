@@ -10,4 +10,5 @@ template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 # @section Test
 #_____________________________
-test name "Error" : check "01"
+test name "Error"   : check "01"
+test name "Warning" : check "02"
