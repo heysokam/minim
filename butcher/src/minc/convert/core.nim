@@ -494,16 +494,16 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
 #______________________________________________________
 # @section Pragmas
 #_____________________________
-proc mincPragmaDefine (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkPragma, code.renderTree
-  assert code[0].len == 2, &"Only {{.define:symbol.}} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
-  let val =
-    if code[0][1].kind == nkInfix and code[0][1][0].strValue == "->":
-      &"{code[0][1][1].strValue} {mincGetValueStr(code[0][1][^1])}"
-    elif code.sons.len > 1 and code[1].kind == nkPrefix and code[1][0].strValue == "->":
-      &"{code[0][1].strValue} {mincGetValueStr(code[1][1])}"
-    else: code[0][1].strValue
-  result.add &"{indent*Tab}#define {val}\n"
+# proc mincPragmaDefine (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkPragma, code.renderTree
+#   assert code[0].len == 2, &"Only {{.define:symbol.}} pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
+#   let val =
+#     if code[0][1].kind == nkInfix and code[0][1][0].strValue == "->":
+#       &"{code[0][1][1].strValue} {mincGetValueStr(code[0][1][^1])}"
+#     elif code.sons.len > 1 and code[1].kind == nkPrefix and code[1][0].strValue == "->":
+#       &"{code[0][1].strValue} {mincGetValueStr(code[1][1])}"
+#     else: code[0][1].strValue
+#   result.add &"{indent*Tab}#define {val}\n"
 # #_____________________________
 # proc mincPragmaError (code :PNode; indent :int= 0) :string=
 #   assert code.kind == nkPragma, code.renderTree

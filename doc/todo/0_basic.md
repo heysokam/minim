@@ -1,7 +1,5 @@
 ```md
 # Refactor Redo
-- [ ] Standalone Pragmas
-  - [ ] {.define: symbol.}   (note: remember when defined(...) )
 - [ ] Function calls: Call(syntax)
 - [ ] Type declaration
   - [ ] Type aliasing    typedef char* str;
