@@ -2,7 +2,6 @@
 # Refactor Redo
 - [ ] Standalone Pragmas
   - [ ] {.namespace: one.sub.}  and  {.namespace: _.}
-  - [ ] {.emit: " ... ".}  # Writes the contents of the pragma literally into the output without any checks.
 - [ ] Discard statement
 - [ ] Immutable data by default  (const unless marked as mutable)
   - [ ] Function arguments
