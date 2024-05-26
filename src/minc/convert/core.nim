@@ -312,13 +312,24 @@ proc mincPragmaError (code :PNode; indent :int= 0; special :SpecialContext= None
   ensure body, Str, &"Only {{.error: [[SomeString]].}} error pragmas are currently supported."
   let msg = mincStr(body, indent, special).c
   result.c = &"{indent*Tab}#error {msg}\n"
-#_____________________________
+#___________________
 proc mincPragmaEmit (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ## @descr Codegen for {.emit: "source.code".} pragmas
   ensure code, Pragma
   let body = pragmas.get(code, "body")
   ensure body, Str, &"Only {{.emit: [[SomeString]].}} emit pragmas are currently supported."
   result.c = &"{indent*Tab}{body.strValue}\n"
+#___________________
+proc mincPragmaNamespace (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ## @descr Codegen for {.namespace: some.sub.name.} pragmas
+  # TODO: Symbol namespacing using a `Context` object
+  # TODO: Name separation without hard-replacing `.` with `_`
+  ensure code, Pragma
+  let name = pragmas.get(code, "name")
+  let body = pragmas.get(code, "body")
+  ensure name, nkIdent, nkDotExpr, &"Only {{.namespace:name.}} and {{.namespace:name.sub.}} namespace pragmas are currently supported."
+  let ns_name = body.renderTree.replace(".", "_")
+  result.c = &"{indent*Tab}// namespace {ns_name}\n"
 #___________________
 const KnownPragmas = ["define", "error", "warning", "namespace", "emit"]
 proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
@@ -327,11 +338,11 @@ proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CF
   ##  Context-specific pragmas are handled inside each section
   ensure code, Pragma
   case code.:name
-  # of "define"    : result = mincPragmaDefine(code, indent, special)
   of "error"     : result = mincPragmaError(code, indent, special)
   of "warning"   : result = mincPragmaWarning(code, indent, special)
-  # of "namespace" : result = mincPragmaNamespace(code, indent, special)
   of "emit"      : result = mincPragmaEmit(code, indent, special)
+  of "namespace" : result = mincPragmaNamespace(code, indent, special)
+  # of "define"    : result = mincPragmaDefine(code, indent, special)
   else: code.trigger PragmaError, &"Only {KnownPragmas} pragmas are currently supported."
 
 
