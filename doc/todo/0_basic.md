@@ -71,7 +71,7 @@
 - [ ] For loops:  Complete support
 - [ ] Conditions : Arbitrary condition tree support
 - [ ] Multi-word pointer types  (eg: ptr unsigned long long int)
-- [ ] {.pragma:once.} and header include guards support
+- [ ] (maybe?) Header include guards support  (todo: research if compilers still get confused about file names or not)
 ```
 
 ---
