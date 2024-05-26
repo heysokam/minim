@@ -375,6 +375,18 @@ proc mincPragmaDefine (code :PNode; indent :int= 0; special :SpecialContext= Non
   # Assign to the result
   result.c = fmt DefineTempl  # TODO: Should go to the header instead
 #___________________
+const PragmaOnceTempl = "{indent*Tab}#pragma once"
+proc mincPragmaOnce (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Pragma
+  result.h = fmt PragmaOnceTempl
+#___________________
+const KnownCPragmas = ["once"]
+proc mincPragmaCPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Pragma
+  case code.:body
+  of "once": result = mincPragmaOnce(code, indent, special)
+  else: code.trigger PragmaError, &"Only {KnownCPragmas} pragmas are currently supported for {{.pragma: [name].}} ."
+#___________________
 const KnownPragmas = ["define", "error", "warning", "namespace", "emit"]
 proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ## @descr
@@ -387,6 +399,7 @@ proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CF
   of "emit"      : result = mincPragmaEmit(code, indent, special)
   of "namespace" : result = mincPragmaNamespace(code, indent, special)
   of "define"    : result = mincPragmaDefine(code, indent, special)
+  of "pragma"    : result = mincPragmaCPragma(code, indent, special)
   else: code.trigger PragmaError, &"Only {KnownPragmas} pragmas are currently supported."
 
 

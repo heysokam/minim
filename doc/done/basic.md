@@ -38,6 +38,7 @@
 - [x] Standalone Pragmas
   - [x] {.error:"msg".}
   - [x] {.define: name.}, {.define: name[sym]value.} and {.define: name [sym]value.}
+  - [x] {.pragma:once.}
 - [x] Doc Comments
 ```
 
