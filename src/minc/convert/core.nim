@@ -331,6 +331,41 @@ proc mincPragmaNamespace (code :PNode; indent :int= 0; special :SpecialContext= 
   let ns_name = body.renderTree.replace(".", "_")
   result.c = &"{indent*Tab}// namespace {ns_name}\n"
 #___________________
+const ValidDefineAsignSymbols = ["->"]
+const DefineTempl = "{indent*Tab}#define {name}{value}\n"
+proc mincPragmaDefine (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ## @descr Codegen for {.define: ... .} pragmas
+  const (Value,AssignSymbol,AssignValue, InfixName,InfixSymbol,InfixValue) = (1,0,1, 1,0,2)
+  ensure code, Pragma
+  let body = pragmas.get(code, "body")
+  # Get the name
+  var name :string
+  case body.kind
+  of nkIdent : name = body.strValue
+  of nkInfix : name = body[InfixName].strValue
+  else:
+    code.trigger PragmaError, "Define[name] error: Only {.define:name.} and {.define: name[sym]value.} pragmas are currently supported."
+  # Get the value
+  var value :string
+  # └─ Empty space between the name and the value when there is a value
+  if code.len > 1 or body.kind == nkInfix:
+    value.add " "
+  # └─ Value for the {.define: name[sym]value.} when the value is not part of the body
+  if code.len == 2:
+    if code[Value].kind == nkPrefix and code[Value][AssignSymbol].strValue in ValidDefineAsignSymbols:
+      value.add code[Value][AssignValue].strValue
+  # └─ Value for the {.define: name[sym]value.} when the value is part of the body
+  elif code.len == 1 and body.kind == nkInfix:
+    if body[InfixSymbol].strValue in ValidDefineAsignSymbols:
+      value.add body[InfixValue].strValue
+    else: code.trigger PragmaError, &"Define[sym] error: Unsupported symbol for {{.define: name[sym]value.}}. Currently suppported list:  {ValidDefineAsignSymbols}"
+  # └─ Value is empty when there is only {.define: name.}
+  elif code.len == 1: value = ""
+  else:
+    code.trigger PragmaError, "Define[value] error: Only {.define:name.} and {.define: name[sym]value.} pragmas are currently supported."
+  # Assign to the result
+  result.c = fmt DefineTempl  # TODO: Should go to the header instead
+#___________________
 const KnownPragmas = ["define", "error", "warning", "namespace", "emit"]
 proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ## @descr
@@ -342,7 +377,7 @@ proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CF
   of "warning"   : result = mincPragmaWarning(code, indent, special)
   of "emit"      : result = mincPragmaEmit(code, indent, special)
   of "namespace" : result = mincPragmaNamespace(code, indent, special)
-  # of "define"    : result = mincPragmaDefine(code, indent, special)
+  of "define"    : result = mincPragmaDefine(code, indent, special)
   else: code.trigger PragmaError, &"Only {KnownPragmas} pragmas are currently supported."
 
 #______________________________________________________

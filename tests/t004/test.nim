@@ -14,3 +14,5 @@ test name "Error"     : check "01"
 test name "Warning"   : check "02"
 test name "Emit"      : check "03"
 test name "Namespace" : check "04"
+test name "Define"    : check "05"
+
