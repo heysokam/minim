@@ -602,13 +602,13 @@ proc mincForStmt (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # @section Control Flow
 #_____________________________
-proc mincReturnStmt (code :PNode; indent :int= 1) :string=
-  assert code.kind == nkReturnStmt, code.renderTree
-  assert indent != 0, "Return statements cannot exist at the top level in C.\n" & code.treeRepr & "\n" & code.renderTree
-  let val =
-    if code[0].kind == nkInfix : mincInfixList(code[0],  indent+1, ConditionAffixRenames)
-    else                       : mincGetValueRaw(code[0],indent+1)
-  result.add &"{indent*Tab}return {val};\n"
+# proc mincReturnStmt (code :PNode; indent :int= 1) :string=
+#   assert code.kind == nkReturnStmt, code.renderTree
+#   assert indent != 0, "Return statements cannot exist at the top level in C.\n" & code.treeRepr & "\n" & code.renderTree
+#   let val =
+#     if code[0].kind == nkInfix : mincInfixList(code[0],  indent+1, ConditionAffixRenames)
+#     else                       : mincGetValueRaw(code[0],indent+1)
+#   result.add &"{indent*Tab}return {val};\n"
 #_____________________________
 proc mincContinueStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkContinueStmt, code.renderTree
@@ -851,7 +851,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # of nkProcDef          : result = mincProcDef(code, indent)
   # of nkFuncDef          : result = mincProcDef(code, indent)
   #   Other Tools
-  of nkDiscardStmt      : result = mincDiscardStmt(code, indent)
+  # of nkDiscardStmt      : result = mincDiscardStmt(code, indent)
   #   Function calls
   of nkCommand          : result = mincCommand(code, indent)
   of nkCall             : result = mincCall(code, indent)
@@ -875,7 +875,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkBreakStmt        : result = mincBreakStmt(code, indent)
   of nkContinueStmt     : result = mincContinueStmt(code, indent)
   #   Comments
-  of nkCommentStmt      : result = mincCommentStmt(code, indent)
+  # of nkCommentStmt      : result = mincCommentStmt(code, indent)
   #   Assignment
   of nkAsgn             : result = mincAsgn(code, indent)
   #   Pragmas
@@ -1002,27 +1002,27 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkNone             : result = mincNone(code)
   of nkEmpty            : result = mincEmpty(code)
   of nkIdent            : result = mincIdent(code)
-  of nkConstDef         : result = mincConstDef(code)   # Accessed by nkConstSection
-  of nkIdentDefs        : result = mincIdentDefs(code)  # Accessed by nkLetSection and nkVarSection
-  of nkCharLit          : result = mincCharLit(code)
-  of nkIntLit           : result = mincIntLit(code)
-  of nkInt8Lit          : result = mincInt8Lit(code)
-  of nkInt16Lit         : result = mincInt16Lit(code)
-  of nkInt32Lit         : result = mincInt32Lit(code)
-  of nkInt64Lit         : result = mincInt64Lit(code)
-  of nkUIntLit          : result = mincUIntLit(code)
-  of nkUInt8Lit         : result = mincUInt8Lit(code)
-  of nkUInt16Lit        : result = mincUInt16Lit(code)
-  of nkUInt32Lit        : result = mincUInt32Lit(code)
-  of nkUInt64Lit        : result = mincUInt64Lit(code)
-  of nkFloatLit         : result = mincFloatLit(code)
-  of nkFloat32Lit       : result = mincFloat32Lit(code)
-  of nkFloat64Lit       : result = mincFloat64Lit(code)
-  of nkFloat128Lit      : result = mincFloat128Lit(code)
-  of nkStrLit           : result = mincStrLit(code)
-  of nkRStrLit          : result = mincRStrLit(code)
-  of nkTripleStrLit     : result = mincTripleStrLit(code)
-  of nkNilLit           : result = mincNilLit(code)
+  # of nkConstDef         : result = mincConstDef(code)   # Accessed by nkConstSection
+  # of nkIdentDefs        : result = mincIdentDefs(code)  # Accessed by nkLetSection and nkVarSection
+  # of nkCharLit          : result = mincCharLit(code)
+  # of nkIntLit           : result = mincIntLit(code)
+  # of nkInt8Lit          : result = mincInt8Lit(code)
+  # of nkInt16Lit         : result = mincInt16Lit(code)
+  # of nkInt32Lit         : result = mincInt32Lit(code)
+  # of nkInt64Lit         : result = mincInt64Lit(code)
+  # of nkUIntLit          : result = mincUIntLit(code)
+  # of nkUInt8Lit         : result = mincUInt8Lit(code)
+  # of nkUInt16Lit        : result = mincUInt16Lit(code)
+  # of nkUInt32Lit        : result = mincUInt32Lit(code)
+  # of nkUInt64Lit        : result = mincUInt64Lit(code)
+  # of nkFloatLit         : result = mincFloatLit(code)
+  # of nkFloat32Lit       : result = mincFloat32Lit(code)
+  # of nkFloat64Lit       : result = mincFloat64Lit(code)
+  # of nkFloat128Lit      : result = mincFloat128Lit(code)
+  # of nkStrLit           : result = mincStrLit(code)
+  # of nkRStrLit          : result = mincRStrLit(code)
+  # of nkTripleStrLit     : result = mincTripleStrLit(code)
+  # of nkNilLit           : result = mincNilLit(code)
   of nkCallStrLit       : result = mincCallStrLit(code)
   of nkExprColonExpr    : result = mincExprColonExpr(code)
   of nkObjectTy         : result = mincObjectTy(code)  # Accessed by nkTypeDef
