@@ -511,11 +511,11 @@ proc mincPragmaDefine (code :PNode; indent :int= 0) :string=
 #   assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.error:\"msg\".}} error pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
 #   result.add &"{indent*Tab}#error {data[1].strValue}\n"
 #_____________________________
-proc mincPragmaWarning (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkPragma, code.renderTree
-  let data = code[0] # The data is inside an nkExprColonExpr node
-  assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.warning:\"msg\".}} warning pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
-  result.add &"{indent*Tab}#warning {data[1].strValue}\n"
+# proc mincPragmaWarning (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkPragma, code.renderTree
+#   let data = code[0] # The data is inside an nkExprColonExpr node
+#   assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.warning:\"msg\".}} warning pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
+#   result.add &"{indent*Tab}#warning {data[1].strValue}\n"
 #_____________________________
 proc mincPragmaNamespace (code :PNode; indent :int= 0) :string=
   assert code.kind == nkPragma, code.renderTree
