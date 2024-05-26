@@ -363,6 +363,18 @@ proc mincDiscard (code :PNode; indent :int= 0; special :SpecialContext= None) :C
 
 
 #______________________________________________________
+# @section Comments
+#_____________________________
+const NewLineTempl = "\n{indent*Tab}/// "
+const CommentTempl = "{indent*Tab}/// {cmt}\n"
+proc mincComment (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Comment
+  let newl = fmt NewLineTempl
+  let cmt  = code.strValue.replace("\n", newl)
+  result.c = fmt CommentTempl
+
+
+#______________________________________________________
 # @section Source-to-Source Generator
 #_____________________________
 proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
@@ -393,5 +405,6 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkIdent            : result = mincIdent(code, indent, special)
   of nkEmpty            : result = CFilePair()
   of nkIncludeStmt      : result = mincInclude(code, indent)
+  of nkCommentStmt      : result = mincComment(code, indent, special)
   else: code.err &"Translating {code.kind} to MinC is not supported yet."
 

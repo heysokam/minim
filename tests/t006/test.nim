@@ -1,4 +1,4 @@
-const Title = "Discard"
+const Title = "Comments and Newlines"
 #_______________________________________
 # @deps tests
 include ../base
@@ -10,6 +10,6 @@ template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 # @section Test
 #_____________________________
-test name "Single identifier" : check "01"
-test name "Multi identifier"  : check "02"
+test name "Basic Doc Comment"   : check "01"
+test name "Multi-line Comments" : check "02"
 

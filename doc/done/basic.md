@@ -34,5 +34,6 @@
 - [x] Header include
 - [x] Standalone Pragmas
   - [x] {.error:"msg".}
+- [x] Doc Comments
 ```
 

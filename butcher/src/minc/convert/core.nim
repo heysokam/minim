@@ -814,14 +814,14 @@ proc mincAsgn (code :PNode; indent :int= 0) :string=
   result.add &"{indent*Tab}{name} = {val};\n"
 
 
-#______________________________________________________
-# @section Comments
-#_____________________________
-proc mincCommentStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkCommentStmt, code.renderTree
-  let newl = &"\n{indent*Tab}/// "
-  let cmt  = code.strValue.replace("\n", newl)
-  result.add &"{indent*Tab}/// {cmt}\n"
+# #______________________________________________________
+# # @section Comments
+# #_____________________________
+# proc mincCommentStmt (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkCommentStmt, code.renderTree
+#   let newl = &"\n{indent*Tab}/// "
+#   let cmt  = code.strValue.replace("\n", newl)
+#   result.add &"{indent*Tab}/// {cmt}\n"
 
 
 # #______________________________________________________
