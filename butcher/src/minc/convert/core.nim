@@ -824,15 +824,15 @@ proc mincCommentStmt (code :PNode; indent :int= 0) :string=
   result.add &"{indent*Tab}/// {cmt}\n"
 
 
-#______________________________________________________
-# @section Other tools
-#_____________________________
-proc mincDiscardStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkDiscardStmt, code.renderTree
-  case code[0].kind
-  of nkTupleConstr,nkPar:
-    for arg in code[0]: result.add &"{indent*Tab}(void){mincGetValueStr(arg,indent)};/*discard*/\n"
-  else: result.add &"{indent*Tab}(void){mincGetValueStr(code[0],indent)};/*discard*/\n"
+# #______________________________________________________
+# # @section Other tools
+# #_____________________________
+# proc mincDiscardStmt (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkDiscardStmt, code.renderTree
+#   case code[0].kind
+#   of nkTupleConstr,nkPar:
+#     for arg in code[0]: result.add &"{indent*Tab}(void){mincGetValueStr(arg,indent)};/*discard*/\n"
+#   else: result.add &"{indent*Tab}(void){mincGetValueStr(code[0],indent)};/*discard*/\n"
 
 
 #______________________________________________________

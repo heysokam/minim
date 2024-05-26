@@ -1,6 +1,5 @@
 ```md
 # Refactor Redo
-- [ ] Discard statement
 - [ ] Immutable data by default  (const unless marked as mutable)
   - [ ] Function arguments
 - [ ] Private (aka static) symbols unless explicitly specified otherwise
@@ -16,7 +15,6 @@
 - [ ] Alternative type casting syntax
   - [ ] val as Type
   - [ ] val @ Type
-- [ ] Multi-discard:   discard (one,two)
 ```
 
 ```md
