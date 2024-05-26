@@ -345,6 +345,21 @@ proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CF
   # of "define"    : result = mincPragmaDefine(code, indent, special)
   else: code.trigger PragmaError, &"Only {KnownPragmas} pragmas are currently supported."
 
+#______________________________________________________
+# @section Discard
+#_____________________________
+const DiscardTempl = "{indent*Tab}(void){body};/*discard*/\n"
+proc mincDiscard (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Discard
+  let D = code[0]
+  case D.kind
+  of nkTupleConstr,nkPar:
+    for arg in D:
+      let body = MinC(arg, indent, special).c
+      result.c.add fmt DiscardTempl
+  else:
+    let body = MinC(D, indent, special).c
+    result.c = fmt DiscardTempl
 
 
 #______________________________________________________
@@ -368,6 +383,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkLetSection       : result = mincLetSection(code, indent)
   of nkVarSection       : result = mincVarSection(code, indent)
   of nkAsgn             : result = mincAsgn(code, indent, special)
+  of nkDiscardStmt      : result = mincDiscard(code, indent, special)
   # └─ Pragmas
   of nkPragma           : result = mincPragma(code, indent, special)
   # Terminal cases
