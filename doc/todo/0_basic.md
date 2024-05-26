@@ -17,8 +17,6 @@
   - [ ] if/elif/else blocks
   - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
   - [ ] Multi-condition support (recursive)
-- [ ] break
-- [ ] continue
 - [ ] Operators
   - [ ] Prefix   + - & ! * -- ++
   - [ ] Infix
