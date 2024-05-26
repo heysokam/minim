@@ -528,13 +528,13 @@ proc mincPragmaNamespace (code :PNode; indent :int= 0) :string=
     else:""
   assert val != "", &"Failed to find the namespace name value for:\n{code.treeRepr}\n"
   result.add &"{indent*Tab}// namespace {val}\n"
-#_____________________________
-proc mincPragmaEmit (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkPragma and code[0].kind == nkExprColonExpr and code[0][0].strValue == "emit" and code[0][1].kind in SomeStrLit,
-    &"Tried to get the code from an emit pragma, but the node does not match the required shape.\nThe incorrect tree+code is:\n{code.treeRepr}\n{code.renderTree}\n"
-  let text = code[0][1].strValue
-  let emit = if text.endsWith("\n"): text[0..^2] else: text
-  result = &"{indent*Tab}{text}\n"
+# #_____________________________
+# proc mincPragmaEmit (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkPragma and code[0].kind == nkExprColonExpr and code[0][0].strValue == "emit" and code[0][1].kind in SomeStrLit,
+#     &"Tried to get the code from an emit pragma, but the node does not match the required shape.\nThe incorrect tree+code is:\n{code.treeRepr}\n{code.renderTree}\n"
+#   let text = code[0][1].strValue
+#   let emit = if text.endsWith("\n"): text[0..^2] else: text
+#   result = &"{indent*Tab}{text}\n"
 # #_____________________________
 # proc mincPragma (code :PNode; indent :int= 0) :string=
 #   ## Codegen for standalone pragmas
