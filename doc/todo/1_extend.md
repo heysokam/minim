@@ -1,7 +1,5 @@
 ```md
 # Refactor Redo
-- [ ] Standalone Pragmas
-  - [ ] {.namespace: one.sub.}  and  {.namespace: _.}
 - [ ] Discard statement
 - [ ] Immutable data by default  (const unless marked as mutable)
   - [ ] Function arguments
@@ -33,6 +31,7 @@
 - [ ] Object extension   (type MyType = object of ... )
 - [ ] Variant types
 - [ ] Generics
+- [ ] {.namespace: one.sub.}  and  {.namespace: _.}   (full support)
 - [ ] Modules
 - [ ] Function calls: dot.syntax()   https://en.wikipedia.org/wiki/Uniform_Function_Call_Syntax
 - [ ] Enum-arrays

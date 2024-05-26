@@ -516,19 +516,19 @@ proc mincPragmaDefine (code :PNode; indent :int= 0) :string=
 #   let data = code[0] # The data is inside an nkExprColonExpr node
 #   assert data.kind == nkExprColonExpr and data.len == 2 and data[1].kind == nkStrLit, &"Only {{.warning:\"msg\".}} warning pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
 #   result.add &"{indent*Tab}#warning {data[1].strValue}\n"
-#_____________________________
-proc mincPragmaNamespace (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkPragma, code.renderTree
-  let data = code[0] # The data is inside an nkExprColonExpr node
-  let name = data[1] # Name node of the namespace
-  assert data.kind == nkExprColonExpr and data.len == 2 and name.kind in [nkIdent,nkDotExpr], &"Only {{.namespace:name.}} and {{.namespace:name.sub.}} namespace pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
-  let val  =
-    if   name.kind == nkIdent   : name.strValue
-    elif name.kind == nkDotExpr : mincDotExprList(name).join(".") # TODO: this is fine, but symbols should be using _
-    else:""
-  assert val != "", &"Failed to find the namespace name value for:\n{code.treeRepr}\n"
-  result.add &"{indent*Tab}// namespace {val}\n"
 # #_____________________________
+# proc mincPragmaNamespace (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkPragma, code.renderTree
+#   let data = code[0] # The data is inside an nkExprColonExpr node
+#   let name = data[1] # Name node of the namespace
+#   assert data.kind == nkExprColonExpr and data.len == 2 and name.kind in [nkIdent,nkDotExpr], &"Only {{.namespace:name.}} and {{.namespace:name.sub.}} namespace pragmas are currently supported.\nThe incorrect code is:\n{code.renderTree}\n"
+#   let val  =
+#     if   name.kind == nkIdent   : name.strValue
+#     elif name.kind == nkDotExpr : mincDotExprList(name).join(".") # TODO: this is fine, but symbols should be using _
+#     else:""
+#   assert val != "", &"Failed to find the namespace name value for:\n{code.treeRepr}\n"
+#   result.add &"{indent*Tab}// namespace {val}\n"
+# # #_____________________________
 # proc mincPragmaEmit (code :PNode; indent :int= 0) :string=
 #   assert code.kind == nkPragma and code[0].kind == nkExprColonExpr and code[0][0].strValue == "emit" and code[0][1].kind in SomeStrLit,
 #     &"Tried to get the code from an emit pragma, but the node does not match the required shape.\nThe incorrect tree+code is:\n{code.treeRepr}\n{code.renderTree}\n"
