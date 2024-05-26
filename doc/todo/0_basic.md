@@ -3,7 +3,6 @@
 - [ ] Standalone Pragmas
   - [ ] {.define: symbol.}   (note: remember when defined(...) )
 - [ ] Function calls: Call(syntax)
-- [ ] Doc Comments
 - [ ] Type declaration
   - [ ] Type aliasing    typedef char* str;
   - [ ] Mutable pointer to immutable data    {.readonly.} pragma

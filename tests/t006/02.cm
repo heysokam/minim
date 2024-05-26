@@ -1,0 +1,27 @@
+# This is a normal comment. (TODO: Ignored by the parser. Should be preserved)
+
+# The empty newline above this one should be preserved by the parser (TODO: currently doesnt, needs parser modifications)
+
+#[  (TODO: This should be preserved, but currently isn't. Needs parser modifications)
+# This is a multi-line standard comment.
+#The source code below should show up as comments, and not code, in the final file
+
+int main(void) { return 42; }
+proc main *() :int= return 42
+]#
+
+
+
+
+## This is a doc-comment
+## created with multiple single-line doc-comments
+## right next to each other
+
+##[
+# This is a multi-line doc comment.
+# The source code below will show up as doc comments, and not code, in the final file
+
+int main(void) { return 42; }
+proc main *() :int= return 42
+]##
+
