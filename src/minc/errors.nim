@@ -37,5 +37,5 @@ proc trigger *(
     msg  : varargs[string, `$`];
     pfx  : string= cfg.Prefix;
   ) :void=
-  nstdErr.trigger excp, &"\n{code.treeRepr}\n{code.renderTree}\n{msg}", pfx
+  nstdErr.trigger excp, &"\n{code.treeRepr}\n{code.renderTree}\n\n{msg.join(\" \")}", pfx
 

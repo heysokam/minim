@@ -1,6 +1,7 @@
 ```md
 # Refactor Redo
-- [ ] Function calls: Call(syntax)
+- [ ] Function Definition (proc)
+  - [ ] {.noreturn.}
 - [ ] Type declaration
   - [ ] Type aliasing    typedef char* str;
   - [ ] Mutable pointer to immutable data    {.readonly.} pragma
@@ -38,7 +39,7 @@
   - [ ] Construction: Function Parameters
   - [ ] Construction: Reassignment
   - [ ] {.stub.} for using the non-typedef version of the struct
-- [ ] addr
+  - [ ] Compound Literals
 - [ ] Explicit casting
 - [ ] Pointer dereference   one[] = val   ->   *one = val
 - [ ] obj->field   pointer access syntax ->

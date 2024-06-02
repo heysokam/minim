@@ -21,6 +21,10 @@ const NilValue *{.strdefine.}= "nullptr" #"NULL"
 const PtrValue *{.strdefine.}= "void*"   ## `pointer` will become `void*`
 
 #_______________________________________
+# @section C Format
+const SeparatorArgs *{.strdefine.}= ", "  ## thing(arg1[sep]arg2[sep]arg3)  ->  thing(arg1, arg2, arg3)
+
+#_______________________________________
 # @section Configuration Defaults
 let binDir *:Path= getCurrentDir()/"bin"
   ## @descr
