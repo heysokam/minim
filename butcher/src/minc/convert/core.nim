@@ -61,7 +61,7 @@ const ConditionAffixRenames = {
   "and": "&&",  "or" : "||",  "xor": "^" ,
   "mod": "%" ,  "div": "/" ,
   }.toTable()
-const KnownMainNames         = ["main", "WinMain"]
+# const KnownMainNames         = ["main", "WinMain"]
 const KnownKeywords          = ["addr", "sizeof"]
 # const KnownPragmas           = ["define", "error", "warning", "namespace", "emit"]
 const KnownForInfix          = ["..", "..<"]
@@ -87,14 +87,14 @@ proc mincGetValueStr (code :PNode; indent :int= 0) :string=
   let isPtr = code.kind == nkPtrTy
   var name  =
     case code.kind
-    of nkEmpty   : ""
-    of nkIdent   :
-      if code.strValue == "_": "{0}" else: code.strValue
+    # of nkEmpty   : ""
+    # of nkIdent   :
+    #   if code.strValue == "_": "{0}" else: code.strValue
     of nkPtrTy   : code[0].strValue
-    of nkNilLit  : "NULL"
-    of nkCharLit : &"'{vars.getValue(code).parseInt().char}'"
-    of nkStrLit  : &"\"{code.strValue}\""
-    of nkRStrLit : &"\"{code.strValue}\""
+    # of nkNilLit  : "NULL"
+    # of nkCharLit : &"'{vars.getValue(code).parseInt().char}'"
+    # of nkStrLit  : &"\"{code.strValue}\""
+    # of nkRStrLit : &"\"{code.strValue}\""
     of nkInfix   : mincGetValueRaw(code,indent)
     of nkDotExpr : mincGetValueRaw(code,indent)
     of nkPar     : &"({mincGetValueRaw(code[0])})"
@@ -229,20 +229,20 @@ proc mincGetValueRaw (code :PNode; indent :int= 0) :string=
   if code.kind == nkBracketExpr :
     if code.sons.len == 1       : &"*{code[0].strValue}" # Dereference case
     else                        : &"{mincGetValueRaw(code[0], indent)}[{mincGetValueRaw(code[1], indent)}]"
-  elif code.kind == nkBracket   : mincGetArrayValue(code, indent)
+  # elif code.kind == nkBracket   : mincGetArrayValue(code, indent)
   elif code.kind == nkDotExpr   : mincDotExprList(code).join(".")
-  elif code.kind == nkCharLit   : &"'{code.strValue.parseInt().char}'"
+  # elif code.kind == nkCharLit   : &"'{code.strValue.parseInt().char}'"
   elif code.kind == nkPrefix    : &"{code[0].strValue}{mincGetValueRaw(code[1], indent)}"
   elif code.kind == nkInfix     : mincInfixList(code, indent, ValueAffixRenames)
   elif code.kind == nkCast      : &"({mincGetValueStr(code[0], indent)})({mincGetValueRaw(code[1], indent)})" # Recursive case for cast[]()
-  elif code.kind in SomeCall    : mincCallRaw(code, indent)
+  # elif code.kind in SomeCall    : mincCallRaw(code, indent)
   elif code.kind == nkPtrTy     : &"{code[0].strValue}*"
   elif code.kind == nkObjConstr : mincGetObjectValue(code, indent)
   elif code.kind == nkIfExpr    : mincGetTernary(code, indent)
   elif code.kind == nkPar       : &"({mincGetValueRaw(code[0])})"
-  elif code.isTripleStrLit      : mincGetTripleStrLit(code,indent+1)
-  elif code.kind in SomeStrLit  : &"\"{strv}\""
-  else                          : mincGetValueStr(code, indent)
+  # elif code.isTripleStrLit      : mincGetTripleStrLit(code,indent+1)
+  # elif code.kind in SomeStrLit  : &"\"{strv}\""
+  # else                          : mincGetValueStr(code, indent)
 
 
 #______________________________________________________
@@ -331,16 +331,16 @@ proc mincProcDefGetArgs (code :PNode) :string=
     let ronly = if arg.node[0].kind == nkPragmaExpr and arg.node[0][1].kind == nkPragma and arg.node[0][1][0].strValue == "readonly": "const " else: ""
     result.add( fmt "{ronly}{typ}{mut} {arg.name}{arr}{sep}" )
 #_____________________________
-proc mincFuncDef  (code :PNode; indent :int= 0) :string=
-  assert false, "proc and func are identical in C"  # TODO : Sideffects checks
-  # __attribute__ ((pure))
-  # write-only memory idea from herose (like GPU write-only mem)
+# proc mincFuncDef  (code :PNode; indent :int= 0) :string=
+#   assert false, "proc and func are identical in C"  # TODO : Sideffects checks
+#   # __attribute__ ((pure))
+#   # write-only memory idea from herose (like GPU write-only mem)
 #_____________________________
-proc mincProcDefGetBody  (code :PNode; indent :int= 1) :string=
-  ## Returns the code for the body of the given ProcDef node.
-  # note: stored in core because it calls MinC
-  result.add "\n"
-  result.add MinC(code[procdef.Elem.Body], indent)
+# proc mincProcDefGetBody  (code :PNode; indent :int= 1) :string=
+#   ## Returns the code for the body of the given ProcDef node.
+#   # note: stored in core because it calls MinC
+#   result.add "\n"
+#   result.add MinC(code[procdef.Elem.Body], indent)
 #_____________________________
 proc mincProcDef  (code :PNode; indent :int= 0) :string=
   ## Converts a nkProcDef into the MinC Language
@@ -370,40 +370,40 @@ proc mincProcDef  (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # @section Function Calls
 #_____________________________
-proc mincCallGetName (code :PNode) :string=
-  assert code.kind in {nkCall, nkCommand}, code.renderTree
-  result = code[0].strValue
-  case result
-  of "addr" : result = "&"
+# proc mincCallGetName (code :PNode) :string=
+#   assert code.kind in {nkCall, nkCommand}, code.renderTree
+#   result = code[0].strValue
+#   case result
+#   of "addr" : result = "&"
 #_____________________________
-proc mincCallGetArgs (code :PNode; indent :int= 0) :string=
-  ## Returns the code for all arguments of the given ProcDef node.
-  assert code.kind in {nkCall, nkCommand}, code.renderTree
-  if calls.getArgCount(code) == 0: return
-  for arg in calls.args(code):
-    result.add mincGetValueRaw(arg.node, indent)
-    result.add( if arg.last: "" else: ", " )
+# proc mincCallGetArgs (code :PNode; indent :int= 0) :string=
+#   ## Returns the code for all arguments of the given ProcDef node.
+#   assert code.kind in {nkCall, nkCommand}, code.renderTree
+#   if calls.getArgCount(code) == 0: return
+#   for arg in calls.args(code):
+#     result.add mincGetValueRaw(arg.node, indent)
+#     result.add( if arg.last: "" else: ", " )
 #_____________________________
-proc mincCallRaw (code :PNode; indent :int= 0) :string=
-  assert code.kind in {nkCall, nkCommand}, code.renderTree
-  # Union special case
-  if code.sons.len == 2 and code[0].kind == nkIdent and code[1].kind == nkInfix and code[1][0].strValue in ValidUnionOperators:
-    return &"{mincGetObjectValue(code,indent)}"
-  # Other cases
-  let name = mincCallGetName(code)
-  let args = mincCallGetArgs(code,indent)
-  result   =
-    if   name == "&"        : &"{name}{args}"
-    elif args in ValidEmpty : &"{mincGetObjectValue(code,indent)}" # Reinterpret as an empty object constructor when "_"
-    else                    : &"{name}({args})"
-#_____________________________
-proc mincCall (code :PNode; indent :int= 0) :string=
-  assert code.kind in {nkCall, nkCommand}, code.renderTree
-  result.add &"{indent*Tab}{mincCallRaw(code,indent)};\n"
-#_____________________________
-proc mincCommand (code :PNode; indent :int= 0) :string=
-  assert code.kind in {nkCommand}, code.renderTree
-  mincCall(code,indent)  # Command and Call are identical in C
+# proc mincCallRaw (code :PNode; indent :int= 0) :string=
+#   assert code.kind in {nkCall, nkCommand}, code.renderTree
+#   # Union special case
+#   if code.sons.len == 2 and code[0].kind == nkIdent and code[1].kind == nkInfix and code[1][0].strValue in ValidUnionOperators:
+#     return &"{mincGetObjectValue(code,indent)}"
+#   # Other cases
+#   let name = mincCallGetName(code)
+#   let args = mincCallGetArgs(code,indent)
+#   result   =
+#     if   name == "&"        : &"{name}{args}"
+#     elif args in ValidEmpty : &"{mincGetObjectValue(code,indent)}" # Reinterpret as an empty object constructor when "_"
+#     else                    : &"{name}({args})"
+# #_____________________________
+# proc mincCall (code :PNode; indent :int= 0) :string=
+#   assert code.kind in {nkCall, nkCommand}, code.renderTree
+#   result.add &"{indent*Tab}{mincCallRaw(code,indent)};\n"
+# #_____________________________
+# proc mincCommand (code :PNode; indent :int= 0) :string=
+#   assert code.kind in {nkCommand}, code.renderTree
+#   mincCall(code,indent)  # Command and Call are identical in C
 
 
 #______________________________________________________
@@ -417,7 +417,7 @@ proc mincVariableGetValue (entry :PNode; value :PNode; typ :VariableType; indent
     # if   value.kind == nkIdent and value.strValue == "_": " {0}"
     # elif value.kind == nkEmpty             : ""
     # elif value.kind == nkNilLit            : " NULL"
-    elif value.kind in {nkCall,nkCommand}  : &" {mincCallRaw(value,indent)}"
+    # elif value.kind in {nkCall,nkCommand}  : &" {mincCallRaw(value,indent)}"
     # elif value.kind in nkStrLit..nkRStrLit : &" \"{vars.getValue(entry)}\""
     # elif value.isTripleStrLit              : mincGetTripleStrLit(value,indent+1)
     # elif value.kind == nkCharLit           : &" '{vars.getValue(entry).parseInt().char}'"
@@ -853,8 +853,8 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   #   Other Tools
   # of nkDiscardStmt      : result = mincDiscardStmt(code, indent)
   #   Function calls
-  of nkCommand          : result = mincCommand(code, indent)
-  of nkCall             : result = mincCall(code, indent)
+  # of nkCommand          : result = mincCommand(code, indent)
+  # of nkCall             : result = mincCall(code, indent)
   # Types
   of nkTypeSection      : result = mincTypeSection(code, indent)
   of nkTypeDef          : result = mincTypeDef(code, indent) # Accessed by nkTypeSection
@@ -1023,7 +1023,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # of nkRStrLit          : result = mincRStrLit(code)
   # of nkTripleStrLit     : result = mincTripleStrLit(code)
   # of nkNilLit           : result = mincNilLit(code)
-  of nkCallStrLit       : result = mincCallStrLit(code)
+  # of nkCallStrLit       : result = mincCallStrLit(code)
   of nkExprColonExpr    : result = mincExprColonExpr(code)
   of nkObjectTy         : result = mincObjectTy(code)  # Accessed by nkTypeDef
   of nkPtrTy            : result = mincPtrTy(code)
@@ -1041,7 +1041,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkFastAsgn         : result = mincFastAsgn(code)
 
   # Recursive Cases
-  of nkStmtList:
-    for child in code: result.add MinC( child, indent )
+  # of nkStmtList:
+  #   for child in code: result.add MinC( child, indent )
 
 

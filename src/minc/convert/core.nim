@@ -20,21 +20,34 @@ import ../tools
 #_______________________________________
 # @section MinC+Slate Node Access
 #_____________________________
+const ReservedCalls :ReservedNames= @[
+  ("addr", "&")
+  ] # << ReservedCalls [ ... ]
+#___________________
+func renameReserved (name :string; kind :TNodeKind) :string=
+  let list =
+    case kind
+    of nkCommand, nkCall: ReservedCalls
+    else: @[]
+  for rename in list:
+    if name == rename.og: return rename.to
+  result = name
+#___________________
 template `.:`*(code :PNode; prop :untyped) :string=
   let field = astToStr(prop)
   case code.kind
-  of nkStmtList :
+  of nkStmtList:
     var id = int.high
     try : id = field.parseInt
-    except NodeAccessError: code.err "Tried to access a Statement List, but the keyword passed was not a number:  "&field
+    except NodeAccessError: code.err "MinC: Tried to access a Statement List, but the keyword passed was not a number:  "&field
     strValue( statement.get(code, id) )
   of nkProcDef:
     var id       = int.high
     var property = field
-    if "arg" in field:
+    if "arg_" in field:
       property = field.split("_")[0]
       try : id = field.split("_")[1].parseInt
-      except NodeAccessError: code.err "Tried to access an Argument ID for a nkProcDef, but the keyword passed has an incorrect format:  "&field
+      except NodeAccessError: code.err "MinC: Tried to access an Argument ID for a nkProcDef, but the keyword passed has an incorrect format:  "&field
     strValue( procs.get(code, property, id) )
   of nkConstDef, nkIdentDefs:
     let typ = vars.get(code, field)
@@ -47,7 +60,15 @@ template `.:`*(code :PNode; prop :untyped) :string=
     else: strValue( typ )
   of nkPragma:
     strValue( pragmas.get(code, field) )
-  else: code.err "Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
+  of nkCommand, nkCall:
+    var id       = int.high
+    var property = field
+    if "arg_" in field:
+      property = field.split("_")[0]
+      try : id = field.split("_")[1].parseInt
+      except NodeAccessError: code.err "MinC: Tried to access an Argument ID for a Call, but the keyword passed has an incorrect format:  "&field
+    strValue( calls.get(code, property, id) ).renameReserved(code.kind)
+  else: code.err "MinC: Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
 
 
 
@@ -130,12 +151,7 @@ proc mincInclude (code :PNode; indent :int= 0) :CFilePair=
 #_______________________________________
 # @section Procedures
 #_____________________________
-proc mincFuncDef (code :PNode; indent :int= 0) :CFilePair=
-  # __attribute__ ((pure))
-  # write-only memory idea from herose (like GPU write-only mem)
-  ensure code, Func
-  code.trigger ProcError, "proc and func are identical in C"  # TODO : Sideffects checks
-#_____________________________
+const KnownMainNames = ["main", "WinMain"]
 const ProcProtoTempl = "{qual}{T} {name} ({args});\n"
 const ProcDefTempl   = "{qual}{T} {name} ({args}) {{\n{body}\n}}\n"
 proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
@@ -144,18 +160,51 @@ proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
   let name = code.:name
   if not code.isPublic: qual.add "static "
   let T    = code.:returnT
-  let args = "void"
+  var args = "void"  # TODO: Proper arguments logic
   let body = MinC(procs.get(code,"body"), indent+1).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
   result.h =
-    if code.isPublic and name != "main" : fmt ProcProtoTempl
-    else                                : ""
+    if code.isPublic and name notin KnownMainNames : fmt ProcProtoTempl
+    else: ""
   result.c = fmt ProcDefTempl
+#_____________________________
+proc mincFuncDef (code :PNode; indent :int= 0) :CFilePair=
+  # __attribute__ ((pure))
+  # write-only memory idea from herose (like GPU write-only mem)
+  ensure code, Func
+  mincProcDef(code, indent)
+  # code.trigger ProcError, "proc and func are identical in C"  # TODO : Sideffects checks
 #___________________
-proc mincCall *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+const CallAddrTempl = "{name}{args}"
+const CallRawTempl  = "{name}({args})"
+const CallTempl     = "{indent*Tab}{call};\n"
+proc mincCall (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  # TODO: Union special case
+  # TODO: &(StructType){...} special case
+  # TODO: StructType(_) special case
   ensure code, Call
   if code.kind == nkCallStrLit: return mincLiteral(code, indent, special)
-  code.trigger CallError, &"Calls are not supported yet\n{code.renderTree}"
+  # Get the name
+  let name = code.:name
+  # Get the args code
+  var args :string
+  let code_args = calls.get(code, "args")
+  for id,arg in code_args.pairs:
+    args.add MinC(arg, indent+1, Argument).c
+    if id != code_args.sons.high: args.add SeparatorArgs
+  # Apply to the result
+  let call =
+    case name
+    of "&": fmt CallAddrTempl
+    else:   fmt CallRawTempl
+  result.c =
+    case special
+    of None : fmt CallTempl # Format it by default
+    else    : call          # Leave it unchanged for special cases
+#_____________________________
+proc mincCommand (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Call
+  mincCall(code, indent, special)  # Command and Call are identical in C
 
 
 #_______________________________________
@@ -164,16 +213,15 @@ proc mincCall *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFi
 const VarDeclTempl = "{indent*Tab}extern {qual}{T} {name};\n"
 const VarDefTempl  = "{indent*Tab}{qual}{T} {name}{eq}{value};\n"
 #___________________
-proc mincVariable (code :PNode; indent :int; kind :Kind) :CFilePair=
-  const Type = 2
+proc mincVariable (code :PNode; indent :int= 0; kind :Kind) :CFilePair=
   # Error check
   ensure code, Const, Let, Var, msg="Tried to generate code for a variable, but its kind is incorrect"
   let typ  = vars.get(code, "type")
   let body = vars.get(code, "body")
   if typ.kind == nkEmpty: code.trigger VariableError,
-    &"Declaring a variable without a type is forbidden. The illegal code is:\n{code.renderTree}\n"
+    &"Declaring a variable without a type is forbidden."
   if kind == Const and body.kind == nkEmpty: code.trigger VariableError,
-    &"Declaring a variable without a value is forbidden for `const`. The illegal code is:\n{code.renderTree}\n"
+    &"Declaring a variable without a value is forbidden for `const`."
   # Get the qualifier
   var qual :string
   if code.isPersist(indent) or (indent < 1 and not code.isPublic) : qual.add "static "
@@ -293,15 +341,16 @@ proc mincBracket (code :PNode; indent :int= 0; special :SpecialContext= None) :C
       result.c.add MinC(value, indent+1, special).c
       result.c.add if id != code.sons.high: "," else: "\n"
     result.c.add &"{indent*Tab}}}"
-  else: code.trigger BracketError, &"Found an unmapped kind for interpreting Bracket code:  {special}"
+  else: code.trigger BracketError, &"Found an unmapped SpecialContext kind for interpreting Bracket code:  {special}"
 #___________________
 proc mincIdent (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   let val = code.strValue
   case special
   of Variable:
     if val == "_": result.c = "{0}" # This is definitely incorrect for the Object SpecialContext
-  of None: result.c = val
-  else: code.trigger IdentError, &"Found an unmapped kind for interpreting Indent code:  {special}"
+  of None, Argument: result.c = val
+  else: code.trigger IdentError, &"Found an unmapped SpecialContext kind for interpreting Ident code:  {special}"
+
 
 #_______________________________________
 # @section Pragmas
@@ -443,7 +492,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   # Intermediate cases
   # └─ Procedures
   of nkProcDef          : result = mincProcDef(code, indent)
-  of nkFuncDef          : result = mincProcDef(code, indent)
+  of nkFuncDef          : result = mincFuncDef(code, indent)
   # └─ Control flow
   of nkReturnStmt       : result = mincReturnStmt(code, indent, special)
   # └─ Variables
@@ -457,7 +506,9 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   # Terminal cases
   of nkEmpty            : result = CFilePair()
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
-  of nim.SomeCall       : result = mincCall(code, indent, special)
+  of nkCallStrLit       : result = mincLiteral(code, indent, special)
+  of nkCall             : result = mincCall(code, indent, special)
+  of nkCommand          : result = mincCommand(code, indent, special)
   of nkBracket          : result = mincBracket(code, indent, special)
   of nkIdent            : result = mincIdent(code, indent, special)
   of nkIncludeStmt      : result = mincInclude(code, indent)

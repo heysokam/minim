@@ -1,0 +1,8 @@
+include @stdio.h
+proc two () :int= return 2
+proc main *() :int=
+  let one :int= 1
+  printf "SingleLine %d %d %f %s", one, two(), 3.0'f, "four"
+  printf "Multi-line %d %d %f %s",
+    one, two(), 3.0'f, "four"
+  return 42

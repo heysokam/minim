@@ -16,7 +16,7 @@ type ClangFormat * = object
   file  *:Path
 
 #_______________________________________
-type SpecialContext *{.pure.}= enum None, Array, Object, Variable
+type SpecialContext *{.pure.}= enum None, Array, Object, Variable, Argument
   ## @descr The same syntax can be interpreted differently depending on its SpecialContext usage
 
 #_______________________________________
@@ -28,3 +28,10 @@ type Module * = object
   lang   *:ModuleLang
   path   *:Path
   local  *:bool= true
+
+#_______________________________________
+type ReservedName * = tuple[og:string, to:string]
+  ## @descr Describes a rename from a reserved keyword `og` to the target keyword `to`
+  ## @eg (og: addr to: &)
+type ReservedNames * = seq[ReservedName]
+

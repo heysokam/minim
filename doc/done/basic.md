@@ -40,5 +40,9 @@
   - [x] {.define: name.}, {.define: name[sym]value.} and {.define: name [sym]value.}
   - [x] {.pragma:once.}
 - [x] Doc Comments
+- [x] Function calls
+  - [x] Call(syntax)
+  - [x] command syntax
+  - [x] addr
 ```
 
