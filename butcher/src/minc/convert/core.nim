@@ -570,11 +570,11 @@ proc mincGetCondition (code :PNode; indent :int= 0) :string=
 #______________________________________________________
 # @section Loops
 #_____________________________
-proc mincWhileStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkWhileStmt, code.renderTree
-  result.add &"{indent*Tab}while ({mincGetCondition(code[0])}) {{\n"
-  result.add MinC( code[^1], indent+1 )
-  result.add &"{indent*Tab}}}\n"
+# proc mincWhileStmt (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkWhileStmt, code.renderTree
+#   result.add &"{indent*Tab}while ({mincGetCondition(code[0])}) {{\n"
+#   result.add MinC( code[^1], indent+1 )
+#   result.add &"{indent*Tab}}}\n"
 #_____________________________
 proc mincForStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkForStmt, code.renderTree
@@ -863,7 +863,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # of nkLetSection       : result = mincLetSection(code, indent)
   # of nkVarSection       : result = mincVarSection(code, indent)
   #   Loops
-  of nkWhileStmt        : result = mincWhileStmt(code, indent)
+  # of nkWhileStmt        : result = mincWhileStmt(code, indent)
   of nkForStmt          : result = mincForStmt(code, indent)
   #   Conditionals
   of nkIfStmt           : result = mincIfStmt(code, indent)
