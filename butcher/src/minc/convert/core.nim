@@ -38,29 +38,29 @@ include ./fwdecl
 # @section Codegen: Types
 #_____________________________
 # type  VarKind {.pure.}= enum Const, Let, Var
-type  Renames         = Table[string, string]
+# type  Renames         = Table[string, string]
 # const SomeLit         = {nkCharLit..nkTripleStrLit}
 # const SomeStrLit      = {nkStrLit..nkTripleStrLit}
 # const SomeCall        = {nkCall,nkCommand}
 # const SomeValueNode   = {nkIdent, nkPtrTy, nkInfix}+SomeLit+{nkNilLit}
 # Special cases
-const Reserved            = ["pointer"]
+# const Reserved            = ["pointer"]
 const NoSpacingInfixes    = ["->"]
 const ValidEmpty          = ["_", "{0}"]
 # const ValidRawStrPrefixes = ["raw"]
 const ValidInfixKind      = {nkIdent,nkInfix,nkPar,nkCast,nkBracketExpr,nkBracket,nkDotExpr,nkPtrTy} + SomeCall + SomeLit + {nkNilLit}
 const ValidCastOperators  = ["as", "@"]
 const ValidUnionOperators = [".:"]
-const ValueAffixRenames   = {
-  "shl": "<<",  "shr": ">>",
-  "and": "&" ,  "or" : "|" ,  "xor": "^" ,
-  "mod": "%" ,  "div": "/" ,
-  }.toTable
-const ConditionAffixRenames = {
-  "shl": "<<",  "shr": ">>",
-  "and": "&&",  "or" : "||",  "xor": "^" ,
-  "mod": "%" ,  "div": "/" ,
-  }.toTable()
+# const ValueAffixRenames   = {
+#   "shl": "<<",  "shr": ">>",
+#   "and": "&" ,  "or" : "|" ,  "xor": "^" ,
+#   "mod": "%" ,  "div": "/" ,
+#   }.toTable
+# const ConditionAffixRenames = {
+#   "shl": "<<",  "shr": ">>",
+#   "and": "&&",  "or" : "||",  "xor": "^" ,
+#   "mod": "%" ,  "div": "/" ,
+#   }.toTable()
 # const KnownMainNames         = ["main", "WinMain"]
 const KnownKeywords          = ["addr", "sizeof"]
 # const KnownPragmas           = ["define", "error", "warning", "namespace", "emit"]
@@ -311,25 +311,25 @@ proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
 #______________________________________________________
 # @section Procedures
 #_____________________________
-proc mincProcDefGetArgs (code :PNode) :string=
-  ## Returns the code for all arguments of the given ProcDef node.
-  assert code.kind == nkProcDef, code.renderTree
-  let params = code[procdef.Elem.Args]
-  assert params.kind == nkFormalParams, params.renderTree
-  let argc = procdef.getArgCount(code)
-  if argc == 0: return "void"  # Explicit fill with void for no arguments
-  # Find all arguments
-  for arg in procdef.args(code): # For every individual argument -> args can be single or grouped arguments. this expands them
-    let tname =
-      if   arg.typ.name == "pointer" : "void*"
-      elif arg.typ.isArr             : arg.node[1][^1].strValue
-      else                           : arg.typ.name
-    let mut   = if not arg.typ.isMut : " const"     else: ""  # Add const by default, when arg is not marked as var
-    let typ   = if arg.typ.isPtr     : &"{tname}*"  else: tname
-    let sep   = if arg.last          : ""           else: ", "
-    let arr   = if arg.typ.isArr     : "[]"         else: ""
-    let ronly = if arg.node[0].kind == nkPragmaExpr and arg.node[0][1].kind == nkPragma and arg.node[0][1][0].strValue == "readonly": "const " else: ""
-    result.add( fmt "{ronly}{typ}{mut} {arg.name}{arr}{sep}" )
+# proc mincProcDefGetArgs (code :PNode) :string=
+#   ## Returns the code for all arguments of the given ProcDef node.
+#   assert code.kind == nkProcDef, code.renderTree
+#   let params = code[procdef.Elem.Args]
+#   assert params.kind == nkFormalParams, params.renderTree
+#   let argc = procdef.getArgCount(code)
+#   if argc == 0: return "void"  # Explicit fill with void for no arguments
+#   # Find all arguments
+#   for arg in procdef.args(code): # For every individual argument -> args can be single or grouped arguments. this expands them
+#     let tname =
+#       if   arg.typ.name == "pointer" : "void*"
+#       elif arg.typ.isArr             : arg.node[1][^1].strValue
+#       else                           : arg.typ.name
+#     let mut   = if not arg.typ.isMut : " const"     else: ""  # Add const by default, when arg is not marked as var
+#     let typ   = if arg.typ.isPtr     : &"{tname}*"  else: tname
+#     let sep   = if arg.last          : ""           else: ", "
+#     let arr   = if arg.typ.isArr     : "[]"         else: ""
+#     let ronly = if arg.node[0].kind == nkPragmaExpr and arg.node[0][1].kind == nkPragma and arg.node[0][1][0].strValue == "readonly": "const " else: ""
+#     result.add( fmt "{ronly}{typ}{mut} {arg.name}{arr}{sep}" )
 #_____________________________
 # proc mincFuncDef  (code :PNode; indent :int= 0) :string=
 #   assert false, "proc and func are identical in C"  # TODO : Sideffects checks
@@ -355,10 +355,10 @@ proc mincProcDef  (code :PNode; indent :int= 0) :string=
       of "noreturn_C11": "_Noreturn "
       of "noreturn"    : "[[noreturn]] "
       else:""
-  let isPriv = procdef.isPrivate(code, indent)
-  let priv   = if isPriv: "static " else: ""
-  let name   = procdef.getName(code)
-  var T      = procdef.getRetT(code)
+#  let isPriv = procdef.isPrivate(code, indent)
+#  let priv   = if isPriv: "static " else: ""
+#  let name   = procdef.getName(code)
+#  var T      = procdef.getRetT(code)
   let isPtr  = not code[3].isEmpty and code[3][0].kind == nkPtrTy
   if   T == "pointer" : T = "void*"
   elif isPtr          : T = T&"*"
