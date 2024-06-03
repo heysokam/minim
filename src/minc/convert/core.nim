@@ -384,6 +384,22 @@ proc mincIdent (code :PNode; indent :int= 0; special :SpecialContext= None) :CFi
   of None, Argument: result.c = val
   else: code.trigger IdentError, &"Found an unmapped SpecialContext kind for interpreting Ident code:  {special}"
 
+#_______________________________________
+# @section Types
+#_____________________________
+const PointerTempl = "{typ}*"
+proc mincType_ptr (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, nkPtrTy
+  const Type = 0
+  let typ = MinC(code[Type], indent, special).c
+  result.c = fmt PointerTempl
+#___________________
+proc mincType (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, Type
+  case code.kind
+  of nkPtrTy: result = mincType_ptr(code, indent, special)
+  else: code.trigger TypeError, &"Found an unmapped kind for interpreting Type code:  {code.kind}"
+
 
 #_______________________________________
 # @section Pragmas
@@ -563,6 +579,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkIdent            : result = mincIdent(code, indent, special)
   of nkIncludeStmt      : result = mincInclude(code, indent)
   of nkCommentStmt      : result = mincComment(code, indent, special)
+  of nim.SomeType       : result = mincType(code, indent, special)
   # └─ Control flow
   of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
   of nkContinueStmt     : result = mincContinueStmt(code, indent, special)
