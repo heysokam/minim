@@ -181,16 +181,46 @@ proc mincInclude (code :PNode; indent :int= 0) :CFilePair=
 #_______________________________________
 # @section Procedures
 #_____________________________
+const ArgTempl = "{typ} {name}"
+proc mincProcArgs (code :PNode; indent :int= 0) :string=
+  # TODO: const by default
+  # TODO: {.readonly.} pragma
+  # ref :  fmt "{ronly}{typ}{mut} {arg.name}{arr}{sep}"
+  ensure code, nkFormalParams
+  if code.sons.len == 0: return "void"  # Explicit fill with void for no arguments
+  # Add all arguments to the result
+  var args :seq[tuple[name:string, typ:string, val:string]]
+  for group in code:
+    const (Type,Value) = (^2,^1)
+    let typ = MinC(group[Type], indent+1, Argument).c
+    let val = MinC(group[Value], indent+1, Argument).c
+    for arg in group.sons[0..^3]:
+      args.add (
+        name : MinC(arg, indent+1, Argument).c,
+        typ  : typ,
+        val  : val,  # TODO: Default values
+        ) # << args.add ( ... )
+  for id,arg in args.pairs:
+    let typ  = arg.typ
+    let name = arg.name
+    result.add fmt ArgTempl
+    if id != args.high: result.add SeparatorArgs
+#___________________
 const KnownMainNames = ["main", "WinMain"]
 const ProcProtoTempl = "{qual}{T} {name} ({args});\n"
 const ProcDefTempl   = "{qual}{T} {name} ({args}) {{\n{body}\n}}\n"
 proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
   ensure code, Proc
-  var qual = ""
+  # Get the Name
   let name = code.:name
-  if not code.isPublic: qual.add "static "
-  let T    = code.:returnT
-  var args = "void"  # TODO: Proper arguments logic
+  # Get the qualifier
+  var qual :string
+  if not code.isPublic and name notin KnownMainNames: qual.add "static "
+  # Get the return Type
+  let T = code.:returnT
+  # Get the Args
+  let args = mincProcArgs(procs.get(code, "args"), indent)
+  # Get the Body
   let body = MinC(procs.get(code,"body"), indent+1).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
   result.h =
