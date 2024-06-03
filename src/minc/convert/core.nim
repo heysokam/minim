@@ -374,10 +374,13 @@ proc mincBracket (code :PNode; indent :int= 0; special :SpecialContext= None) :C
   else: code.trigger BracketError, &"Found an unmapped SpecialContext kind for interpreting Bracket code:  {special}"
 #___________________
 proc mincIdent (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, nkIdent
   let val = code.strValue
   case special
   of Variable:
-    if val == "_": result.c = "{0}" # This is definitely incorrect for the Object SpecialContext
+    result.c =
+      if val == "_" : "{0}"  # TODO: Probably incorrect for the Object SpecialContext
+      else          : val
   of None, Argument: result.c = val
   else: code.trigger IdentError, &"Found an unmapped SpecialContext kind for interpreting Ident code:  {special}"
 
@@ -466,7 +469,7 @@ proc mincPragmaCPragma (code :PNode; indent :int= 0; special :SpecialContext= No
   of "once": result = mincPragmaOnce(code, indent, special)
   else: code.trigger PragmaError, &"Only {KnownCPragmas} pragmas are currently supported for {{.pragma: [name].}} ."
 #___________________
-const KnownPragmas = ["define", "error", "warning", "namespace", "emit"]
+const KnownPragmas = ["define", "error", "warning", "namespace", "emit", "pragma"]
 proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
   ## @descr
   ##  Codegen for all standalone pragmas
