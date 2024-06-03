@@ -19,6 +19,7 @@ type IdentError     * = object of CatchableError
 type PragmaError    * = object of CatchableError
 type CallError      * = object of CatchableError
 type FlowCtrlError  * = object of CatchableError
+type TypeError      * = object of CatchableError
 # TODO
 type ProcError      * = object of CatchableError
 type AffixError     * = object of CatchableError
@@ -27,9 +28,10 @@ type ObjectError    * = object of CatchableError
 type AssignError    * = object of CatchableError
 #_____________________________
 type SomeCodegenError =
-  AffixError     | CallError    | VariableError | PragmaError |
-  ConditionError | ObjectError  | AssignError   | ProcError   |
-  LiteralError   | BracketError | IdentError    | FlowCtrlError
+  AffixError     | CallError    | VariableError | PragmaError   |
+  ConditionError | ObjectError  | AssignError   | ProcError     |
+  LiteralError   | BracketError | IdentError    | FlowCtrlError |
+  TypeError
 #_____________________________
 proc trigger *(
     code : PNode;
