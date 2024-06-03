@@ -1,14 +1,14 @@
-#:__________________________________________________________
-#  Min> C <niM |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
-#:__________________________________________________________
-## stdlib dependencies
-include "<stdio.h>"
-include "<stdlib.h>"
-include "<stdint.h>"
-## External dependencies
-include "<epoxy/gl.h>"
-include "<epoxy/glx.h>"
-include "<GLFW/glfw3.h>"
+#:______________________________________________________
+## ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
+#:______________________________________________________
+## @deps C stdlib
+include @stdio.h
+include @stdlib.h
+include @stdint.h
+## @deps External
+include @epoxy/gl.h
+include @epoxy/glx.h
+include @GLFW/glfw3.h
 
 #_______________________________________
 ## Types
