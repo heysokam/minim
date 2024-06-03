@@ -2,7 +2,7 @@ const Title = "Comments and Newlines"
 #_______________________________________
 # @deps tests
 include ../base
-const thisDir = currentSourcePath.parentDir()
+const thisDir = currentSourcePath.Path.parentDir()
 template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 
