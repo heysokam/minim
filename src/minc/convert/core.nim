@@ -20,15 +20,31 @@ import ../tools
 #_______________________________________
 # @section MinC+Slate Node Access
 #_____________________________
-const ReservedCalls :ReservedNames= @[
+const Renames_Calls :RenameList= @[
   ("addr", "&")
-  ] # << ReservedCalls [ ... ]
+  ] # << Renames_Calls [ ... ]
 #___________________
-func renameReserved (name :string; kind :TNodeKind) :string=
+const Renames_ConditionPrefix :RenameList= @[
+  ("not", "!"),
+  ] # << Renames_ConditionPrefix [ ... ]
+#___________________
+const Renames_ConditionAffix :RenameList= @[
+  ("shl", "<<"),  ("shr", ">>"),
+  ("and", "&&"),  ("or" , "||"),  ("xor", "^"),
+  ("mod", "%" ),  ("div", "/" ),
+  ] # << Renames_ConditionAffix [ ... ]
+const Renames_AssignmentAffix :RenameList= @[
+  ("shl", "<<"),  ("shr", ">>"),
+  ("and", "&" ),  ("or" , "|" ),  ("xor", "^" ),
+  ("mod", "%" ),  ("div", "/" ),
+  ] # << Renames_AssignmentAffix [ ... ]
+#___________________
+func renamed (name :string; kind :TNodeKind; special :SpecialContext= None) :string=
   let list =
     case kind
-    of nkCommand, nkCall: ReservedCalls
-    else: @[]
+    of nkCommand, nkCall : Renames_Calls
+    of nkPrefix          : Renames_ConditionPrefix
+    else                 : @[]
   for rename in list:
     if name == rename.og: return rename.to
   result = name
@@ -67,7 +83,9 @@ template `.:`*(code :PNode; prop :untyped) :string=
       property = field.split("_")[0]
       try : id = field.split("_")[1].parseInt
       except NodeAccessError: code.err "MinC: Tried to access an Argument ID for a Call, but the keyword passed has an incorrect format:  "&field
-    strValue( calls.get(code, property, id) ).renameReserved(code.kind)
+    strValue( calls.get(code, property, id) ).renamed(code.kind)
+  of nkPrefix:
+    strValue( affixes.getPrefix(code, field) )
   else: code.err "MinC: Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
 
 
@@ -120,6 +138,18 @@ proc mincBreakStmt (code :PNode; indent :int= 0; special :SpecialContext= None) 
   ensure code, Break
   if indent < 1: code.trigger FlowCtrlError, "Break statements cannot exist at the top level in C."
   result.c = &"{indent*Tab}break;\n"
+
+
+#_______________________________________
+# @section Control Flow: Loops
+#_____________________________
+const WhileTempl = "{indent*Tab}while ({cond}) {{\n{body}{indent*Tab}}}\n"
+proc mincWhile (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, nkWhileStmt
+  const (Condition,Body) = (0,1)
+  let cond = MinC(code[Condition], indent, SpecialContext.Condition).c
+  let body = MinC(code[Body], indent+1, special).c
+  result.c = fmt WhileTempl
 
 
 #_______________________________________
@@ -452,6 +482,20 @@ proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CF
   else: code.trigger PragmaError, &"Only {KnownPragmas} pragmas are currently supported."
 
 
+#_______________________________________
+# @section Affixes
+#_____________________________
+const PrefixTempl = "{affix}{body}"
+proc mincPrefix (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+  ensure code, nkPrefix
+  let affix = ( code.:name ).renamed(code.kind, special)
+  case special
+  of Condition:
+    let body = MinC(affixes.getPrefix(code, "body"), indent, special).c
+    result.c = fmt PrefixTempl
+  else: code.trigger ConditionError, &"Found an unmapped special case for mincPrefix:  {special}"
+
+
 #______________________________________________________
 # @section Discard
 #_____________________________
@@ -495,6 +539,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkFuncDef          : result = mincFuncDef(code, indent)
   # └─ Control flow
   of nkReturnStmt       : result = mincReturnStmt(code, indent, special)
+  of nkWhileStmt        : result = mincWhile(code, indent, special)
   # └─ Variables
   of nkConstSection     : result = mincConstSection(code, indent)
   of nkLetSection       : result = mincLetSection(code, indent)
@@ -503,6 +548,8 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkDiscardStmt      : result = mincDiscard(code, indent, special)
   # └─ Pragmas
   of nkPragma           : result = mincPragma(code, indent, special)
+  # └─ Affixes
+  of nkPrefix           : result = mincPrefix(code, indent, special)
   # Terminal cases
   of nkEmpty            : result = CFilePair()
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
