@@ -3,27 +3,22 @@
 # @section Dependencies used by all tests
 # @deps std
 import std/unittest
-from std/paths import Path, parentDir, lastPathPart, `/`, changeFileExt
-from std/files import removeFile, fileExists
-from std/os import execShellCmd
-from std/osproc import execProcess
-from std/strformat import `&`
-from std/strutils import join
+# @deps ndk
+import nstd/paths
+import nstd/shell
+import nstd/strings
+import nstd/logger except err
+from ../src/minc/cfg import Prefix
+
 
 #_______________________________________
 # @section General Tools
 #_____________________________
+logger.init(name=cfg.Prefix, threshold=Log.Err)
+#___________________
 type UnitTestError = object of CatchableError
 template err *(msg :varargs[string, `$`]) :void= raise newException(UnitTestError, msg.join(""))
-proc sh *(cmd :string) :void=
-  try: os.execShellCmd(cmd)
-  except CatchableError: err "Failed to execute the command:\n  ",cmd
 
-#_______________________________________
-# @section Paths
-#_____________________________
-converter toPath *(s :string) :Path= s.Path
-proc readFile *(p :Path) :string {.borrow.}
 
 #_______________________________________
 # @section Tests Tools

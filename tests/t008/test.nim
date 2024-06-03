@@ -2,7 +2,7 @@ const Title = "Calls and Procedures"
 #_______________________________________
 # @deps tests
 include ../base
-const thisDir = currentSourcePath.parentDir()
+const thisDir = currentSourcePath.Path.parentDir()
 template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 
