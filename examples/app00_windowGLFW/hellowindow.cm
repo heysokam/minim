@@ -16,7 +16,7 @@ const Resizable :int= GLFW_RESIZABLE
 #_______________________________________
 ## Callbacks
 #___________________
-proc resize (win :ptr GLFWwindow; W,H :int) :void=
+proc resize (win :var ptr GLFWwindow; W,H :var int) :void=
   ## GLFW resize Callback
   discard win
   discard W
