@@ -18,14 +18,14 @@ type cstr *{.readonly.}= ptr char
 #_______________________________________
 ## GLFW Aliases
 #___________________
-const ClientApi  *:int=  GLFW_CLIENT_API
-const NoApi      *:int=  GLFW_NO_API
-const Resizable  *:int=  GLFW_RESIZABLE
-const GLVers_M   *:int=  GLFW_CONTEXT_VERSION_MAJOR
-const GLVers_m   *:int=  GLFW_CONTEXT_VERSION_MINOR
-const OpenGLProf *:int=  GLFW_OPENGL_PROFILE
-const OpenGLCore *:int=  GLFW_OPENGL_CORE_PROFILE
-const ColorBit   *:int=  GL_COLOR_BUFFER_BIT
+const ClientApi  :int=  GLFW_CLIENT_API
+const NoApi      :int=  GLFW_NO_API
+const Resizable  :int=  GLFW_RESIZABLE
+const GLVers_M   :int=  GLFW_CONTEXT_VERSION_MAJOR
+const GLVers_m   :int=  GLFW_CONTEXT_VERSION_MINOR
+const OpenGLProf :int=  GLFW_OPENGL_PROFILE
+const OpenGLCore :int=  GLFW_OPENGL_CORE_PROFILE
+const ColorBit   :int=  GL_COLOR_BUFFER_BIT
 
 #_______________________________________
 ## Callbacks
