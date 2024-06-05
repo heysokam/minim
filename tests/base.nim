@@ -46,6 +46,20 @@ proc compile *(file,outDir :Path) :string=
 #_____________________________
 template compile *(file :Path) :string=  compile file, thisDir
 #_____________________________
-template check *(cm,C :Path) :void=  check cm.compile == C.readFile
+template check *(cm,C :Path) :void=
+  const fileA = "A.c".Path
+  const fileB = "B.c".Path
+  let A = cm.compile
+  let B = C.readFile
+  if A != B:
+    fileA.writeFile(A)
+    fileB.writeFile(B)
+    try : sh "diff", fileA, fileB
+    except CatchableError: discard
+    rm fileA
+    rm fileB
+    check false
+  else:
+    check A == B
 template check *(file :string) :void=  check thisDir/file.Path.changeFileExt(".cm"), thisDir/file.Path.changeFileExt(".c")
 
