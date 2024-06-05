@@ -202,6 +202,21 @@ proc mincInclude (
 #_______________________________________
 # @section Procedures
 #_____________________________
+const KnownMainNames = ["main", "WinMain"]
+proc mincProcPragmas (code :PNode; indent :int= 0) :string=
+  let pragmas = procs.get(code, "pragmas")
+  for prag in pragmas:
+    let name = MinC(prag, 0).c
+    if   name == "noreturn"     : result.add "[[noreturn]] "
+    elif name == "noreturn_C11" : result.add "_Noreturn"
+    elif name == "noreturn_GNU" : result.add "__attribute__((noreturn))"
+    else: code.trigger PragmaError, "proc pragmas error: Only {.noreturn.}, {.noreturn_C11.}, {.noreturn_GNU.} are currently supported."
+#___________________
+proc mincProcQualifiers (code :PNode; indent :int= 0) :string=
+  let name = code.:name
+  result = mincProcPragmas(code, indent)
+  if not code.isPublic and name notin KnownMainNames: result.add "static "
+#___________________
 const ArgTempl = "{typ} {name}"
 proc mincProcArgs (code :PNode; indent :int= 0) :string=
   # TODO: const by default
@@ -212,10 +227,10 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
   # Add all arguments to the result
   var args :seq[tuple[name:string, typ:string, val:string]]
   for group in code:
-    const (Type,Value) = (^2,^1)
-    let typ = MinC(group[Type], indent+1, Argument).c
-    let val = MinC(group[Value], indent+1, Argument).c
-    for arg in group.sons[0..^3]:
+    const (Type,Value,LastArg) = (^2,^1,^3)
+    let typ = MinC(group[Type], indent+1, {Argument, Readonly}).c
+    let val = MinC(group[Value], indent+1, {Argument, Readonly}).c
+    for arg in group.sons[0..LastArg]:
       args.add (
         name : MinC(arg, indent+1, Argument).c,
         typ  : typ,
@@ -227,7 +242,6 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
     result.add fmt ArgTempl
     if id != args.high: result.add SeparatorArgs
 #___________________
-const KnownMainNames = ["main", "WinMain"]
 const ProcProtoTempl = "{qual}{T} {name} ({args});\n"
 const ProcDefTempl   = "{qual}{T} {name} ({args}) {{\n{body}\n}}\n"
 proc mincProcDef (
@@ -236,16 +250,10 @@ proc mincProcDef (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, Proc
-  # Get the Name
   let name = code.:name
-  # Get the qualifier
-  var qual :string
-  if not code.isPublic and name notin KnownMainNames: qual.add "static "
-  # Get the return Type
-  let T = code.:returnT
-  # Get the Args
+  let qual = mincProcQualifiers(code, indent)
+  let T    = code.:returnT
   let args = mincProcArgs(procs.get(code, "args"), indent)
-  # Get the Body
   let body = MinC(procs.get(code,"body"), indent+1).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
   result.h =
@@ -734,8 +742,6 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
     for child in code   : result.add MinC( child, indent, special )
   # Intermediate cases
   # └─ Procedures
-  of nkProcDef          : result = mincProcDef(code, indent)
-  of nkFuncDef          : result = mincFuncDef(code, indent)
   of nkProcDef          : result = mincProcDef(code, indent, special)
   of nkFuncDef          : result = mincFuncDef(code, indent, special)
   # └─ Control flow
