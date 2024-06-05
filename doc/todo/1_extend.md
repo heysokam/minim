@@ -1,13 +1,5 @@
 ```md
 # Refactor Redo
-- [ ] Immutable data by default  (const unless marked as mutable)
-  - [ ] Function arguments
-- [ ] Function calls: Command syntax
-- [ ] noreturn pragma
-  - [ ] C23  {.noreturn.}       <- [[noreturn]]
-  - [ ] C11  {.noreturn_C11.}   <- _Noreturn
-  - [ ] GNU  {.noreturn_GNU.}   <- __attribute__((noreturn))
-- [ ] East-const rule always
 - [ ] Booleans without stdbool.h  (-std=c23)
 - [ ] Alternative type casting syntax
   - [ ] val as Type

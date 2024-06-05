@@ -44,5 +44,15 @@
   - [x] Call(syntax)
   - [x] command syntax
   - [x] addr
+- [x] Conditions
+  - [x] Sketch   : Single condition only
+  - [x] While
+  - [x] Ternary operator   let one = if condition: 1 else: 2
+  - [x] if/elif/else blocks
+- [x] Operators
+  - [x] Prefix   + - & ! * -- ++
+- [x] Type declaration
+  - [x] Type aliasing   typedef char* str;
+  - [x] {.readonly.}    Mutable pointer to immutable data
 ```
 
