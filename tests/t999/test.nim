@@ -49,4 +49,5 @@ proc checkApp (id,name :string) :void=
 #_____________________________
 test name "GLFW: Hello Window"  : checkApp "00", "hellowindow"
 test name "OpenGL: Hello Clear" : checkApp "01", "helloclear"
+test name "OpenGL: Triangle"    : checkApp "02", "hellotriangle"
 
