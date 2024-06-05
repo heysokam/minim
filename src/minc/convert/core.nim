@@ -170,6 +170,37 @@ proc mincWhile (
 
 
 #_______________________________________
+# @section Control Flow: Conditionals
+#_____________________________
+const IfTempl = "{elseStr}{ifStr}({cond}) {{\n{body}{indent*Tab}}}"
+const TernaryRawTempl = "({cond}) ? {case1} : {case2}"
+proc mincIf (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkIfStmt
+  if special == Variable:
+    const (Condition,Case1,Case2) = (0,1,^1)
+    let cond  = MinC(code[Condition], indent, Context.Condition).c
+    let case1 = MinC(code[Case1], indent, Context.Condition).c
+    let case2 = MinC(code[Case2], indent, Context.Condition).c
+    result.c = fmt TernaryRawTempl
+    return
+  for id,branch in code.pairs:
+    const (Condition,Body) = (0,1)
+    let first   = id == 0
+    let isElse  = branch.kind == nkElse
+    let last    = id == code.sons.high
+    let cond    = MinC(branch[Condition], indent, Context.Condition).c
+    let body    = MinC(branch[Body], indent+1, special).c
+    let elseStr = if first: indent*Tab else: " else "  # elif or else
+    let ifStr   = if not isElse: " if "  else: ""      # if or elif
+    result.c.add fmt IfTempl
+    if last: result.c.add "\n"
+
+
+#_______________________________________
 # @section Modules
 #_____________________________
 proc getModule *(code :PNode) :Module=
@@ -747,6 +778,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   # └─ Control flow
   of nkReturnStmt       : result = mincReturnStmt(code, indent, special)
   of nkWhileStmt        : result = mincWhile(code, indent, special)
+  of nkIfStmt           : result = mincIf(code, indent, special)
   # └─ Variables
   of nkConstSection     : result = mincConstSection(code, indent, special)
   of nkLetSection       : result = mincLetSection(code, indent, special)
