@@ -87,6 +87,8 @@ template `.:`*(code :PNode; prop :untyped) :string=
     strValue( calls.get(code, property, id) ).renamed(code.kind)
   of nkPrefix:
     strValue( affixes.getPrefix(code, field) )
+  of nkTypeDef:
+    strValue( types.get(code, field) )
   else: code.err "MinC: Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
 
 
@@ -579,6 +581,20 @@ proc mincType (
   of nkPtrTy : result = mincType_ptr(code, indent, special, isVar)
   of nkVarTy : result = MinC(code[0], indent, special.without Readonly)
   else: code.trigger TypeError, &"Found an unmapped kind for interpreting Type code:  {code.kind}"
+#___________________
+const TypedefTempl = "typedef {typ} {name};\n"
+proc mincTypeDef (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, Kind.TypeDef
+  let pragm = types.get(code, "pragma").renderTree
+  let isVar = "readonly" notin pragm
+  let name  = code.:name
+  let specl = if isVar: special else: special.with Readonly
+  let typ   = MinC(types.get(code, "type"), indent, specl).c
+  result.c  = fmt TypedefTempl
 
 
 #_______________________________________
@@ -769,7 +785,7 @@ proc mincComment (code :PNode; indent :int= 0; special :SpecialContext= Context.
 proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair=
   case code.kind
   # Recursive Cases
-  of nkStmtList:
+  of nkStmtList, nkTypeSection:
     for child in code   : result.add MinC( child, indent, special )
   # Intermediate cases
   # └─ Procedures
@@ -800,6 +816,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkIncludeStmt      : result = mincInclude(code, indent, special)
   of nkCommentStmt      : result = mincComment(code, indent, special)
   of nim.SomeType       : result = mincType(code, indent, special)
+  of nkTypeDef          : result = mincTypeDef(code, indent, special)
   # └─ Control flow
   of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
   of nkContinueStmt     : result = mincContinueStmt(code, indent, special)
