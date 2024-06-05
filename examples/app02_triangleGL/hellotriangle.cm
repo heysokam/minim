@@ -21,16 +21,16 @@ type cstr *{.readonly.}= ptr char
 #_______________________________________
 ## GLFW Aliases
 #___________________
-const ClientApi  *:i32=  GLFW_CLIENT_API
-const NoApi      *:i32=  GLFW_NO_API
-const Resizable  *:i32=  GLFW_RESIZABLE
-const GLVers_M   *:i32=  GLFW_CONTEXT_VERSION_MAJOR
-const GLVers_m   *:i32=  GLFW_CONTEXT_VERSION_MINOR
-const OpenGLProf *:i32=  GLFW_OPENGL_PROFILE
-const OpenGLCore *:i32=  GLFW_OPENGL_CORE_PROFILE
-const ColorBit   *:i32=  GL_COLOR_BUFFER_BIT
+const ClientApi  :i32=  GLFW_CLIENT_API
+const NoApi      :i32=  GLFW_NO_API
+const Resizable  :i32=  GLFW_RESIZABLE
+const GLVers_M   :i32=  GLFW_CONTEXT_VERSION_MAJOR
+const GLVers_m   :i32=  GLFW_CONTEXT_VERSION_MINOR
+const OpenGLProf :i32=  GLFW_OPENGL_PROFILE
+const OpenGLCore :i32=  GLFW_OPENGL_CORE_PROFILE
+const ColorBit   :i32=  GL_COLOR_BUFFER_BIT
 ## OpenGL Configuration
-const InfoMsgLen *:i32=  512
+const InfoMsgLen :i32=  512
 
 #_______________________________________
 ## Callbacks
