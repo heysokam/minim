@@ -4,6 +4,7 @@
 # @deps ndk
 import nstd/strings
 import nstd/paths
+from nstd/sets import anyIn, with, without
 # @deps *Slate
 import slate/nimc as nim
 import slate/format
@@ -39,7 +40,7 @@ const Renames_AssignmentAffix :RenameList= @[
   ("mod", "%" ),  ("div", "/" ),
   ] # << Renames_AssignmentAffix [ ... ]
 #___________________
-func renamed (name :string; kind :TNodeKind; special :SpecialContext= None) :string=
+func renamed (name :string; kind :TNodeKind; special :SpecialContext= Context.None) :string=
   let list =
     case kind
     of nkCommand, nkCall : Renames_Calls
@@ -93,8 +94,8 @@ template `.:`*(code :PNode; prop :untyped) :string=
 #_______________________________________
 # @section Forward Declares
 #_____________________________
-proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair
-proc mincLiteral *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair
+proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
+proc mincLiteral (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
 
 
 #_______________________________________
@@ -119,7 +120,11 @@ proc mincArrSize *(code :PNode; indent :int= 0) :CFilePair=
 # @section Control Flow: Keywords
 #_____________________________
 const ReturnTempl = "{indent*Tab}return{body};"
-proc mincReturnStmt (code :PNode; indent :int= 1; special :SpecialContext= None) :CFilePair=
+proc mincReturnStmt (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Return
   if indent < 1: code.trigger FlowCtrlError, "Return statements cannot exist at the top level in C."
   # Generate the Body
@@ -129,12 +134,20 @@ proc mincReturnStmt (code :PNode; indent :int= 1; special :SpecialContext= None)
   # Generate the result
   result.c = fmt ReturnTempl
 #___________________
-proc mincContinueStmt (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincContinueStmt (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Continue
   if indent < 1: code.trigger FlowCtrlError, "Continue statements cannot exist at the top level in C."
   result.c = &"{indent*Tab}continue;\n"
 #___________________
-proc mincBreakStmt (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincBreakStmt (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Break
   if indent < 1: code.trigger FlowCtrlError, "Break statements cannot exist at the top level in C."
   result.c = &"{indent*Tab}break;\n"
@@ -144,10 +157,14 @@ proc mincBreakStmt (code :PNode; indent :int= 0; special :SpecialContext= None) 
 # @section Control Flow: Loops
 #_____________________________
 const WhileTempl = "{indent*Tab}while ({cond}) {{\n{body}{indent*Tab}}}\n"
-proc mincWhile (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincWhile (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, nkWhileStmt
   const (Condition,Body) = (0,1)
-  let cond = MinC(code[Condition], indent, SpecialContext.Condition).c
+  let cond = MinC(code[Condition], indent, Context.Condition).c
   let body = MinC(code[Body], indent+1, special).c
   result.c = fmt WhileTempl
 
@@ -168,7 +185,11 @@ proc getModule *(code :PNode) :Module=
   result = tools.getModule( line )
 #___________________
 const IncludeTempl = "#include {module}\n"
-proc mincInclude (code :PNode; indent :int= 0) :CFilePair=
+proc mincInclude (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Kind.Module, Kind.Ident, &"Tried to get the include of an unsupported kind:  {code.kind}"
   if indent > 0: code.err "include statements are only allowed at the top level."
   let M = code.getModule()
@@ -209,7 +230,11 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
 const KnownMainNames = ["main", "WinMain"]
 const ProcProtoTempl = "{qual}{T} {name} ({args});\n"
 const ProcDefTempl   = "{qual}{T} {name} ({args}) {{\n{body}\n}}\n"
-proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
+proc mincProcDef (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Proc
   # Get the Name
   let name = code.:name
@@ -228,17 +253,29 @@ proc mincProcDef (code :PNode; indent :int= 0) :CFilePair=
     else: ""
   result.c = fmt ProcDefTempl
 #_____________________________
-proc mincFuncDef (code :PNode; indent :int= 0) :CFilePair=
+proc mincFuncDef (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   # __attribute__ ((pure))
   # write-only memory idea from herose (like GPU write-only mem)
   ensure code, Func
-  mincProcDef(code, indent)
+  mincProcDef(code, indent, special)
   # code.trigger ProcError, "proc and func are identical in C"  # TODO : Sideffects checks
-#___________________
+
+
+#_______________________________________
+# @section Calls & Commands
+#_____________________________
 const CallAddrTempl = "{name}{args}"
 const CallRawTempl  = "{name}({args})"
 const CallTempl     = "{indent*Tab}{call};\n"
-proc mincCall (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincCall (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   # TODO: Union special case
   # TODO: &(StructType){...} special case
   # TODO: StructType(_) special case
@@ -258,11 +295,14 @@ proc mincCall (code :PNode; indent :int= 0; special :SpecialContext= None) :CFil
     of "&": fmt CallAddrTempl
     else:   fmt CallRawTempl
   result.c =
-    case special
-    of None : fmt CallTempl # Format it by default
-    else    : call          # Leave it unchanged for special cases
+    if special == {Context.None} : fmt CallTempl  # Format it by default
+    else                         : call           # Leave it unchanged for special cases
 #_____________________________
-proc mincCommand (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincCommand (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Call
   mincCall(code, indent, special)  # Command and Call are identical in C
 
@@ -273,7 +313,11 @@ proc mincCommand (code :PNode; indent :int= 0; special :SpecialContext= None) :C
 const VarDeclTempl = "{indent*Tab}extern {qual}{T} {name};\n"
 const VarDefTempl  = "{indent*Tab}{qual}{T} {name}{eq}{value};\n"
 #___________________
-proc mincVariable (code :PNode; indent :int= 0; kind :Kind) :CFilePair=
+proc mincVariable (
+    code   : PNode;
+    indent : int;
+    kind   : Kind;
+  ) :CFilePair=
   # Error check
   ensure code, Const, Let, Var, msg="Tried to generate code for a variable, but its kind is incorrect"
   let typ  = vars.get(code, "type")
@@ -301,7 +345,7 @@ proc mincVariable (code :PNode; indent :int= 0; kind :Kind) :CFilePair=
     "Found an array type, but its code has not been correctly generated."
   name.add arr
   # Get the body (aka variable value)
-  let value = MinC(body, indent+1, SpecialContext.Variable).c
+  let value = MinC(body, indent+1, Context.Variable).c
   let eq    = if value != "": " = " else: ""
   # Generate the result
   result.h =
@@ -309,42 +353,68 @@ proc mincVariable (code :PNode; indent :int= 0; kind :Kind) :CFilePair=
     else:""
   result.c = fmt VarDefTempl
 #___________________
-proc mincConstSection (code :PNode; indent :int= 0) :CFilePair=
+proc mincConstSection (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Const
   for entry in code.sons: result.add mincVariable(entry, indent, Kind.Const)
 #___________________
-proc mincLetSection (code :PNode; indent :int= 0) :CFilePair=
+proc mincLetSection (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Let
   for entry in code.sons: result.add mincVariable(entry, indent, Kind.Let)
 #___________________
-proc mincVarSection (code :PNode; indent :int= 0) :CFilePair=
+proc mincVarSection (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Var
   for entry in code.sons: result.add mincVariable(entry, indent, Kind.Var)
 #___________________
 const AsgnTempl = "{indent*Tab}{left} = {right};"
-proc mincAsgn *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincAsgn (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Asgn
   const (Left, Right) = (0,1)
   let left  = MinC(code[Left], indent).c
   let right = MinC(code[Right], indent).c
   result.c = fmt AsgnTempl
-  case special
-  of None: result.c.add "\n"
-  else: discard
+  if special == {Context.None}: result.c.add "\n"
 
 
 #_______________________________________
 # @section Literals
 #_____________________________
-proc mincNil (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincNil (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Nil
   result.c = NilValue
 #___________________
-proc mincChar (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincChar (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Char
   result.c = &"'{code.strValue}'"
 #___________________
-proc mincFloat (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincFloat (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Float
   result.c = $code.floatVal
   case code.kind
@@ -352,11 +422,19 @@ proc mincFloat (code :PNode; indent :int= 0; special :SpecialContext= None) :CFi
   of nkFloat128Lit : result.c.add "L"
   else: discard
 #___________________
-proc mincInt (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincInt (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Int
   result.c = $code.intVal
 #___________________
-proc mincUInt (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincUInt (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, UInt
   result.c = $code.intVal
 #___________________
@@ -364,7 +442,11 @@ const StrKinds = nim.Str+{nkCallStrLit}
 const ValidRawStrPrefixes = ["raw"]
 proc isCustomTripleStrLitRaw (code :PNode) :bool= (code.kind in {nkCallStrLit} and code[0].strValue in ValidRawStrPrefixes and code[1].kind == nkTripleStrLit)
 proc isTripleStrLit (code :PNode) :bool=  code.kind == nkTripleStrLit or code.isCustomTripleStrLitRaw
-proc getTripleStrLit (code :PNode; indent :int= 0; special :SpecialContext= None) :string=
+proc getTripleStrLit (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :string=
   ensure code, StrKinds, "Called getTripleStrLit with an incorrect node kind."
   let tab  = indent*Tab
   let val  = if code.kind == nkTripleStrLit: code else: code[1]
@@ -376,12 +458,20 @@ proc getTripleStrLit (code :PNode; indent :int= 0; special :SpecialContext= None
   result.add &"\"{body}\""
   result = result.replace( &"\n{tab}\"\"", "" ) # Remove empty lines  (eg: the last empty line)
 #___________________
-proc mincStr (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincStr (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, StrKinds, "Called mincStr with an incorrect node kind."
   if code.isTripleStrLit : result.c = code.getTripleStrLit(indent, special)
   else                   : result.c = &"\"{code.strVal}\""
 #___________________
-proc mincLiteral (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincLiteral (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Literal, RawStr, "Called mincLiteral with an incorrect node kind."
   case code.kind
   of nim.Nil      : result = mincNil(code, indent, special)
@@ -392,9 +482,12 @@ proc mincLiteral (code :PNode; indent :int= 0; special :SpecialContext= None) :C
   of StrKinds     : result = mincStr(code, indent, special)
   else: code.trigger LiteralError, &"Found an unmapped Literal kind:  {code.kind}"
 #___________________
-proc mincBracket (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
-  case special
-  of Variable:
+proc mincBracket (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  if Variable in special:
     result.c.add "{ "
     for id,value in code.sons.pairs:
       result.c.add &"\n{indent*Tab}[{id}]= "
@@ -403,38 +496,60 @@ proc mincBracket (code :PNode; indent :int= 0; special :SpecialContext= None) :C
     result.c.add &"{indent*Tab}}}"
   else: code.trigger BracketError, &"Found an unmapped SpecialContext kind for interpreting Bracket code:  {special}"
 #___________________
-proc mincIdent (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincIdent (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, nkIdent
   let val = code.strValue
-  case special
-  of Variable:
+  if Variable in special:
     result.c =
       if val == "_" : "{0}"  # TODO: Probably incorrect for the Object SpecialContext
       else          : val
-  of None, Argument: result.c = val
+  elif Readonly in special:
+    result.c = &"{val} const"
+  elif special.anyIn {Context.None, Argument, Condition, Typedef}:
+    result.c = val
   else: code.trigger IdentError, &"Found an unmapped SpecialContext kind for interpreting Ident code:  {special}"
+
 
 #_______________________________________
 # @section Types
 #_____________________________
 const PointerTempl = "{typ}*"
-proc mincType_ptr (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincType_ptr (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+    isVar   : bool           = false
+  ) :CFilePair=
   ensure code, nkPtrTy
   const Type = 0
   let typ = MinC(code[Type], indent, special).c
   result.c = fmt PointerTempl
 #___________________
-proc mincType (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincType (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+    isVar   : bool           = false
+  ) :CFilePair=
   ensure code, Type
   case code.kind
-  of nkPtrTy: result = mincType_ptr(code, indent, special)
+  of nkPtrTy : result = mincType_ptr(code, indent, special, isVar)
+  of nkVarTy : result = MinC(code[0], indent, special.without Readonly)
   else: code.trigger TypeError, &"Found an unmapped kind for interpreting Type code:  {code.kind}"
 
 
 #_______________________________________
 # @section Pragmas
 #_____________________________
-proc mincPragmaWarning (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincPragmaWarning (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ## @descr Codegen for {.warning: "msg".} pragmas
   ensure code, Pragma
   let body = pragmas.get(code, "body")
@@ -442,7 +557,11 @@ proc mincPragmaWarning (code :PNode; indent :int= 0; special :SpecialContext= No
   let msg = mincStr(body, indent, special).c
   result.c = &"{indent*Tab}#warning {msg}\n"
 #___________________
-proc mincPragmaError (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincPragmaError (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ## @descr Codegen for {.error: "msg".} pragmas
   ensure code, Pragma
   let body = pragmas.get(code, "body")
@@ -450,14 +569,22 @@ proc mincPragmaError (code :PNode; indent :int= 0; special :SpecialContext= None
   let msg = mincStr(body, indent, special).c
   result.c = &"{indent*Tab}#error {msg}\n"
 #___________________
-proc mincPragmaEmit (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincPragmaEmit (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ## @descr Codegen for {.emit: "source.code".} pragmas
   ensure code, Pragma
   let body = pragmas.get(code, "body")
   ensure body, Str, &"Only {{.emit: [[SomeString]].}} emit pragmas are currently supported."
   result.c = &"{indent*Tab}{body.strValue}\n"
 #___________________
-proc mincPragmaNamespace (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincPragmaNamespace (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ## @descr Codegen for {.namespace: some.sub.name.} pragmas
   # TODO: Symbol namespacing using a `Context` object
   # TODO: Name separation without hard-replacing `.` with `_`
@@ -470,7 +597,11 @@ proc mincPragmaNamespace (code :PNode; indent :int= 0; special :SpecialContext= 
 #___________________
 const ValidDefineAsignSymbols = ["->"]
 const DefineTempl = "{indent*Tab}#define {name}{value}\n"
-proc mincPragmaDefine (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincPragmaDefine (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ## @descr Codegen for {.define: ... .} pragmas
   const (Value,AssignSymbol,AssignValue, InfixName,InfixSymbol,InfixValue) = (1,0,1, 1,0,2)
   ensure code, Pragma
@@ -504,19 +635,31 @@ proc mincPragmaDefine (code :PNode; indent :int= 0; special :SpecialContext= Non
   result.c = fmt DefineTempl  # TODO: Should go to the header instead
 #___________________
 const PragmaOnceTempl = "{indent*Tab}#pragma once"
-proc mincPragmaOnce (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincPragmaOnce (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Pragma
   result.h = fmt PragmaOnceTempl
 #___________________
 const KnownCPragmas = ["once"]
-proc mincPragmaCPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincPragmaCPragma (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Pragma
   case code.:body
   of "once": result = mincPragmaOnce(code, indent, special)
   else: code.trigger PragmaError, &"Only {KnownCPragmas} pragmas are currently supported for {{.pragma: [name].}} ."
 #___________________
 const KnownPragmas = ["define", "error", "warning", "namespace", "emit", "pragma"]
-proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincPragma (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ## @descr
   ##  Codegen for all standalone pragmas
   ##  Context-specific pragmas are handled inside each section
@@ -535,11 +678,14 @@ proc mincPragma (code :PNode; indent :int= 0; special :SpecialContext= None) :CF
 # @section Affixes
 #_____________________________
 const PrefixTempl = "{affix}{body}"
-proc mincPrefix (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincPrefix (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, nkPrefix
   let affix = ( code.:name ).renamed(code.kind, special)
-  case special
-  of Condition:
+  if Condition in special:
     let body = MinC(affixes.getPrefix(code, "body"), indent, special).c
     result.c = fmt PrefixTempl
   else: code.trigger ConditionError, &"Found an unmapped special case for mincPrefix:  {special}"
@@ -549,7 +695,11 @@ proc mincPrefix (code :PNode; indent :int= 0; special :SpecialContext= None) :CF
 # @section Discard
 #_____________________________
 const DiscardTempl = "{indent*Tab}(void){body};/*discard*/\n"
-proc mincDiscard (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincDiscard (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ensure code, Discard
   let D = code[0]
   case D.kind
@@ -567,7 +717,7 @@ proc mincDiscard (code :PNode; indent :int= 0; special :SpecialContext= None) :C
 #_____________________________
 const NewLineTempl = "\n{indent*Tab}/// "
 const CommentTempl = "{indent*Tab}/// {cmt}\n"
-proc mincComment (code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc mincComment (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair=
   ensure code, Comment
   let newl = fmt NewLineTempl
   let cmt  = code.strValue.replace("\n", newl)
@@ -577,7 +727,7 @@ proc mincComment (code :PNode; indent :int= 0; special :SpecialContext= None) :C
 #______________________________________________________
 # @section Source-to-Source Generator
 #_____________________________
-proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePair=
+proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair=
   case code.kind
   # Recursive Cases
   of nkStmtList:
@@ -586,13 +736,15 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   # └─ Procedures
   of nkProcDef          : result = mincProcDef(code, indent)
   of nkFuncDef          : result = mincFuncDef(code, indent)
+  of nkProcDef          : result = mincProcDef(code, indent, special)
+  of nkFuncDef          : result = mincFuncDef(code, indent, special)
   # └─ Control flow
   of nkReturnStmt       : result = mincReturnStmt(code, indent, special)
   of nkWhileStmt        : result = mincWhile(code, indent, special)
   # └─ Variables
-  of nkConstSection     : result = mincConstSection(code, indent)
-  of nkLetSection       : result = mincLetSection(code, indent)
-  of nkVarSection       : result = mincVarSection(code, indent)
+  of nkConstSection     : result = mincConstSection(code, indent, special)
+  of nkLetSection       : result = mincLetSection(code, indent, special)
+  of nkVarSection       : result = mincVarSection(code, indent, special)
   of nkAsgn             : result = mincAsgn(code, indent, special)
   of nkDiscardStmt      : result = mincDiscard(code, indent, special)
   # └─ Pragmas
@@ -607,7 +759,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= None) :CFilePa
   of nkCommand          : result = mincCommand(code, indent, special)
   of nkBracket          : result = mincBracket(code, indent, special)
   of nkIdent            : result = mincIdent(code, indent, special)
-  of nkIncludeStmt      : result = mincInclude(code, indent)
+  of nkIncludeStmt      : result = mincInclude(code, indent, special)
   of nkCommentStmt      : result = mincComment(code, indent, special)
   of nim.SomeType       : result = mincType(code, indent, special)
   # └─ Control flow

@@ -16,8 +16,15 @@ type ClangFormat * = object
   file  *:Path
 
 #_______________________________________
-type SpecialContext *{.pure.}= enum None, Array, Object, Variable, Argument, Condition
-  ## @descr The same syntax can be interpreted differently depending on its SpecialContext usage
+type Context *{.pure.}= enum
+  ## @descr The same syntax can be interpreted differently depending on its Context usage
+  None,
+  Array, Object,
+  Variable, Condition, Argument, Typedef,
+  Readonly,
+type SpecialContext * = set[Context]
+  ## @descr Set of flags that define the context for how to interpret the syntax
+converter toSpecialContext *(flag :Context) :SpecialContext= {flag}
 
 #_______________________________________
 type ModuleKind *{.pure.}= enum Unknown, Include, Import, NotModule
