@@ -1,10 +1,5 @@
 ```md
 # Refactor Redo
-- [ ] Function Definition (proc)
-  - [ ] {.noreturn.}
-- [ ] Type declaration
-  - [ ] Type aliasing    typedef char* str;
-  - [ ] Mutable pointer to immutable data    {.readonly.} pragma
 - [ ] Multi-word types  (eg: unsigned T)
   - [ ] signed
   - [ ] unsigned
@@ -13,13 +8,9 @@
   - [ ] double, triple and quadruple worded types
 - [ ] Conditions
   - [ ] when defined(symbol)
-  - [ ] Sketch   : Single condition only
-  - [ ] While
-  - [ ] if/elif/else blocks
   - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
   - [ ] Multi-condition support (recursive)
 - [ ] Operators
-  - [ ] Prefix   + - & ! * -- ++
   - [ ] Infix
     - [ ] Arithmetic : + - * / %
     - [ ] Bitwise    : & | << >>
@@ -28,23 +19,23 @@
     - [ ] Postfix    : ++ --  (nim parser has no postfix, other than * for visibility)
 - [ ] Arrays
   - [ ] indexed access
-- [ ] Structs
-  - [ ] Declaration
-  - [ ] Definition
-  - [ ] Designated Initialization
-  - [ ] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
-  - [ ] Field access
-    - [ ] Value access    thing.sub
-    - [ ] Pointer access  thing->sub
-  - [ ] Construction: Function Parameters
-  - [ ] Construction: Reassignment
-  - [ ] {.stub.} for using the non-typedef version of the struct
-  - [ ] Compound Literals
+- [ ] Type declaration
+  - [ ] Structs
+    - [ ] Declaration
+    - [ ] Definition
+    - [ ] Designated Initialization
+    - [ ] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
+    - [ ] Field access
+      - [ ] Value access    thing.sub
+      - [ ] Pointer access  thing->sub
+    - [ ] Construction: Function Parameters
+    - [ ] Construction: Reassignment
+    - [ ] {.stub.} for using the non-typedef version of the struct
+    - [ ] Compound Literals
 - [ ] Explicit casting
 - [ ] Pointer dereference   one[] = val   ->   *one = val
 - [ ] obj->field   pointer access syntax ->
 - [ ] For loops:  Basic support
-- [ ] Ternary operator   let one = if condition: 1 else: 2
 - [ ] Switch case
   - [ ] case ... of:
   - [ ] else: == default:
@@ -52,9 +43,11 @@
 
 ```md
 # Essentials
-- [ ] Enums
-- [ ] Unions
-- [ ] varargs
+- [ ] Type declaration
+  - [ ] Enums
+  - [ ] Unions
+- [ ] Function Definition (proc)
+  - [ ] varargs
 ```
 
 ```md
