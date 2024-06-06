@@ -597,10 +597,10 @@ proc mincTypeDef (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, Kind.TypeDef
+  var specl = {Context.Typedef}
   let pragm = types.get(code, "pragma").renderTree
-  let isVar = "readonly" notin pragm
+  if "readonly" in pragm: specl.incl Readonly
   let name  = code.:name
-  let specl = if isVar: special else: special.with Readonly
   let typ   = MinC(types.get(code, "type"), indent, specl).c
   result.c  = fmt TypedefTempl
 
