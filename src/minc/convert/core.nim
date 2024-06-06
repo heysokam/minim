@@ -203,7 +203,7 @@ proc mincIf (
     let cond    = MinC(branch[Condition], indent, Context.Condition).c
     let body    = MinC(branch[Body], indent+1, special).c
     let elseStr = if first: indent*Tab else: " else "  # elif or else
-    let ifStr   = if not isElse: " if "  else: ""      # if or elif
+    let ifStr   = if not isElse: "if "  else: ""       # if or elif
     result.c.add fmt IfTempl
     if last: result.c.add "\n"
 
