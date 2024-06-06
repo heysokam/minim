@@ -40,31 +40,31 @@ static void              echo(cstr const msg) { printf("%s\n", msg); }
   exit(-1);
 }
 /// Shaders: Code
-static /*constexpr*/ cstr const TriVert  = "//:_____________________________________________________\n"
-                                           "//  hello  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :\n"
-                                           "//:_____________________________________________________\n"
-                                           "// Hardcoded triangle in NDC coordinates            |\n"
-                                           "// UVs flipped vertically, so that 0,0 is topleft   |\n"
-                                           "//__________________________________________________|\n"
-                                           "#version 330 core\n"
-                                           "out vec2 vUV;\n"
-                                           "void main() {\n"
-                                           "  vec2 vertices[3] = vec2[3](\n"
-                                           "    vec2(-0.5,-0.5),\n"
-                                           "    vec2( 0.5,-0.5),\n"
-                                           "    vec2(-0.5, 0.5));\n"
-                                           "  gl_Position = vec4(vertices[gl_VertexID],0,1);\n"
-                                           "  vUV   = 0.5 * gl_Position.xy + vec2(0.5);\n"
-                                           "  vUV.y = 1-vUV.y;  // vUV.flipVertical(), so that (0,0) is at topleft (OpenGL wants 0,0 at bottomleft)\n"
-                                           "}";
-static /*constexpr*/ cstr const TriFrag  = "//:_____________________________________________________\n"
-                                           "//  hello  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :\n"
-                                           "//:_____________________________________________________\n"
-                                           "#version 330 core\n"
-                                           "uniform sampler2D pixels;\n"
-                                           "in vec2 vUV;\n"
-                                           "out vec4 fColor;\n"
-                                           "void main() { fColor = texture(pixels, vUV); }";
+static /*constexpr*/ cstr const TriVert = "//:_____________________________________________________\n"
+                                          "//  hello  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :\n"
+                                          "//:_____________________________________________________\n"
+                                          "// Hardcoded triangle in NDC coordinates            |\n"
+                                          "// UVs flipped vertically, so that 0,0 is topleft   |\n"
+                                          "//__________________________________________________|\n"
+                                          "#version 330 core\n"
+                                          "out vec2 vUV;\n"
+                                          "void main() {\n"
+                                          "  vec2 vertices[3] = vec2[3](\n"
+                                          "    vec2(-0.5,-0.5),\n"
+                                          "    vec2( 0.5,-0.5),\n"
+                                          "    vec2(-0.5, 0.5));\n"
+                                          "  gl_Position = vec4(vertices[gl_VertexID],0,1);\n"
+                                          "  vUV   = 0.5 * gl_Position.xy + vec2(0.5);\n"
+                                          "  vUV.y = 1-vUV.y;  // vUV.flipVertical(), so that (0,0) is at topleft (OpenGL wants 0,0 at bottomleft)\n"
+                                          "}";
+static /*constexpr*/ cstr const TriFrag = "//:_____________________________________________________\n"
+                                          "//  hello  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :\n"
+                                          "//:_____________________________________________________\n"
+                                          "#version 330 core\n"
+                                          "uniform sampler2D pixels;\n"
+                                          "in vec2 vUV;\n"
+                                          "out vec4 fColor;\n"
+                                          "void main() { fColor = texture(pixels, vUV); }";
 /// Configuration
 static /*constexpr*/ str const cfg_Title = "MinC | Hello Triangle";
 static /*constexpr*/ i32 const cfg_W     = 960;
