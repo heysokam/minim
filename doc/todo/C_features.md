@@ -4,6 +4,8 @@ From [C language reference](https://en.cppreference.com/w/c/language)
 ```md
 # Basic concepts
 - [ ] Comments
+  - [ ] `///`
+  - [ ] `//`
 - [ ] Punctuation
   - [ ] { }
     - [ ] In a struct or union definition, delimit the struct-declaration-list.
@@ -16,22 +18,22 @@ From [C language reference](https://en.cppreference.com/w/c/language)
     - [ ] In initialization, introduce a designator for an array element. (since C99)
     - [ ] In an attribute specifier, delimit the attributes. (since C23)
   - [ ] #
-    - [ ] Introduce a preprocessing directive.
+    - [x] Introduce a preprocessing directive.
     - [ ] The preprocessing operator for stringification.
   - [ ] ## The preprocessing operator for token pasting.
   - [ ] ( )
     - [ ] In an expression, indicate grouping.
-    - [ ] Function call operator.
+    - [x] Function call operator.
     - [ ] Delimit the operand in expressions:
-      - [ ] sizeof
+      - [x] sizeof
       - [ ] Alignof (since C11)
       - [ ] typeof (since C23)
       - [ ] typeof_unqual (since C23)
     - [ ] In an explicit cast, delimit the type-id.
     - [ ] In a compound literal, delimit the type-id. (since C99)
     - [ ] In a declaration or a type-id, indicate grouping.
-    - [ ] In a function declarator (in a declaration or a type-id), delimit the parameter list.
-    - [ ] In an if, switch, while, do-while, or for statement, delimit the controlling clause.
+    - [x] In a function declarator (in a declaration or a type-id), delimit the parameter list.
+    - [!] In an if, switch, while, do-while, or for statement, delimit the controlling clause.
     - [ ] In a function-like macro definition, delimit the macro parameters.
     - [ ] In a function-like macro invocation, delimit the macro arguments or prevent commas from being interpreted as argument separators.
     - [ ] Part of a defined, __has_include, __has_embed or __has_c_attribute (since C23) preprocessing operator.
@@ -39,17 +41,18 @@ From [C language reference](https://en.cppreference.com/w/c/language)
     - [ ] In an _Atomic type specifier, delimit the type-id. (since C11)
     - [ ] In a static assertion declaration, delimit the operands. (since C11)
     - [ ] In an _Alignas specifier, delimit the operand. (since C11)
-    - [ ] In an attribute, delimit the attribute arguments. (since C23)
+    - [x] In an attribute, delimit the attribute arguments. (since C23)
     - [ ] In a bit-precise integer type name (_BitInt(N)), delimit the size. (since C23)
     - [ ] Part of __VA_OPT__ replacement in a variadic macro definition. (since C23)
     - [ ] In a preprocessor parameter used in #embed directives and __has_embed preprocessing expressions, delimit the preprocessor parameter clause. (since C23)
   - [ ] ;
     - [ ] Indicate the end of
-      - [ ] a statement (including the init-statement of a for statement)
-      - [ ] a declaration or struct-declaration-list
+      - [x] a statement (including the init-statement of a for statement)
+      - [x] a declaration
+      - [ ] a struct-declaration-list
       - [ ] Separate the second and third clauses of a for statement.
   - [ ] :
-    - [ ] Part of conditional operator.
+    - [!] Part of conditional operator.
     - [ ] Part of label declaration.
     - [ ] In a bit-field member declaration, introduce the width.
     - [ ] Introduce an enum base, which specifies the underlying type of the enum. (since C23)
@@ -57,7 +60,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] ...
     - [ ] In the parameter list of a function declarator, signify a variadic function.
     - [ ] In a macro definition, signify a variadic macro. (since C99)
-  - [ ] ? Part of conditional operator.
+  - [!] ? Part of conditional operator.
   - [ ] ::
     - [ ] In an attribute, indicate attribute scope. (since C23)
     - [ ] In a preprocessor prefixed parameter (used by #embed and __has_embed), indicate scope. (since C23)
@@ -126,9 +129,9 @@ From [C language reference](https://en.cppreference.com/w/c/language)
     - [ ] List separator in
       - [ ] the declarator list in a declaration
       - [ ] initializer list in initialization, including compound literals (since C99)
-      - [ ] the argument list in a function call expression
+      - [!] the argument list in a function call expression
       - [ ] the enumerator list in an enum declaration
-      - [ ] a function parameter list
+      - [!] a function parameter list
       - [ ] the macro parameter list in a function-like macro definition
       - [ ] the macro argument list in a function-like macro invocation, unless found between an inner set of parentheses
       - [ ] the generic association list in a generic selection expression (since C11)
@@ -141,14 +144,14 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] Unbounded: Disallow name shadowing, even through nested scopes
 - [ ] Type
   - [ ] Type classification
-    - [ ] void
-    - [ ] char
+    - [x] void
+    - [!] char
     - [ ] signed integers
       - [ ] standard
         - [ ] signed char
-        - [ ] short
-        - [ ] int
-        - [ ] long
+        - [!] short
+        - [!] int
+        - [!] long
         - [ ] long long
       - [ ] Bit precise _BitInt(N)  (C23)
       - [ ] Extended:  implementation-defined, eg: __int128
@@ -162,9 +165,9 @@ From [C language reference](https://en.cppreference.com/w/c/language)
       - [ ] Bit precise: unsigned _BitInt(N)  (C23)
       - [ ] Extended:  implementation-defined, eg: __uint128
     - [ ] Floating point
-      - [ ] float
-      - [ ] double
-      - [ ] long double
+      - [!] float
+      - [!] double
+      - [!] long double
       - [ ] decimal real floating-point types  (C23)
         - [ ] _Decimal32
         - [ ] _Decimal64
@@ -179,31 +182,31 @@ From [C language reference](https://en.cppreference.com/w/c/language)
         - [ ] long double _Imaginary
     - [ ] Enumerated types  https://en.cppreference.com/w/c/language/enum
     - [ ] Derived types
-      - [ ] Array  https://en.cppreference.com/w/c/language/array
+      - [!] Array  https://en.cppreference.com/w/c/language/array
       - [ ] Structure  https://en.cppreference.com/w/c/language/struct
       - [ ] Union  https://en.cppreference.com/w/c/language/union
       - [ ] Function  https://en.cppreference.com/w/c/language/functions
-      - [ ] Pointer  https://en.cppreference.com/w/c/language/pointer
+      - [!] Pointer  https://en.cppreference.com/w/c/language/pointer
       - [ ] Atomic  https://en.cppreference.com/w/c/language/atomic
     - [ ] Type qualifiers
-      - [ ] const
+      - [!] const
       - [ ] volatile
       - [ ] restrict
-    - [ ] Null type  (C23)
-      - [ ] nullptr_t
-      - [ ] NULL
-    - [ ] size_t
+    - [!] Null type  (C23)
+      - [!] nullptr_t
+      - [!] NULL
+    - [!] size_t
   - [ ] Compatible types  https://en.cppreference.com/w/c/language/type
     - [ ] Unbounded:
       - [ ] Disallow matching Compatible types
       - [ ] Require explicit cast mandatory (unless unbounded)
   - [ ] Composite types
   - [ ] Incomplete types
-    - [ ] array[_,Type] extern
+    - [!] array[_,Type] extern
     - [ ] struct declaration
   - [ ] Type names usecases
     - [ ] cast
-    - [ ] sizeof
+    - [!] sizeof
     - [ ] compound literal
     - [ ] generic selection
     - [ ] _Alignof
@@ -211,7 +214,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
     - [ ] _Atomic
     - [ ] Typename introducing a new type
   - [ ] Type Keywords
-    - [ ] bool, true, false, char, int, short, long, signed, unsigned, float, double
+    - [!] bool, true, false, char, int, short, long, signed, unsigned, float, double
     - [ ] _Bool, _BitInt, _Complex, _Imaginary, _Decimal32, _Decimal64, _Decimal128.
 - [ ] Arithmetic types
 - [ ] Objects and Alignment
@@ -221,8 +224,8 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] fundamental alignment
   - [ ] max_align_t
 - [ ] The main function
-  - [ ] Minimal version
-  - [ ] Most used version
+  - [x] Minimal version
+  - [!] Most used version
   - [ ] Complete version
   - [ ] Modifiable vs non-modifiable inputs
 - [ ] Undefined behavior  https://en.cppreference.com/w/c/language/behavior
@@ -234,47 +237,47 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] alignof (C23)
   - [ ] auto
   - [ ] bool (C23)
-  - [ ] break
+  - [!] break
   - [ ] case
-  - [ ] char
-  - [ ] const
+  - [x] char
+  - [x] const
   - [ ] constexpr (C23)
-  - [ ] continue
+  - [!] continue
   - [ ] default
   - [ ] do
-  - [ ] double
-  - [ ] else
+  - [x] double
+  - [!] else
   - [ ] enum
-  - [ ] extern
+  - [!] extern
   - [ ] false (C23)
-  - [ ] float
+  - [x] float
   - [ ] for
   - [ ] goto
-  - [ ] if
+  - [!] if
   - [ ] inline (C99)
-  - [ ] int
-  - [ ] long
-  - [ ] nullptr (C23)
+  - [x] int
+  - [x] long
+  - [x] nullptr (C23)
   - [ ] register
   - [ ] restrict (C99)
-  - [ ] return
-  - [ ] short
-  - [ ] signed
-  - [ ] sizeof
-  - [ ] static
+  - [x] return
+  - [!] short
+  - [!] signed
+  - [!] sizeof
+  - [x] static
   - [ ] static_assert (C23)
   - [ ] struct
   - [ ] switch
   - [ ] thread_local (C23)
   - [ ] true (C23)
-  - [ ] typedef
+  - [x] typedef
   - [ ] typeof (C23)
   - [ ] typeof_unqual (C23)
   - [ ] union
-  - [ ] unsigned
-  - [ ] void
+  - [!] unsigned
+  - [!] void
   - [ ] volatile
-  - [ ] while
+  - [!] while
   - [ ] _Alignas (C11)
   - [ ] _Alignof (C11)
   - [ ] _Atomic (C11)
@@ -302,7 +305,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] #elifndef(C23)
   - [ ] #endif
   - [ ] #else
-  - [ ] #define
+  - [x] #define
   - [ ] defined
   - [ ] #undef
   - [ ] #
@@ -310,9 +313,9 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] #include
   - [ ] #pragma
   - [ ] #line
-  - [ ] #error
-  - [ ] #warning(C23)   -> #if __STDC_VERSION__ >= 202311L
-  - [ ] #embed(C23)
+  - [x] #error
+  - [x] #warning (C23)   -> #if __STDC_VERSION__ >= 202311L
+  - [ ] #embed (C23)
   - [ ] __has_include (C23)
   - [ ] __has_embed (C23)
   - [ ] __has_c_attribute (C23)
@@ -332,10 +335,10 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] while
   - [ ] do-while
 - [ ] 5) jump statements
-  - [ ] continue
-  - [ ] break
-  - [ ] goto
-  - [ ] return
+  - [!] continue
+  - [!] break
+  - [!] goto
+  - [x] return
 ```
 
 ```md
@@ -375,8 +378,8 @@ From [C language reference](https://en.cppreference.com/w/c/language)
 
 ```md
 # Initialization
-- [ ] Scalar
-- [ ] Array
+- [x] Scalar
+- [!] Array
 - [ ] Structure
 - [ ] Union
 ```
@@ -408,14 +411,14 @@ From [C language reference](https://en.cppreference.com/w/c/language)
 - [ ] Function declaration
 - [ ] Function definition
 - [ ] inline(C99)
-- [ ] _Noreturn(C11)(deprecated in C23)
+- [ ] _Noreturn (C11) (deprecated in C23)
 - [ ] Variadic arguments
 ```
 
 ```md
 # Miscellaneous
 - [ ] Inline assembly
-- [ ] Analyzability(C11) : __STDC_ANALYZABLE__
+- [ ] Analyzability (C11) : __STDC_ANALYZABLE__
 - [ ] Unicode Characters (C23) https://en.cppreference.com/w/c/language/charset
 ```
 
