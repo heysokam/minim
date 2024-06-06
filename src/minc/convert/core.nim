@@ -426,7 +426,8 @@ proc mincVarSection (
   ensure code, Var
   for entry in code.sons: result.add mincVariable(entry, indent, Kind.Var)
 #___________________
-const AsgnTempl = "{indent*Tab}{left} = {right};"
+const AsgnRawTempl = "{left} = {right}"
+const AsgnTempl    = "{indent*Tab}{asgn};\n"
 proc mincAsgn (
     code    : PNode;
     indent  : int            = 0;
@@ -434,10 +435,12 @@ proc mincAsgn (
   ) :CFilePair=
   ensure code, Asgn
   const (Left, Right) = (0,1)
-  let left  = MinC(code[Left], indent).c
-  let right = MinC(code[Right], indent).c
-  result.c = fmt AsgnTempl
-  if special == {Context.None}: result.c.add "\n"
+  let left  = MinC(code[Left], indent, Assign).c
+  let right = MinC(code[Right], indent, Assign).c
+  let asgn  = fmt AsgnRawTempl
+  result.c  =
+    if Context.None in special : fmt AsgnTempl
+    else                       : fmt AsgnRawTempl
 
 
 #_______________________________________
