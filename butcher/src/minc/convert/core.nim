@@ -90,7 +90,7 @@ proc mincGetValueStr (code :PNode; indent :int= 0) :string=
     # of nkEmpty   : ""
     # of nkIdent   :
     #   if code.strValue == "_": "{0}" else: code.strValue
-    of nkPtrTy   : code[0].strValue
+    # of nkPtrTy   : code[0].strValue
     # of nkNilLit  : "NULL"
     # of nkCharLit : &"'{vars.getValue(code).parseInt().char}'"
     # of nkStrLit  : &"\"{code.strValue}\""
@@ -99,13 +99,13 @@ proc mincGetValueStr (code :PNode; indent :int= 0) :string=
     of nkDotExpr : mincGetValueRaw(code,indent)
     of nkPar     : &"({mincGetValueRaw(code[0])})"
     else         : code.strValue
-  if code.isTripleStrLit: name = mincGetTripleStrLit(code,indent+1)
-  if name in Reserved : # Reserved identifier names that are always renamed
-    case name
-    of "pointer" : result = "void*"
-    else         : assert false, "Found a Reserved identifier name, but no behavior for it is defined. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
-  elif isPtr : result = &"{name}*"
-  else       : result = name
+  # if code.isTripleStrLit: name = mincGetTripleStrLit(code,indent+1)
+  # if name in Reserved : # Reserved identifier names that are always renamed
+  #   case name
+  #   of "pointer" : result = "void*"
+  #   else         : assert false, "Found a Reserved identifier name, but no behavior for it is defined. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+  # elif isPtr : result = &"{name}*"
+  # else       : result = name
 #_____________________________
 proc mincGetObjectValue (code :PNode; indent :int= 0) :string=
   # Special case: Redirection from other sections
@@ -211,11 +211,11 @@ proc mincInfixList *(code :PNode; indent :int= 0; renames :Renames= Renames()) :
     result.add right.getSideCode()
 
 #_____________________________
-proc mincGetTernary (code :PNode; indent :int= 0) :string=
-  # TODO: Support for nkStmtList other than a single nkIdent
-  assert code.kind == nkIfExpr, "Getting ternary operator expresions is only allowed for nkIfExpr nodes. The illegal tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
-  assert code.sons.len == 2, "Getting nested ternary operator expresions (using if+elif+else) is not implemented. The erroring tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
-  result = &"({mincGetValueRaw(code[0][0], indent)}) ? {mincGetValueRaw(code[0][1][0], indent)} : {mincGetValueRaw(code[1][0][0], indent)}"
+# proc mincGetTernary (code :PNode; indent :int= 0) :string=
+#   # TODO: Support for nkStmtList other than a single nkIdent
+#   assert code.kind == nkIfExpr, "Getting ternary operator expresions is only allowed for nkIfExpr nodes. The illegal tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+#   assert code.sons.len == 2, "Getting nested ternary operator expresions (using if+elif+else) is not implemented. The erroring tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+#   result = &"({mincGetValueRaw(code[0][0], indent)}) ? {mincGetValueRaw(code[0][1][0], indent)} : {mincGetValueRaw(code[1][0][0], indent)}"
 #_____________________________
 const ValidValue =
   {nkEmpty, nkIdent, nkBracketExpr, nkBracket, nkDotExpr, nkIfExpr, nkPrefix, nkInfix, nkCast, nkPar, nkCall, nkCommand, nkCallStrLit, nkObjConstr, nkPtrTy} +
@@ -236,9 +236,9 @@ proc mincGetValueRaw (code :PNode; indent :int= 0) :string=
   elif code.kind == nkInfix     : mincInfixList(code, indent, ValueAffixRenames)
   elif code.kind == nkCast      : &"({mincGetValueStr(code[0], indent)})({mincGetValueRaw(code[1], indent)})" # Recursive case for cast[]()
   # elif code.kind in SomeCall    : mincCallRaw(code, indent)
-  elif code.kind == nkPtrTy     : &"{code[0].strValue}*"
+  # elif code.kind == nkPtrTy     : &"{code[0].strValue}*"
   elif code.kind == nkObjConstr : mincGetObjectValue(code, indent)
-  elif code.kind == nkIfExpr    : mincGetTernary(code, indent)
+  # elif code.kind == nkIfExpr    : mincGetTernary(code, indent)
   elif code.kind == nkPar       : &"({mincGetValueRaw(code[0])})"
   # elif code.isTripleStrLit      : mincGetTripleStrLit(code,indent+1)
   # elif code.kind in SomeStrLit  : &"\"{strv}\""
@@ -620,23 +620,23 @@ proc mincForStmt (code :PNode; indent :int= 0) :string=
 #   assert indent != 0, "Break statements cannot exist at the top level in C.\n" & code.renderTree
 #   result.add &"{indent*Tab}break;\n"
 #_____________________________
-proc mincIfStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkIfStmt, code.renderTree
-  let tab :string= indent*Tab
-  for id,branch in code.pairs:
-    let body = &"{MinC(branch[^1], indent+1)}"
-    let pfx :string=
-      if   branch.kind == nkElifBranch and id == 0 : &"{tab}if "
-      elif branch.kind == nkElifBranch             : " else if "
-      elif branch.kind == nkElse                   : " else "
-      else:""
-    assert pfx != "", "Unknown branch kind in minc.IfStmt"
-    let condition :string=
-      if   branch.kind == nkElifBranch : &"({mincGetCondition(branch[0])}) "
-      elif branch.kind == nkElse       : ""
-      else:""
-    result.add &"{pfx}{condition}{{\n{body}{tab}}}"
-  result.add "\n" # Finish with Newline on the last branch
+# proc mincIfStmt (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkIfStmt, code.renderTree
+#   let tab :string= indent*Tab
+#   for id,branch in code.pairs:
+#     let body = &"{MinC(branch[^1], indent+1)}"
+#     let pfx :string=
+#       if   branch.kind == nkElifBranch and id == 0 : &"{tab}if "
+#       elif branch.kind == nkElifBranch             : " else if "
+#       elif branch.kind == nkElse                   : " else "
+#       else:""
+#     assert pfx != "", "Unknown branch kind in minc.IfStmt"
+#     let condition :string=
+#       if   branch.kind == nkElifBranch : &"({mincGetCondition(branch[0])}) "
+#       elif branch.kind == nkElse       : ""
+#       else:""
+#     result.add &"{pfx}{condition}{{\n{body}{tab}}}"
+#   result.add "\n" # Finish with Newline on the last branch
 #_____________________________
 proc mincWhenStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkWhenStmt, code.renderTree
@@ -782,9 +782,9 @@ proc mincTypeDef (code :PNode; indent :int= 0) :string=
   result = &"{indent*Tab}typedef {typ} {name};\n"         # Normal decl for non-obj and fw.decl for objects
   if info.isObj and not stub: result.add &"{indent*Tab}{typ} {body};\n"
 #_____________________________
-proc mincTypeSection (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkTypeSection, code.renderTree
-  for entry in code: result.add mincTypeDef(entry, indent)
+# proc mincTypeSection (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkTypeSection, code.renderTree
+#   for entry in code: result.add mincTypeDef(entry, indent)
 
 
 #______________________________________________________
@@ -841,7 +841,7 @@ proc mincAsgn (code :PNode; indent :int= 0) :string=
 proc MinC *(code :PNode; indent :int= 0) :string=
   ## Node selector function. Sends the node into the relevant codegen function.
   # Base Cases
-  if code == nil: return
+  # if code == nil: return
   case code.kind
 
   # Process this node
@@ -856,8 +856,8 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # of nkCommand          : result = mincCommand(code, indent)
   # of nkCall             : result = mincCall(code, indent)
   # Types
-  of nkTypeSection      : result = mincTypeSection(code, indent)
-  of nkTypeDef          : result = mincTypeDef(code, indent) # Accessed by nkTypeSection
+  # of nkTypeSection      : result = mincTypeSection(code, indent)
+  # of nkTypeDef          : result = mincTypeDef(code, indent) # Accessed by nkTypeSection
   # #   Variables
   # of nkConstSection     : result = mincConstSection(code, indent)
   # of nkLetSection       : result = mincLetSection(code, indent)
@@ -866,7 +866,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # of nkWhileStmt        : result = mincWhileStmt(code, indent)
   of nkForStmt          : result = mincForStmt(code, indent)
   #   Conditionals
-  of nkIfStmt           : result = mincIfStmt(code, indent)
+  # of nkIfStmt           : result = mincIfStmt(code, indent)
   of nkWhenStmt         : result = mincWhenStmt(code, indent)
   of nkElifBranch       : result = mincElifBranch(code)
   of nkCaseStmt         : result = mincCaseStmt(code)
@@ -877,12 +877,12 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   #   Comments
   # of nkCommentStmt      : result = mincCommentStmt(code, indent)
   #   Assignment
-  of nkAsgn             : result = mincAsgn(code, indent)
+  # of nkAsgn             : result = mincAsgn(code, indent)
   #   Pragmas
   # of nkPragma           : result = mincPragma(code, indent)
   #   Pre-In-Post.fix
   of nkInfix            : result = mincInfix(code, indent)
-  of nkPrefix           : result = mincPrefix(code, indent)
+  # of nkPrefix           : result = mincPrefix(code, indent)
   of nkPostfix          : result = mincPostfix(code, indent)
 
 
