@@ -657,6 +657,7 @@ proc mincPragmaNamespace (
   ensure name, nkIdent, nkDotExpr, &"Only {{.namespace:name.}} and {{.namespace:name.sub.}} namespace pragmas are currently supported."
   let ns_name = body.renderTree.replace(".", "_")
   result.c = &"{indent*Tab}// namespace {ns_name}\n"
+  # if "_" in ns_name: result.c.add "\n"
 #___________________
 const ValidDefineAsignSymbols = ["->"]
 const DefineTempl = "{indent*Tab}#define {name}{value}\n"
