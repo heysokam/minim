@@ -18,7 +18,7 @@ const appsDir = rootDir/"examples"
 #_____________________________
 func prefixWith (file :Path; id :string) :Path= Path( id & "_" & file.lastPathPart.string )
 #___________________
-proc checkApp (id,name :string) :void=
+template checkApp (id,name :string) :void=
   # Setup the test with the app's example code
   for dir in appsDir.walkDir:
     # Filter everything that doesn't match
@@ -50,4 +50,5 @@ proc checkApp (id,name :string) :void=
 test name "GLFW: Hello Window"  : checkApp "00", "hellowindow"
 test name "OpenGL: Hello Clear" : checkApp "01", "helloclear"
 test name "OpenGL: Triangle"    : checkApp "02", "hellotriangle"
+test name "OpenGL: Framebuffer" : checkApp "03", "framebuffer"
 
