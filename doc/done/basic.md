@@ -49,6 +49,7 @@
   - [x] While
   - [x] Ternary operator   let one = if condition: 1 else: 2
   - [x] if/elif/else blocks
+  - [x] Multi-condition support (recursive)
 - [x] Operators
   - [x] Prefix   + - & ! * -- ++
 - [x] Type declaration

@@ -9,7 +9,6 @@
 - [ ] Conditions
   - [ ] when defined(symbol)
   - [ ] Operators:  (and,&&) (or,||) (&,&) (|,|)
-  - [ ] Multi-condition support (recursive)
 - [ ] Operators
   - [ ] Infix
     - [ ] Arithmetic : + - * / %
