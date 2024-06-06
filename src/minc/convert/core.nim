@@ -43,9 +43,13 @@ const Renames_AssignmentAffix :RenameList= @[
 func renamed (name :string; kind :TNodeKind; special :SpecialContext= Context.None) :string=
   let list =
     case kind
-    of nkCommand, nkCall : Renames_Calls
-    of nkPrefix          : Renames_ConditionPrefix
-    else                 : @[]
+    of nkCommand, nkCall        : Renames_Calls
+    of nkPrefix                 : Renames_ConditionPrefix
+    of nkInfix                  :
+      if   Condition in special : Renames_ConditionAffix
+      elif Variable  in special : Renames_AssignmentAffix
+      else                      : @[]
+    else                        : @[]
   for rename in list:
     if name == rename.og: return rename.to
   result = name
@@ -85,10 +89,12 @@ template `.:`*(code :PNode; prop :untyped) :string=
       try : id = field.split("_")[1].parseInt
       except NodeAccessError: code.err "MinC: Tried to access an Argument ID for a Call, but the keyword passed has an incorrect format:  "&field
     strValue( calls.get(code, property, id) ).renamed(code.kind)
-  of nkPrefix:
-    strValue( affixes.getPrefix(code, field) )
   of nkTypeDef:
     strValue( types.get(code, field) )
+  of nkPrefix:
+    strValue( affixes.getPrefix(code, field) )
+  of nkInfix:
+    strValue( affixes.getInfix(code, field) )
   else: code.err "MinC: Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
 
 
@@ -744,6 +750,18 @@ proc mincPrefix (
     let body = MinC(affixes.getPrefix(code, "body"), indent, special).c
     result.c = fmt PrefixTempl
   else: code.trigger ConditionError, &"Found an unmapped special case for mincPrefix:  {special}"
+#___________________
+const InfixTempl = "{left} {affix} {right}"
+proc mincInfix (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkInfix
+  let left  = MinC(affixes.getInfix(code, "left"),  indent, special).c
+  let right = MinC(affixes.getInfix(code, "right"), indent, special).c
+  let affix = ( code.:name ).renamed(code.kind, special)
+  result.c = fmt InfixTempl
 
 
 #______________________________________________________
@@ -783,6 +801,7 @@ proc mincComment (code :PNode; indent :int= 0; special :SpecialContext= Context.
 # @section Source-to-Source Generator
 #_____________________________
 proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair=
+  if code == nil: return
   case code.kind
   # Recursive Cases
   of nkStmtList, nkTypeSection:
@@ -805,6 +824,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkPragma           : result = mincPragma(code, indent, special)
   # └─ Affixes
   of nkPrefix           : result = mincPrefix(code, indent, special)
+  of nkInfix            : result = mincInfix(code, indent, special)
   # Terminal cases
   of nkEmpty            : result = CFilePair()
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
