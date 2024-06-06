@@ -32,6 +32,10 @@
     - [ ] {.stub.} for using the non-typedef version of the struct
     - [ ] Compound Literals
 - [ ] Explicit casting
+  - [ ] cast[T](...) syntax
+  - [ ] Alternative syntax
+    - [ ] val as Type
+    - [ ] val @ Type
 - [ ] Pointer dereference   one[] = val   ->   *one = val
 - [ ] obj->field   pointer access syntax ->
 - [ ] For loops:  Basic support

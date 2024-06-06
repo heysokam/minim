@@ -1,9 +1,6 @@
 ```md
 # Refactor Redo
 - [ ] Booleans without stdbool.h  (-std=c23)
-- [ ] Alternative type casting syntax
-  - [ ] val as Type
-  - [ ] val @ Type
 ```
 
 ```md
