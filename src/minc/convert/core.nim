@@ -4,7 +4,7 @@
 # @deps ndk
 import nstd/strings
 import nstd/paths
-from nstd/sets import anyIn, with, without
+from nstd/sets import hasAll, hasAny, with, without
 # @deps *Slate
 import slate/nimc as nim
 import slate/format
@@ -258,25 +258,27 @@ proc mincProcQualifiers (code :PNode; indent :int= 0) :string=
 #___________________
 const ArgTempl = "{typ} {name}"
 proc mincProcArgs (code :PNode; indent :int= 0) :string=
-  # TODO: const by default
   # TODO: {.readonly.} pragma
   # ref :  fmt "{ronly}{typ}{mut} {arg.name}{arr}{sep}"
   ensure code, nkFormalParams
   if code.sons.len == 0: return "void"  # Explicit fill with void for no arguments
   # Add all arguments to the result
-  var args :seq[tuple[name:string, typ:string, val:string]]
+  var args :seq[tuple[name:string, typ:string, val:string, special:SpecialContext]]
   for group in code:
     const (Type,Value,LastArg) = (^2,^1,^3)
-    let typ = MinC(group[Type], indent+1, {Argument, Readonly}).c
-    let val = MinC(group[Value], indent+1, {Argument, Readonly}).c
+    var special = {Argument, Immutable}                     # const by default
+    if group[Type].kind == nkVarTy: special.excl Immutable  # Remove Immutable for `var T`
+    let typ     = MinC(group[Type], indent+1, special).c
+    let val     = MinC(group[Value], indent+1, special).c
     for arg in group.sons[0..LastArg]:
       args.add (
-        name : MinC(arg, indent+1, Argument).c,
-        typ  : typ,
-        val  : val,  # TODO: Default values
+        name    : MinC(arg, indent+1, special).c,
+        typ     : typ,
+        val     : val,  # TODO: Default values
+        special : special,
         ) # << args.add ( ... )
   for id,arg in args.pairs:
-    let typ  = arg.typ
+    let typ  = if Immutable in arg.special: arg.typ & " const" else: arg.typ
     let name = arg.name
     result.add fmt ArgTempl
     if id != args.high: result.add SeparatorArgs
@@ -554,9 +556,10 @@ proc mincIdent (
     result.c =
       if val == "_" : "{0}"  # TODO: Probably incorrect for the Object SpecialContext
       else          : val
-  elif Readonly in special:
+  elif special.hasAll({ Argument, Readonly }) or
+       special.hasAll({ Context.Typedef, Readonly }):
     result.c = &"{val} const"
-  elif special.anyIn {Context.None, Argument, Condition, Typedef}:
+  elif special.hasAny {Context.None, Argument, Condition, Typedef, Assign}:
     result.c = val
   else: code.trigger IdentError, &"Found an unmapped SpecialContext kind for interpreting Ident code:  {special}"
 
@@ -569,7 +572,6 @@ proc mincType_ptr (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
-    isVar   : bool           = false
   ) :CFilePair=
   ensure code, nkPtrTy
   const Type = 0
@@ -580,12 +582,12 @@ proc mincType (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
-    isVar   : bool           = false
   ) :CFilePair=
   ensure code, Type
+  let special = if code.kind == nkVarTy: special.without Immutable else: special
   case code.kind
-  of nkPtrTy : result = mincType_ptr(code, indent, special, isVar)
-  of nkVarTy : result = MinC(code[0], indent, special.without Readonly)
+  of nkPtrTy : result = mincType_ptr(code, indent, special)
+  of nkVarTy : result = MinC(code[0], indent, special)
   else: code.trigger TypeError, &"Found an unmapped kind for interpreting Type code:  {code.kind}"
 #___________________
 const TypedefTempl = "typedef {typ} {name};\n"
