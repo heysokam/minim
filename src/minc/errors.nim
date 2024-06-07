@@ -20,12 +20,12 @@ type PragmaError    * = object of CatchableError
 type CallError      * = object of CatchableError
 type FlowCtrlError  * = object of CatchableError
 type TypeError      * = object of CatchableError
+type AssignError    * = object of CatchableError
+type ObjectError    * = object of CatchableError
 # TODO
 type ProcError      * = object of CatchableError
 type AffixError     * = object of CatchableError
 type ConditionError * = object of CatchableError
-type ObjectError    * = object of CatchableError
-type AssignError    * = object of CatchableError
 #_____________________________
 type SomeCodegenError =
   AffixError     | CallError    | VariableError | PragmaError   |
