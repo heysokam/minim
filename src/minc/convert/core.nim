@@ -559,12 +559,6 @@ proc mincLiteral (
   ) :CFilePair=
   ensure code, Literal, RawStr, "Called mincLiteral with an incorrect node kind."
   case code.kind
-  of nim.Nil      : result = mincNil(code, indent, special)
-  of nim.Char     : result = mincChar(code, indent, special)
-  of nim.Float    : result = mincFloat(code, indent, special)
-  of nim.Int      : result = mincInt(code, indent, special)
-  of nim.UInt     : result = mincUInt(code, indent, special)
-  of StrKinds     : result = mincStr(code, indent, special)
   of nim.Nil   : result = mincNil(code, indent, special)
   of nim.Char  : result = mincChar(code, indent, special)
   of nim.Float : result = mincFloat(code, indent, special)
