@@ -43,13 +43,14 @@ const Renames_AssignmentAffix :RenameList= @[
 func renamed (name :string; kind :TNodeKind; special :SpecialContext= Context.None) :string=
   let list =
     case kind
-    of nkCommand, nkCall        : Renames_Calls
-    of nkPrefix                 : Renames_ConditionPrefix
-    of nkInfix                  :
-      if   Condition in special : Renames_ConditionAffix
-      elif Variable  in special : Renames_AssignmentAffix
-      else                      : @[]
-    else                        : @[]
+    of nkCommand, nkCall             : Renames_Calls
+    of nkPrefix                      : Renames_ConditionPrefix
+    of nkInfix                       :
+      if   Condition in special      : Renames_ConditionAffix
+      elif Variable  in special      : Renames_AssignmentAffix
+      elif Context.Return in special : Renames_AssignmentAffix
+      else                           : @[]
+    else                             : @[]
   for rename in list:
     if name == rename.og: return rename.to
   result = name
@@ -158,12 +159,12 @@ proc mincReturnStmt (
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  ensure code, Return
+  ensure code, Kind.Return
   if indent < 1: code.trigger FlowCtrlError, "Return statements cannot exist at the top level in C."
   # Generate the Body
   var body :string
   if code.sons.len > 0: body.add " "  # Separate `return` and `body` with a space when there is a value
-  for entry in code: body.add MinC(entry, indent+1, special).c # TODO: Could Header stuff happen inside a body ??
+  for entry in code: body.add MinC(entry, indent+1, special.with Context.Return).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
   result.c = fmt ReturnTempl
 #___________________
