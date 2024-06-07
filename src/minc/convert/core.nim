@@ -274,6 +274,7 @@ proc mincWhen (
     result.c.add fmt WhenTempl
   result.c.add fmt WhenEndTempl
 
+
 #_______________________________________
 # @section Modules
 #_____________________________
@@ -698,6 +699,18 @@ proc mincCast (
   let typ  = MinC(code[Type], indent+1, special).c
   let body = MinC(code[Body], indent+1, special).c
   result.c = fmt CastTempl
+#___________________
+const DotTempl = "{left}.{right}"
+proc mincDot (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkDotExpr
+  const (Left,Right) = (0,1)
+  let left  = MinC(code[Left], indent, special).c
+  let right = MinC(code[Right], indent, special).c
+  result.c = fmt DotTempl
 
 
 #_______________________________________
@@ -1019,6 +1032,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkBracketExpr      : result = mincBracketExpr(code, indent, special)
   of nkPar              : result = mincPar(code, indent, special)
   of nkObjConstr        : result = mincObjConstr(code, indent, special)
+  of nkDotExpr          : result = mincDot(code, indent, special)
   # Terminal cases
   of nkEmpty            : result = CFilePair()
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
