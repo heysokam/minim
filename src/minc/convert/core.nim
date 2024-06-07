@@ -70,7 +70,10 @@ template `.:`*(code :PNode; prop :untyped) :string=
       property = field.split("_")[0]
       try : id = field.split("_")[1].parseInt
       except NodeAccessError: code.err "MinC: Tried to access an Argument ID for a nkProcDef, but the keyword passed has an incorrect format:  "&field
-    strValue( procs.get(code, property, id) )
+    let prop = procs.get(code, property, id)
+    case prop.kind
+    of nkPtrTy : strValue( prop[0] ) & "*"
+    else       : strValue( prop )
   of nkConstDef, nkIdentDefs:
     let typ = vars.get(code, field)
     case typ.kind
