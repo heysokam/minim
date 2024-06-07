@@ -600,23 +600,17 @@ proc mincBracket (
     result.c.add &"{indent*Tab}}}"
   else: code.trigger BracketError, &"Found an unmapped SpecialContext kind for interpreting Bracket code:  {special}"
 #___________________
-proc mincIdent (
+const CastTempl = "({typ})({body})"
+proc mincCast (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  ensure code, nkIdent
-  let val = code.strValue
-  if Variable in special:
-    result.c =
-      if val == "_" : "{0}"  # TODO: Probably incorrect for the Object SpecialContext
-      else          : val
-  elif special.hasAll({ Argument, Readonly }) or
-       special.hasAll({ Context.Typedef, Readonly }):
-    result.c = &"{val} const"
-  elif special.hasAny {Context.None, Argument, Condition, Typedef, Assign}:
-    result.c = val
-  else: code.trigger IdentError, &"Found an unmapped SpecialContext kind for interpreting Ident code:  {special}"
+  ensure code, nkCast
+  const (Type,Body) = (0,1)
+  let typ  = MinC(code[Type], indent+1, special).c
+  let body = MinC(code[Body], indent+1, special).c
+  result.c = fmt CastTempl
 
 
 #_______________________________________
@@ -897,6 +891,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkCommentStmt      : result = mincComment(code, indent, special)
   of nim.SomeType       : result = mincType(code, indent, special)
   of nkTypeDef          : result = mincTypeDef(code, indent, special)
+  of nkCast             : result = mincCast(code, indent, special)
   # └─ Control flow
   of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
   of nkContinueStmt     : result = mincContinueStmt(code, indent, special)
