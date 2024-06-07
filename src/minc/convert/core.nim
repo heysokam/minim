@@ -798,22 +798,34 @@ proc mincPrefix (
   ) :CFilePair=
   ensure code, nkPrefix
   let affix = ( code.:name ).renamed(code.kind, special)
-  if Condition in special:
+  if special.hasAny {Condition, Variable}:
     let body = MinC(affixes.getPrefix(code, "body"), indent, special).c
     result.c = fmt PrefixTempl
   else: code.trigger ConditionError, &"Found an unmapped special case for mincPrefix:  {special}"
 #___________________
-const InfixTempl = "{left} {affix} {right}"
+const ExtraCastOperators = ["as", "@"]
+const ExtraCastRawTempl  = "({right})({left})"
+const ExtraCastTempl     = "{indent*Tab}({right})({left});\n"
+#___________________
+const InfixRawTempl = "{left} {affix} {right}"
+const InfixTempl    = "{indent*Tab}{left} {affix} {right};\n"
 proc mincInfix (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, nkInfix
-  let left  = MinC(affixes.getInfix(code, "left"),  indent, special).c
-  let right = MinC(affixes.getInfix(code, "right"), indent, special).c
-  let affix = ( code.:name ).renamed(code.kind, special)
-  result.c = fmt InfixTempl
+  let left   = MinC(affixes.getInfix(code, "left"),  indent, special).c
+  let right  = MinC(affixes.getInfix(code, "right"), indent, special).c
+  let affix  = ( code.:name ).renamed(code.kind, special)
+  let isRaw  = special.hasAny {Variable, Condition, Return, Argument}
+  let isCast = affix in ExtraCastOperators
+  if isCast:
+    if  isRaw : result.c = fmt ExtraCastRawTempl
+    else      : result.c = fmt ExtraCastTempl
+  else:
+    if  isRaw : result.c = fmt InfixRawTempl
+    else      : result.c = fmt InfixTempl
 
 
 #______________________________________________________
