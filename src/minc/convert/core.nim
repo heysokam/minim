@@ -567,6 +567,25 @@ proc mincLiteral (
   of StrKinds  : result = mincStr(code, indent, special)
   else: code.trigger LiteralError, &"Found an unmapped Literal kind:  {code.kind}"
 #___________________
+proc mincIdent (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkIdent
+  let val =
+    if code.strValue == "pointer" : PtrValue # Rename `pointer` to `void*`  ## TODO: configurable based on c23 option
+    else                          : code.strValue
+  if Variable in special:
+    result.c =
+      if val == "_" : "{0}"  # TODO: Probably incorrect for the Object SpecialContext
+      else          : val
+  elif special.hasAll({ Argument, Readonly }) or
+       special.hasAll({ Context.Typedef, Readonly }):
+    result.c = &"{val} const"
+  elif special.hasAny {Context.None, Argument, Condition, Typedef, Assign, Return}:
+    result.c = val
+  else: code.trigger IdentError, &"Found an unmapped SpecialContext kind for interpreting Ident code:  {special}"
 proc mincBracket (
     code    : PNode;
     indent  : int            = 0;
