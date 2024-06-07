@@ -62,9 +62,9 @@ proc getModule *(code :string) :Module=
   # Find language
   let ext = result.path.splitFile.ext
   case ext
-  of ".h"  : result.lang = C
-  of ".cm" : result.lang = MinC
-  of ""    : result.lang = MinC
+  of ".c", ".h" : result.lang = C
+  of ".cm"      : result.lang = MinC
+  of ""         : result.lang = MinC
   else: fail &"Tried to get the language of a path string with an unknown extension:\n  `{result.path}`"
   if ext == "" and result.lang == MinC:
     result.path = result.path.addFileExt(".cm")
