@@ -671,6 +671,31 @@ proc mincCast (
 #_______________________________________
 # @section Types
 #_____________________________
+const ObjBodyTempl  = "struct {name} {{{bfr}{body}{spc}}}" # After-name is added by the typedef already
+const ObjFieldTempl = "{typ} {name};"
+proc mincType_obj (
+    code      : PNode;
+    indent    : int            = 0;
+    special   : SpecialContext = Context.None;
+    extraName : PNode          = nil;
+  ) :CFilePair=
+  ensure code, nkObjectTy
+  const (Fields,Inherit) = (^1,1)
+  let fieldCount = code[Fields].sons.high
+  discard Inherit # TODO: object of T
+  let name = MinC(extraName, indent, special).c
+  let spc  = if fieldCount > 1: fmt "\n{indent*Tab}" else: " "
+  let bfr  = if fieldCount > 1: "\n" else: " "
+  var body :string
+  for id,entry in code[Fields].pairs:
+    let specl = special.with ObjectField
+    let name  = MinC(entry.getName(), indent, specl).c
+    let typ   = MinC(entry.getType(), indent, specl).c
+    if fieldCount > 1: body.add indent*Tab
+    body.add fmt ObjFieldTempl
+    if id != code[Fields].sons.high: body.add "\n"  # Skip adding \n for the last field
+  result.c = fmt ObjBodyTempl
+#___________________
 const PointerTempl = "{typ}*"
 proc mincType_ptr (
     code    : PNode;
@@ -683,15 +708,20 @@ proc mincType_ptr (
   result.c = fmt PointerTempl
 #___________________
 proc mincType (
-    code    : PNode;
-    indent  : int            = 0;
-    special : SpecialContext = Context.None;
+    code      : PNode;
+    indent    : int            = 0;
+    special   : SpecialContext = Context.None;
+    extraName : PNode          = nil;
   ) :CFilePair=
+  case code.kind
+  of nkIdent : return MinC(code, indent, special)
+  else       : discard
   ensure code, Type
   let special = if code.kind == nkVarTy: special.without Immutable else: special
   case code.kind
-  of nkPtrTy : result = mincType_ptr(code, indent, special)
-  of nkVarTy : result = MinC(code[0], indent, special)
+  of nkVarTy    : result = MinC(code[0], indent+1, special)
+  of nkPtrTy    : result = mincType_ptr(code, indent+1, special)
+  of nkObjectTy : result = mincType_obj(code, indent+1, special, extraName)
   else: code.trigger TypeError, &"Found an unmapped kind for interpreting Type code:  {code.kind}"
 #___________________
 const TypedefTempl = "typedef {typ} {name};\n"
@@ -705,8 +735,14 @@ proc mincTypeDef (
   let pragm = types.get(code, "pragma").renderTree
   if "readonly" in pragm: specl.incl Readonly
   let name  = code.:name
-  let typ   = MinC(types.get(code, "type"), indent, specl).c
-  result.c  = fmt TypedefTempl
+  let codeT = types.get(code, "type")
+  let typ   = mincType(
+    code      = codeT,
+    indent    = indent,
+    special   = specl,
+    extraName = if codeT.kind == nkObjectTy: types.get(code, "name") else: nil,
+    ).c # << mincType( ... )
+  result.h = fmt TypedefTempl
 
 
 #_______________________________________
