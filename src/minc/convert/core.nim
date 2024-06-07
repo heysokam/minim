@@ -399,12 +399,14 @@ const VarDeclTempl = "{indent*Tab}extern {qual}{T} {name};\n"
 const VarDefTempl  = "{indent*Tab}{qual}{T} {name}{eq}{value};\n"
 #___________________
 proc mincVariable (
-    code   : PNode;
-    indent : int;
-    kind   : Kind;
+    code    : PNode;
+    indent  : int;
+    kind    : Kind;
+    special : SpecialContext= Context.None;
   ) :CFilePair=
   # Error check
   ensure code, Const, Let, Var, msg="Tried to generate code for a variable, but its kind is incorrect"
+  let special = special.with Context.Variable
   let typ  = vars.get(code, "type")
   let body = vars.get(code, "body")
   if typ.kind == nkEmpty: code.trigger VariableError,
@@ -425,7 +427,7 @@ proc mincVariable (
   # Name: Array special case extras
   name.add mincArraySuffix(code, indent, special)
   # Get the body (aka variable value)
-  let value = MinC(body, indent+1, Context.Variable).c
+  let value = MinC(body, indent+1, special).c
   let eq    = if value != "": " = " else: ""
   # Generate the result
   result.h =
@@ -439,7 +441,7 @@ proc mincConstSection (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, Const
-  for entry in code.sons: result.add mincVariable(entry, indent, Kind.Const)
+  for entry in code.sons: result.add mincVariable(entry, indent, Kind.Const, special)
 #___________________
 proc mincLetSection (
     code    : PNode;
@@ -447,7 +449,7 @@ proc mincLetSection (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, Let
-  for entry in code.sons: result.add mincVariable(entry, indent, Kind.Let)
+  for entry in code.sons: result.add mincVariable(entry, indent, Kind.Let, special)
 #___________________
 proc mincVarSection (
     code    : PNode;
@@ -455,7 +457,7 @@ proc mincVarSection (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, Var
-  for entry in code.sons: result.add mincVariable(entry, indent, Kind.Var)
+  for entry in code.sons: result.add mincVariable(entry, indent, Kind.Var, special)
 #___________________
 const AsgnRawTempl = "{left} = {right}"
 const AsgnTempl    = "{indent*Tab}{asgn};\n"
@@ -563,6 +565,12 @@ proc mincLiteral (
   of nim.Int      : result = mincInt(code, indent, special)
   of nim.UInt     : result = mincUInt(code, indent, special)
   of StrKinds     : result = mincStr(code, indent, special)
+  of nim.Nil   : result = mincNil(code, indent, special)
+  of nim.Char  : result = mincChar(code, indent, special)
+  of nim.Float : result = mincFloat(code, indent, special)
+  of nim.Int   : result = mincInt(code, indent, special)
+  of nim.UInt  : result = mincUInt(code, indent, special)
+  of StrKinds  : result = mincStr(code, indent, special)
   else: code.trigger LiteralError, &"Found an unmapped Literal kind:  {code.kind}"
 #___________________
 proc mincBracket (
