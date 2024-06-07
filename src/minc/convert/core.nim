@@ -109,7 +109,11 @@ proc mincLiteral (code :PNode; indent :int= 0; special :SpecialContext= Context.
 #_______________________________________
 # @section Array tools
 #_____________________________
-proc mincArrSize *(code :PNode; indent :int= 0) :CFilePair=
+proc mincArrSize (
+    code      : PNode;
+    indent    : int            = 0;
+    special   : SpecialContext = Context.None;
+  ) :CFilePair=
   ## @descr Returns the array size defined by {@arg code}
   const (Type,ArraySize) = (1,1)
   let typ =
@@ -122,6 +126,27 @@ proc mincArrSize *(code :PNode; indent :int= 0) :CFilePair=
   else: code.err &"Tried to access the array size of an unmapped kind:  {typ.kind}" # TODO: Better infix resolution
   # Correct the `_` empty array size case
   if result.c == "_": result.c = ""
+#_____________________________
+const ArrSuffixTempl = "[{size}]"
+proc mincArraySuffix (
+    code      : PNode;
+    indent    : int            = 0;
+    special   : SpecialContext = Context.None;
+  ) :string=
+  let isArr = code.isArr
+  if not isArr: return
+  let size = mincArrSize(code, indent, special).c
+  result = fmt ArrSuffixTempl
+#_____________________________
+proc mincArrayType (
+    code      : PNode;
+    indent    : int            = 0;
+    special   : SpecialContext = Context.None;
+  ) :string=
+  let isArr = code.isArr
+  if not isArr: return
+  const Type = ^1
+  result = MinC(code[Type], indent, special).c
 
 
 #_______________________________________
@@ -270,13 +295,14 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
     if group[Type].kind == nkVarTy: special.excl Immutable  # Remove Immutable for `var T`
     let typ     = MinC(group[Type], indent+1, special).c
     let val     = MinC(group[Value], indent+1, special).c
-    for arg in group.sons[0..LastArg]:
+    for id,arg in group.sons[0..LastArg].pairs:
       args.add (
         name    : MinC(arg, indent+1, special).c,
         typ     : typ,
         val     : val,  # TODO: Default values
         special : special,
         ) # << args.add ( ... )
+      args[id].name.add mincArraySuffix(group[Type], indent, special)
   for id,arg in args.pairs:
     let typ  = if Immutable in arg.special: arg.typ & " const" else: arg.typ
     let name = arg.name
@@ -387,12 +413,7 @@ proc mincVariable (
   # Get the Name
   var name = code.:name
   # Name: Array special case extras
-  let isArr = code.isArr
-  let arrSz = if isArr: mincArrSize(code, indent).c else: ""
-  let arr   = if isArr: &"[{arrSz}]" else: ""
-  if isArr and arr == "": code.trigger VariableError,
-    "Found an array type, but its code has not been correctly generated."
-  name.add arr
+  name.add mincArraySuffix(code, indent, special)
   # Get the body (aka variable value)
   let value = MinC(body, indent+1, Context.Variable).c
   let eq    = if value != "": " = " else: ""
@@ -812,6 +833,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   # Recursive Cases
   of nkStmtList, nkTypeSection:
     for child in code   : result.add MinC( child, indent, special )
+
   # Intermediate cases
   # └─ Procedures
   of nkProcDef          : result = mincProcDef(code, indent, special)
@@ -846,5 +868,6 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   # └─ Control flow
   of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
   of nkContinueStmt     : result = mincContinueStmt(code, indent, special)
+
   else: code.err &"Translating {code.kind} to MinC is not supported yet."
 
