@@ -586,6 +586,18 @@ proc mincIdent (
   elif special.hasAny {Context.None, Argument, Condition, Typedef, Assign, Return}:
     result.c = val
   else: code.trigger IdentError, &"Found an unmapped SpecialContext kind for interpreting Ident code:  {special}"
+#___________________
+const ParTempl = "({body})"
+proc mincPar (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkPar
+  const Body = 0
+  let body = MinC(code[Body], indent, special).c
+  result.c = fmt ParTempl
+#___________________
 proc mincBracket (
     code    : PNode;
     indent  : int            = 0;
@@ -891,6 +903,8 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   # └─ Affixes
   of nkPrefix           : result = mincPrefix(code, indent, special)
   of nkInfix            : result = mincInfix(code, indent, special)
+  # └─ Identifiers
+  of nkPar              : result = mincPar(code, indent, special)
   # Terminal cases
   of nkEmpty            : result = CFilePair()
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
