@@ -474,6 +474,22 @@ proc mincAsgn (
   result.c  =
     if Context.None in special : fmt AsgnTempl
     else                       : fmt AsgnRawTempl
+#___________________
+const DerefTempl = "*{name}"
+proc mincBracketExpr (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkBracketExpr
+  if special.hasAny {Assign, Variable, Return}:
+    let name = MinC(code.getName(), indent, special).c
+    result.c = fmt DerefTempl
+  elif code.isArr:
+    if special.hasAny {Argument}:
+      result.c = mincArrayType(code, indent, special)
+    else: code.trigger AssignError, &"Found a SpecialContext for arrays that hasn't been mapped yet:  {special}"
+  else: code.trigger AssignError, &"Found a SpecialContext that hasn't been mapped yet:  {special}"
 
 
 #_______________________________________
@@ -904,6 +920,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkPrefix           : result = mincPrefix(code, indent, special)
   of nkInfix            : result = mincInfix(code, indent, special)
   # └─ Identifiers
+  of nkBracketExpr      : result = mincBracketExpr(code, indent, special)
   of nkPar              : result = mincPar(code, indent, special)
   # Terminal cases
   of nkEmpty            : result = CFilePair()
