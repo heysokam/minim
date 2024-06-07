@@ -638,46 +638,46 @@ proc mincForStmt (code :PNode; indent :int= 0) :string=
 #     result.add &"{pfx}{condition}{{\n{body}{tab}}}"
 #   result.add "\n" # Finish with Newline on the last branch
 #_____________________________
-proc mincWhenStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkWhenStmt, code.renderTree
-  let tab :string= indent*Tab
-  for id,branch in code.pairs:
-    # Get the macro prefix
-    let pfx :string=
-      if   branch.kind == nkElifBranch and id == 0 : &"{tab}#if "
-      elif branch.kind == nkElifBranch             : &"{tab}#elif "
-      elif branch.kind == nkElse                   : &"{tab}#else"
-      else:""
-    assert pfx != "", "Unknown branch kind in minc.WhenStmt"
-    # Get the body code from the Stmt section
-    let body = &"{MinC(branch[^1], indent)}"
-    # Exit early for Else statements
-    if branch.kind == nkElse:
-      assert branch[0].kind == nkStmtList, &"Found an Else statement with an unknown shape. Its tree+code are:\n{branch.treeRepr}\n{branch.renderTree}\n"
-      result.add &"{pfx}\n{body}"
-      continue # Don't get the condition. Else statements don't have any
-    # Get the condition
-    assert branch[^2].kind == nkIdent or branch[^2].len <= 2, "Multi-condition when/elif/else statements are currently not supported"
-    let cond  = branch[0]
-    let isDef = cond.kind == nkCall and cond[0].strValue == "defined"
-    assert cond.kind in {nkPrefix, nkIdent} or isDef, &"Only Prefix/Single/defined conditions are currently supported\n{code.renderTree}"
-    var condition :string
-    if cond.kind == nkIdent: # single condition case. Add its content to condition
-      condition.add cond.strValue
-    elif cond[0].kind == nkIdent and cond[0].strValue == "not":
-      condition.add "!"
-    # TODO: This is broken for most. Only works for `when defined(thing)`
-    if cond.kind == nkIdent: discard # single condition case. Skip searching for subnodes
-    elif isDef:
-      condition.add &"defined({cond[1].strValue})"
-    elif cond[1].kind == nkCall and cond[1][0].strValue == "defined":
-      condition.add &"defined({cond[1][1].strValue})"
-    elif cond[1].kind == nkIdent:
-      condition.add cond[1].strValue
-    else: assert false, &"Unknown when condition in:\n{code.renderTree}"
-    # Add to the result
-    result.add &"{pfx}{condition}\n{body}"
-  result.add &"{tab}#endif\n"
+# proc mincWhenStmt (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkWhenStmt, code.renderTree
+#   let tab :string= indent*Tab
+#   for id,branch in code.pairs:
+#     # Get the macro prefix
+#     let pfx :string=
+#       if   branch.kind == nkElifBranch and id == 0 : &"{tab}#if "
+#       elif branch.kind == nkElifBranch             : &"{tab}#elif "
+#       elif branch.kind == nkElse                   : &"{tab}#else"
+#       else:""
+#     assert pfx != "", "Unknown branch kind in minc.WhenStmt"
+#    # Get the body code from the Stmt section
+#    let body = &"{MinC(branch[^1], indent)}"
+#    # Exit early for Else statements
+#    if branch.kind == nkElse:
+#      assert branch[0].kind == nkStmtList, &"Found an Else statement with an unknown shape. Its tree+code are:\n{branch.treeRepr}\n{branch.renderTree}\n"
+#      result.add &"{pfx}\n{body}"
+#      continue # Don't get the condition. Else statements don't have any
+#    # Get the condition
+#    assert branch[^2].kind == nkIdent or branch[^2].len <= 2, "Multi-condition when/elif/else statements are currently not supported"
+#    let cond  = branch[0]
+#    let isDef = cond.kind == nkCall and cond[0].strValue == "defined"
+#    assert cond.kind in {nkPrefix, nkIdent} or isDef, &"Only Prefix/Single/defined conditions are currently supported\n{code.renderTree}"
+#    var condition :string
+#    if cond.kind == nkIdent: # single condition case. Add its content to condition
+#      condition.add cond.strValue
+#    elif cond[0].kind == nkIdent and cond[0].strValue == "not":
+#      condition.add "!"
+#    # TODO: This is broken for most. Only works for `when defined(thing)`
+#    if cond.kind == nkIdent: discard # single condition case. Skip searching for subnodes
+#    elif isDef:
+#      condition.add &"defined({cond[1].strValue})"
+#    elif cond[1].kind == nkCall and cond[1][0].strValue == "defined":
+#      condition.add &"defined({cond[1][1].strValue})"
+#    elif cond[1].kind == nkIdent:
+#      condition.add cond[1].strValue
+#    else: assert false, &"Unknown when condition in:\n{code.renderTree}"
+#    # Add to the result
+#    result.add &"{pfx}{condition}\n{body}"
+#   result.add &"{tab}#endif\n"
 #_____________________________
 proc mincCaseStmt (code :PNode; indent :int= 0) :string=
   assert code.kind == nkCaseStmt, code.renderTree
@@ -867,7 +867,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   of nkForStmt          : result = mincForStmt(code, indent)
   #   Conditionals
   # of nkIfStmt           : result = mincIfStmt(code, indent)
-  of nkWhenStmt         : result = mincWhenStmt(code, indent)
+  # of nkWhenStmt         : result = mincWhenStmt(code, indent)
   of nkElifBranch       : result = mincElifBranch(code)
   of nkCaseStmt         : result = mincCaseStmt(code)
   #   Control flow

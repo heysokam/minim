@@ -240,7 +240,36 @@ proc mincIf (
     let ifStr   = if not isElse: "if "  else: ""       # if or elif
     result.c.add fmt IfTempl
     if last: result.c.add "\n"
-
+#___________________
+const WhenTempl    = "{tab}{pfx}{cond}\n{tab}{body}"
+const WhenEndTempl = "{tab}#endif\n"
+proc mincWhen (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  # TODO: Support for when cases in .h files
+  ensure code, nkWhenStmt
+  let special = special + {Context.Condition, Context.When}
+  let tab = indent*Tab
+  for id,branch in code.pairs:
+    const (Condition,Body) = (0,^1)
+    # Get the macro prefix
+    var pfx  :string
+    var cond :string
+    case branch.kind
+    of nkElifBranch:
+      if id == 0 : pfx = "#if "
+      else       : pfx = "#elif "
+      cond = MinC(branch[Condition], indent, special).c
+      #body = "?"
+    of nkElse    :
+      pfx = "#else"
+      # Don't get the condition. Else statements don't have any
+    else: code.trigger ConditionError, "Unknown branch kind in mincWhen"
+    let body = MinC(branch[Condition], indent, special).c
+    result.c.add fmt WhenTempl
+  result.c.add fmt WhenEndTempl
 
 #_______________________________________
 # @section Modules
@@ -971,6 +1000,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkWhileStmt        : result = mincWhile(code, indent, special)
   of nkIfStmt           : result = mincIf(code, indent, special)
   of nkIfExpr           : result = mincIf(code, indent, special)
+  of nkWhenStmt         : result = mincWhen(code, indent, special)
   # └─ Variables
   of nkConstSection     : result = mincConstSection(code, indent, special)
   of nkLetSection       : result = mincLetSection(code, indent, special)
