@@ -514,13 +514,13 @@ proc mincBracketExpr (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, nkBracketExpr
-  if special.hasAny {Assign, Variable, Return}:
-    let name = MinC(code.getName(), indent, special).c
-    result.c = fmt DerefTempl
-  elif code.isArr:
+  if code.isArr:
     if special.hasAny {Argument}:
       result.c = mincArrayType(code, indent, special)
     else: code.trigger AssignError, &"Found a SpecialContext for arrays that hasn't been mapped yet:  {special}"
+  elif special.hasAny {Assign, Variable, Return, Argument}:
+    let name = MinC(code.getName(), indent, special).c
+    result.c = fmt DerefTempl
   else: code.trigger AssignError, &"Found a SpecialContext that hasn't been mapped yet:  {special}"
 #___________________
 const ObjConstrTempl       = "({typ}){{{args}}}"
