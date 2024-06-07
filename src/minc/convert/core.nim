@@ -204,6 +204,39 @@ proc mincWhile (
   let cond = MinC(code[Condition], indent, Context.Condition).c
   let body = MinC(code[Body], indent+1, special).c
   result.c = fmt WhileTempl
+#___________________
+func isIncr *(value,infix,final :string) :bool= true  # TODO : Remove hardcoded ++. How to know if we increment or decrement?
+#___________________
+const ForSentryTempl = "size_t {sentry} = {value}"  # TODO: Remove hardcoded size_t. Should be coming from code[Exprs][Value].T
+const ForCondTempl   = " {sentry} {infix} {final}"
+const ForIterTempl   = " {prefix}{sentry}"
+const ForTempl       = "{indent*Tab}for ({init};{cond};{iter}) {{\n{body}{(indent+1)*Tab}}}"
+proc mincFor (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkForStmt
+  const (Sentry,Exprs,Body) = (0,1,2)  # Root for loop items
+  const (Infix,Value,Final) = (0,1,2)  # Expression items at code[Exprs]
+  report code[Body]
+  # Get the sentry initializer
+  let sentry = MinC(code[Sentry], indent, special.with Variable).c
+  let value  = MinC(code[Exprs][Value], indent, special.with Variable).c
+  # Get the incrementer/finalizer
+  let infix  = MinC(code[Exprs][Infix], indent, special.with ForLoop).c
+  let final  = MinC(code[Exprs][Final], indent, special.with Variable).c
+  let prefix = if value.isIncr(infix,final): "++" else: "--"
+  # Generate the code
+  let init = fmt ForSentryTempl
+  let cond = fmt ForCondTempl
+  let iter = fmt ForIterTempl
+  let body = MinC(code[Body], indent+1, special).c
+  result.c = fmt ForTempl
+  # echo "__for_________________________"
+  # echo result.c
+  # echo "______________________________"
+  # code.trigger FlowCtrlError, "For loops not implemented yet"
 
 
 #_______________________________________
@@ -659,8 +692,10 @@ proc mincIdent (
   elif special.hasAll({ Argument, Readonly }) or
        special.hasAll({ Context.Typedef, Readonly }):
     result.c = &"{val} const"
-  elif special.hasAny {Context.None, Argument, Condition, Typedef, Assign, Return}:
+  elif special.hasAny {Context.None, Argument, Condition, Typedef, Assign, Return, ForLoop}:
     result.c = val
+    if ForLoop in special and result.c.startsWith(".."):
+      result.c = result.c[2..^1] # Remove .. from ForLoop infixes
   else: code.trigger IdentError, &"Found an unmapped SpecialContext kind for interpreting Ident code:  {special}"
 #___________________
 const ParTempl = "({body})"
@@ -1017,6 +1052,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkIfStmt           : result = mincIf(code, indent, special)
   of nkIfExpr           : result = mincIf(code, indent, special)
   of nkWhenStmt         : result = mincWhen(code, indent, special)
+  of nkForStmt          : result = mincFor(code, indent, special)
   # └─ Variables
   of nkConstSection     : result = mincConstSection(code, indent, special)
   of nkLetSection       : result = mincLetSection(code, indent, special)

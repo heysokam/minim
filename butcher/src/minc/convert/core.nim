@@ -576,28 +576,33 @@ proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
 #   result.add MinC( code[^1], indent+1 )
 #   result.add &"{indent*Tab}}}\n"
 #_____________________________
-proc mincForStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkForStmt, code.renderTree
-  # Name the entries
-  let exprs   = code[1]   # For Expression
-  let value   = exprs[1]  # Initial Value assigned to the sentry
-  let content = code[2]   # Contents of the for body block
-  let sentry  = code[0]   # Sentry variable
-  let infix   = exprs[0]  # Infix operator that does the finalizing condition check
-  let final   = exprs[2]  # Final value checked to terminates the for
+#proc mincForStmt (code :PNode; indent :int= 0) :string=
+#  assert code.kind == nkForStmt, code.renderTree
+#  # Name the code entries
+#  let sentry  = code[0]   # Sentry variable
+#  let exprs   = code[1]   # For Expression
+#  let content = code[2]   # Contents of the for body block
+#  # Name the expresion entries
+#  let infix   = exprs[0]  # Infix operator that does the finalizing condition check
+#  let value   = exprs[1]  # Initial Value assigned to the sentry
+#  let final   = exprs[2]  # Final value checked to terminates the for
   # Error check
-  assert sentry.kind == nkIdent and exprs.kind == nkInfix and infix.strValue in KnownForInfix and content.kind == nkStmtList,
-    &"Tried to generate the code of a for loop, but its definition syntax is not supported. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
-  # Name the outputs
-  let init = if sentry.isEmpty: ""
-    else: &"size_t {sentry.strValue} = {mincGetValueStr(value)}"  # TODO: Remove hardcoded size_t. Should be coming from exprs[1].T
-  let fix  = if infix.strValue[2..^1] == "": "<=" else: infix.strValue[2..^1]
-  let cond = if exprs.isEmpty : ""
-    else: &" {mincGetValueStr(sentry)} {fix} {mincGetValueStr(final)}"
-  let iter = if exprs.isEmpty : ""
-    else: &" ++{sentry.strValue}" # TODO : Remove hardcoded ++. Allow decrementing the value
-  let body = &" {{\n{MinC(content,indent+1)}{indent*Tab}}}\n"
-  result.add &"{indent*Tab}for({init};{cond};{iter}){body}"
+#  assert sentry.kind == nkIdent and
+#         exprs.kind == nkInfix and
+#         infix.strValue in KnownForInfix
+#         and content.kind == nkStmtList,
+#    &"Tried to generate the code of a for loop, but its definition syntax is not supported. Its tree+code are:\n{code.treeRepr}\n{code.renderTree}\n"
+#  # Name the outputs
+#  let init = if sentry.isEmpty: ""
+#    else: &"size_t {sentry.strValue} = {mincGetValueStr(value)}"  # TODO: Remove hardcoded size_t. Should be coming from exprs[1].T
+#  let fix  = if infix.strValue[2..^1] == "": "<=" else: infix.strValue[2..^1]
+#  let cond = if exprs.isEmpty : ""
+#    else: &" {mincGetValueStr(sentry)} {fix} {mincGetValueStr(final)}"
+#  let iter = if exprs.isEmpty : ""
+#    else: &" ++{sentry.strValue}" # TODO : Remove hardcoded ++. Allow decrementing the value
+#  let body = &" {{\n{MinC(content,indent+1)}{indent*Tab}}}\n"
+#  result.add &"{indent*Tab}for({init};{cond};{iter}){body}"
+
 
 #______________________________________________________
 # @section Control Flow
@@ -864,7 +869,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # of nkVarSection       : result = mincVarSection(code, indent)
   #   Loops
   # of nkWhileStmt        : result = mincWhileStmt(code, indent)
-  of nkForStmt          : result = mincForStmt(code, indent)
+  # of nkForStmt          : result = mincForStmt(code, indent)
   #   Conditionals
   # of nkIfStmt           : result = mincIfStmt(code, indent)
   # of nkWhenStmt         : result = mincWhenStmt(code, indent)
