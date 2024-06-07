@@ -206,15 +206,23 @@ proc mincWhile (
 #_______________________________________
 # @section Control Flow: Conditionals
 #_____________________________
-const IfTempl = "{elseStr}{ifStr}({cond}) {{\n{body}{indent*Tab}}}"
+const IfTempl = "{elseStr}{ifStr}({cond}) {{\n{body}\n{indent*Tab}}}"
 const TernaryRawTempl = "({cond}) ? {case1} : {case2}"
 proc mincIf (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  ensure code, nkIfStmt
-  if special == Variable:
+  ensure code, nkIfStmt, nkIfExpr, "Tried to generate the code for an `if/elif/else` block with an incorrect node."
+  if code.kind == nkIfExpr:  # if Expressions always become ternary expressions
+    if code.len != 2: code.trigger ConditionError, "Support for elif branches in if `expr` is not implemented yet"
+    const (Condition,IfCase,ElseCase,Body) = (0,0,^1,^1)
+    let cond  = MinC(code[IfCase][Condition], indent, Context.Condition).c
+    let case1 = MinC(code[IfCase][Body], indent, Context.Condition).c
+    let case2 = MinC(code[ElseCase][Body], indent, Context.Condition).c
+    result.c = fmt TernaryRawTempl
+    return
+  elif Variable in special:  # nkIfStmt for variables become ternary expressions
     const (Condition,Case1,Case2) = (0,1,^1)
     let cond  = MinC(code[Condition], indent, Context.Condition).c
     let case1 = MinC(code[Case1], indent, Context.Condition).c
@@ -261,7 +269,8 @@ proc mincInclude (
   let module =
     if M.local : M.path.string.wrapped
     else       : "<" & M.path.string & ">"
-  result.c = fmt IncludeTempl
+  if M.path.endsWith(".c") : result.c = fmt IncludeTempl  # Include .c files into other .c files, and not into the header
+  else                     : result.h = fmt IncludeTempl
 
 
 #_______________________________________
@@ -843,6 +852,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkReturnStmt       : result = mincReturnStmt(code, indent, special)
   of nkWhileStmt        : result = mincWhile(code, indent, special)
   of nkIfStmt           : result = mincIf(code, indent, special)
+  of nkIfExpr           : result = mincIf(code, indent, special)
   # └─ Variables
   of nkConstSection     : result = mincConstSection(code, indent, special)
   of nkLetSection       : result = mincLetSection(code, indent, special)
