@@ -490,6 +490,33 @@ proc mincBracketExpr (
       result.c = mincArrayType(code, indent, special)
     else: code.trigger AssignError, &"Found a SpecialContext for arrays that hasn't been mapped yet:  {special}"
   else: code.trigger AssignError, &"Found a SpecialContext that hasn't been mapped yet:  {special}"
+#___________________
+const ObjConstrTempl       = "({typ}){{{args}}}"
+const ObjConstrFieldTempl  = ".{name}= {body}"
+const ObjConstrIndentTempl = "\n{(indent+1)*Tab}"
+proc mincObjConstr (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ## @descr Designated Initialization for Objects with syntax:  SomeType(field1: val1, field2: val2)
+  ensure code, nkObjConstr, nkCall, "Tried to codegen a Designated Initializer for an object from an incorrect node type"
+  # Redirection case
+  if code.kind == nkCall: code.trigger ObjectError, "Object construction from Call(...) syntax is not implemented yet"
+  # Object Construction Case
+  const (Type,) = (0,)
+  let typ = MinC(code[Type], indent, special).c
+  var args :string
+  let argCount = code.sons.high - 1
+  for field in 1..argCount+1:  # For every field, skipping entry0 (the type)
+    if argCount > 1: args.add fmt ObjConstrIndentTempl
+    const (Body,) = (1,)
+    let name = MinC(code[field].getName(), indent, special).c
+    let body = MinC(code[field][Body], indent, special).c
+    args.add fmt ObjConstrFieldTempl
+    if field != argCount+1 : args.add SeparatorObj              # Skip adding , for the last one
+    elif argCount > 1      : args.add fmt ObjConstrIndentTempl  # Add an indent before the final bracket when there is more than 1 field
+  result.c = fmt ObjConstrTempl
 
 
 #_______________________________________
@@ -922,6 +949,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   # └─ Identifiers
   of nkBracketExpr      : result = mincBracketExpr(code, indent, special)
   of nkPar              : result = mincPar(code, indent, special)
+  of nkObjConstr        : result = mincObjConstr(code, indent, special)
   # Terminal cases
   of nkEmpty            : result = CFilePair()
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
