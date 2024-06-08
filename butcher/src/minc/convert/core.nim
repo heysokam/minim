@@ -45,7 +45,7 @@ include ./fwdecl
 # const SomeValueNode   = {nkIdent, nkPtrTy, nkInfix}+SomeLit+{nkNilLit}
 # Special cases
 # const Reserved            = ["pointer"]
-const NoSpacingInfixes    = ["->"]
+# const NoSpacingInfixes    = ["->"]
 const ValidEmpty          = ["_", "{0}"]
 # const ValidRawStrPrefixes = ["raw"]
 # const ValidInfixKind      = {nkIdent,nkInfix,nkPar,nkCast,nkBracketExpr,nkBracket,nkDotExpr,nkPtrTy} + SomeCall + SomeLit + {nkNilLit}
