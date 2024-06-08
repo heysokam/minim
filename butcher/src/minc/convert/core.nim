@@ -248,20 +248,20 @@ const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 #______________________________________________________
 # @section Affixes
 #_____________________________
-proc mincPrefix (code :PNode; indent :int= 0; raw :bool= false) :string=
-  assert code.kind == nkPrefix, code.renderTree
-  let data = affixes.getPrefix(code)
-  if not raw: result.add indent*Tab
-  case data.fix
-  of "++","--":
-    discard # Known Prefixes. Do nothing, the line after this caseof will add their code
-  of "+", "-", "~":
-    assert raw, &"Found a prefix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}"
-  of "&", "!", "*": raise newException(AffixCodegenError,
-    &"Found a C prefix that cannot be used in MinC. The incorrect code is:\n{code.renderTree}")
-  else: raise newException(AffixCodegenError, &"Found an unknown prefix  {data.fix}  The code that contains it is:\n{code.renderTree}\n")
-  result.add &"{data.fix}{data.right}"
-  if not raw: result.add ";\n"
+# proc mincPrefix (code :PNode; indent :int= 0; raw :bool= false) :string=
+#   assert code.kind == nkPrefix, code.renderTree
+#   let data = affixes.getPrefix(code)
+#   if not raw: result.add indent*Tab
+#   case data.fix
+#   of "++","--":
+#     discard # Known Prefixes. Do nothing, the line after this caseof will add their code
+#   of "+", "-", "~":
+#     assert raw, &"Found a prefix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}"
+#   of "&", "!", "*": raise newException(AffixCodegenError,
+#     &"Found a C prefix that cannot be used in MinC. The incorrect code is:\n{code.renderTree}")
+#   else: raise newException(AffixCodegenError, &"Found an unknown prefix  {data.fix}  The code that contains it is:\n{code.renderTree}\n")
+#   result.add &"{data.fix}{data.right}"
+#   if not raw: result.add ";\n"
 #_____________________________
 proc mincInfix (code :PNode; indent :int= 0; raw :bool= false) :string=
   # assert code.kind == nkInfix, code.renderTree
