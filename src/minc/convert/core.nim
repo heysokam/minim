@@ -47,8 +47,8 @@ func renamed (name :string; kind :TNodeKind; special :SpecialContext= Context.No
     of nkPrefix                      : Renames_ConditionPrefix
     of nkInfix                       :
       if   Condition in special      : Renames_ConditionAffix
+      elif Context.Return in special : Renames_ConditionAffix
       elif Variable  in special      : Renames_AssignmentAffix
-      elif Context.Return in special : Renames_AssignmentAffix
       else                           : @[]
     else                             : @[]
   for rename in list:
