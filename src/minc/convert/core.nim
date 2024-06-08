@@ -985,6 +985,7 @@ const ExtraCastOperators = ["as", "@"]
 const ExtraCastRawTempl  = "({right})({left})"
 const ExtraCastTempl     = "{indent*Tab}"&ExtraCastRawTempl&";\n"
 #___________________
+const NoSpacingInfixes = ["->"]
 const InfixRawTempl    = "{left}{spc}{affix}{spc}{right}"
 const InfixTempl       = "{indent*Tab}"&InfixRawTempl&";\n"
 proc mincInfix (
@@ -996,9 +997,9 @@ proc mincInfix (
   let left   = MinC(affixes.getInfix(code, "left"),  indent, special).c
   let right  = MinC(affixes.getInfix(code, "right"), indent, special).c
   let affix  = ( code.:name ).renamed(code.kind, special)
-  let isRaw  = special.hasAny {Variable, Condition, Return, Argument}
   let spc    = if affix in NoSpacingInfixes: "" else: " "
   let isCast = affix in ExtraCastOperators
+  let isRaw  = special.hasAny {Variable, Condition, Return, Argument, Assign}
   if isCast:
     if  isRaw : result.c = fmt ExtraCastRawTempl
     else      : result.c = fmt ExtraCastTempl
