@@ -348,7 +348,8 @@ proc mincInclude (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, Kind.Module, Kind.Ident, &"Tried to get the include of an unsupported kind:  {code.kind}"
-  if indent > 0: code.err "include statements are only allowed at the top level."
+  if When notin special and indent > 0:
+    code.err "include statements are only allowed at the top level or inside When statements."
   let M = code.getModule()
   let module =
     if M.local : M.path.string.wrapped
@@ -413,11 +414,12 @@ proc mincProcDef (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, Proc
+  let special = special.without(When).with(Context.Body)
   let name = code.:name
   let qual = mincProcQualifiers(code, indent)
   let T    = code.:returnT
   let args = mincProcArgs(procs.get(code, "args"), indent)
-  let body = MinC(procs.get(code,"body"), indent+1).c # TODO: Could Header stuff happen inside a body ??
+  let body = MinC(procs.get(code,"body"), indent+1, special).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
   # result.h =
   #   if code.isPublic and name notin KnownMainNames : fmt ProcProtoTempl
@@ -565,8 +567,8 @@ proc mincAsgn (
   let left  = MinC(code[Left], indent, specl).c
   let right = MinC(code[Right], indent, specl).c
   result.c  =
-    if Context.None in special : fmt AsgnTempl
-    else                       : fmt AsgnRawTempl
+    if special.hasAny RawSpecials : fmt AsgnRawTempl
+    else                          : fmt AsgnTempl
 #___________________
 const DerefTempl     = "*{name}"
 const ArrAccessTempl = "{name}[{inner}]"
@@ -691,7 +693,8 @@ proc mincStr (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, StrKinds, "Called mincStr with an incorrect node kind."
-  if Context.When in special : result.c = code.strValue
+  if special.hasAll {Context.When, Context.Condition}:
+    result.c = code.strValue
   elif code.isTripleStrLit   : result.c = code.getTripleStrLit(indent, special)
   else                       : result.c = &"\"{code.strValue}\""
 #___________________
@@ -726,7 +729,7 @@ proc mincIdent (
   elif special.hasAll({ Argument, Readonly }) or
        special.hasAll({ Context.Typedef, Readonly }):
     result.c = &"{val} const"
-  elif special.hasAny {Context.None, Argument, Condition, Typedef, Assign, Return, ForLoop}:
+  elif special.hasAny {Context.None, Body, Argument, Condition, Typedef, Assign, Return, ForLoop}:
     result.c = val
     if ForLoop in special and result.c.startsWith(".."):
       result.c = result.c[2..^1] # Remove .. from ForLoop infixes
@@ -748,7 +751,7 @@ proc mincBracket (
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  if Variable in special:
+  if special.hasAny {Variable, Union, Assign, Argument}:
     result.c.add "{ "
     for id,value in code.sons.pairs:
       result.c.add &"\n{indent*Tab}[{id}]= "
@@ -1028,7 +1031,7 @@ proc mincInfix (
   ) :CFilePair=
   ensure code, nkInfix
   let affix  = ( code.:name ).renamed(code.kind, special)
-  let specl  = if affix in AssignInfixes: special.with Assign else: special
+  let specl  = if affix in AssignInfixes: special.with(Assign).without(When) else: special
   let left   = MinC(affixes.getInfix(code, "left"),  indent, specl).c
   let right  = MinC(affixes.getInfix(code, "right"), indent, specl).c
   let sep    = if affix in NoSpacingInfixes: "" else: " "
