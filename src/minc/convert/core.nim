@@ -122,19 +122,20 @@ proc mincArrSize (
     code      : PNode;
     indent    : int            = 0;
     special   : SpecialContext = Context.None;
-  ) :CFilePair=
+  ) :string=
   ## @descr Returns the array size defined by {@arg code}
   const (Type,ArraySize) = (1,1)
   let typ =
-    if   code.kind == nkIdent     : code
-    elif code.kind == nkIdentDefs : code[Type]
-    else                          : code.getType()
-  if   typ.kind in {nkIdent}+nim.Literals : result.c = typ.strValue
-  elif typ.kind == nkBracketExpr          : result.c = typ[ArraySize].strValue
-  elif typ.kind == nkInfix                : result = MinC(typ, indent)
+    if   code.kind == nkIdent       : code
+    elif code.kind == nkBracketExpr : code
+    elif code.kind == nkIdentDefs   : code[Type]
+    else                            : code.getType()
+  if   typ.kind in {nkIdent}+nim.Literals : result = typ.strValue
+  elif typ.kind == nkBracketExpr          : result = typ[ArraySize].strValue
+  elif typ.kind == nkInfix                : result = MinC(typ, indent, special).c
   else: code.err &"Tried to access the array size of an unmapped kind:  {typ.kind}" # TODO: Better infix resolution
   # Correct the `_` empty array size case
-  if result.c == "_": result.c = ""
+  if result == "_": result = ""
 #_____________________________
 const ArrSuffixTempl = "[{size}]"
 proc mincArraySuffix (
@@ -144,7 +145,7 @@ proc mincArraySuffix (
   ) :string=
   let isArr = code.isArr
   if not isArr: return
-  let size = mincArrSize(code, indent, special).c
+  let size = mincArrSize(code, indent, special)
   result = fmt ArrSuffixTempl
 #_____________________________
 proc mincArrayType (
