@@ -380,21 +380,23 @@ proc mincProcQualifiers (code :PNode; indent :int= 0) :string=
 #___________________
 const ArgTempl = "{typ} {name}"
 proc mincProcArgs (code :PNode; indent :int= 0) :string=
-  # TODO: {.readonly.} pragma
-  # ref :  fmt "{ronly}{typ}{mut} {arg.name}{arr}{sep}"
   ensure code, nkFormalParams
   if code.sons.len == 0: return "void"  # Explicit fill with void for no arguments
   # Add all arguments to the result
   var args :seq[tuple[name:string, typ:string, val:string, special:SpecialContext]]
   for group in code:
     const (Type,Value,LastArg) = (^2,^1,^3)
-    var special = {Argument, Immutable}                     # const by default
-    if group[Type].kind == nkVarTy: special.excl Immutable  # Remove Immutable for `var T`
+    var special = {Argument, Immutable}                      # const by default
+    if group[Type].kind == nkVarTy : special.excl Immutable  # Remove Immutable for `var T`
+    if group.isReadonly            : special.incl Readonly
     let typ     = MinC(group[Type], indent+1, special).c
     let val     = MinC(group[Value], indent+1, special).c
     for id,arg in group.sons[0..LastArg].pairs:
+      let arg =
+        if arg.kind == nkPragmaExpr : arg.getName()
+        else                        : arg
       args.add (
-        name    : MinC(arg, indent+1, special).c,
+        name    : MinC(arg, indent+1, special.without Readonly).c,
         typ     : typ,
         val     : val,  # TODO: Default values
         special : special,
