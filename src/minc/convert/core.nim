@@ -9,6 +9,7 @@ from nstd/sets import hasAll, hasAny
 import slate/nimc as nim
 import slate/format
 import slate/elements
+import slate/element/extras
 import slate/errors as slateErr
 import slate/types as slate
 # @deps minc
@@ -107,13 +108,13 @@ template `.:`*(code :PNode; prop :untyped) :string=
   else: code.err "MinC: Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
 
 
-
 #_______________________________________
 # @section Forward Declares
 #_____________________________
+const RawSpecials = {Variable, Argument, Assign, Condition, Return}
 proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
-proc mincLiteral (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
-
+proc mincLiteral   (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
+proc mincObjConstr (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
 
 #_______________________________________
 # @section Array tools
@@ -295,7 +296,8 @@ proc mincWhen (
   ) :CFilePair=
   # TODO: Support for when cases in .h files
   ensure code, nkWhenStmt
-  let special = special + {Context.Condition, Context.When}
+  let extra   = {Context.Condition, Context.When}
+  let special = (special.without Context.None) + extra
   let tab = indent*Tab
   for id,branch in code.pairs:
     const (Condition,Body) = (0,^1)
@@ -307,12 +309,11 @@ proc mincWhen (
       if id == 0 : pfx = "#if "
       else       : pfx = "#elif "
       cond = MinC(branch[Condition], indent, special).c
-      #body = "?"
     of nkElse    :
       pfx = "#else"
       # Don't get the condition. Else statements don't have any
     else: code.trigger ConditionError, "Unknown branch kind in mincWhen"
-    let body = MinC(branch[Body], indent, special.without Context.Condition).c
+    let body = MinC(branch[Body], indent+1, special.without Context.Condition).c
     result.c.add fmt WhenTempl
   result.c.add fmt WhenEndTempl
 
