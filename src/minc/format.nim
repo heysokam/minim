@@ -24,7 +24,7 @@ proc clang *(
   ) :string=
   ## TODO: Support for Multi-file
   # Clean the temporary file before starting
-  let tmpFile :Path= cli.cacheDir/"clangFmt.tmp.c"
+  let tmpFile :Path= cli.cacheDir/cli.output.changeFileExt(".fmt.c").lastPathPart
   if not dirExists(cli.cacheDir): md cli.cacheDir
   if fileExists(tmpFile): rm tmpFile
   # Write the temporary file
