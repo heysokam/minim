@@ -1023,8 +1023,11 @@ proc mincPragma (
 #_______________________________________
 # @section Affixes
 #_____________________________
-const PrefixRawTempl = "{affix}{body}"
-const PrefixTempl    = "{indent*Tab}"&PrefixRawTempl&";"
+const IllegalPrefixes = ["&", "!", "*"]
+const ArithmPrefixes  = ["+", "-", "~"] 
+const ValidPrefixes   = ["++", "--"]
+const PrefixRawTempl  = "{affix}{body}"
+const PrefixTempl     = "{indent*Tab}"&PrefixRawTempl&";"
 proc mincPrefix (
     code    : PNode;
     indent  : int            = 0;
@@ -1032,11 +1035,20 @@ proc mincPrefix (
   ) :CFilePair=
   ensure code, nkPrefix
   let affix = ( code.:name ).renamed(code.kind, special)
+  let isRaw = special.hasAny RawSpecials
+  # Error Check
+  case affix
+  of ValidPrefixes   : discard  # Don't error on known prefixes
+  of ArithmPrefixes  :
+    if not isRaw     : code.trigger ConditionError, &"Found a prefix that cannot be used in a standalone line:  {affix}"
+  of IllegalPrefixes : code.trigger ConditionError, &"Found a prefix that cannot be used in MinC:  {affix}"
+  else               : code.trigger ConditionError, &"Found an unmapped prefix:  {affix}"
+  # Generate the code
   if special.hasAny {Condition, Variable, None}:
     let body = MinC(affixes.getPrefix(code, "body"), indent, special).c
     result.c =
-      if Context.None in special : fmt PrefixTempl
-      else                       : fmt PrefixRawTempl
+      if isRaw : fmt PrefixRawTempl
+      else     : fmt PrefixTempl
   else: code.trigger ConditionError, &"Found an unmapped special case for mincPrefix:  {special}"
 #___________________
 const ExtraCastOperators = ["as", "@"]
