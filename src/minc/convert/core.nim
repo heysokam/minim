@@ -210,7 +210,7 @@ func isIncr *(value,infix,final :string) :bool= true  # TODO : Remove hardcoded 
 const ForSentryTempl = "size_t {sentry} = {value}"  # TODO: Remove hardcoded size_t. Should be coming from code[Exprs][Value].T
 const ForCondTempl   = " {sentry} {infix} {final}"
 const ForIterTempl   = " {prefix}{sentry}"
-const ForTempl       = "{indent*Tab}for ({init};{cond};{iter}) {{\n{body}{(indent+1)*Tab}}}"
+const ForTempl       = "{indent*Tab}for ({init};{cond};{iter}) {{\n{body}{indent*Tab}}}\n"
 proc mincFor (
     code    : PNode;
     indent  : int            = 0;
