@@ -778,7 +778,7 @@ proc mincType_obj (
   ) :CFilePair=
   ensure code, nkObjectTy
   const (Fields,Inherit) = (^1,1)
-  let fieldCount = code[Fields].sons.high
+  let fieldCount = code[Fields].sons.len
   discard Inherit # TODO: object of T
   let name = MinC(extraName, indent, special).c
   let spc  = if fieldCount > 1: fmt "\n{indent*Tab}" else: " "
