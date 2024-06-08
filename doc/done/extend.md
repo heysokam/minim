@@ -19,5 +19,6 @@
   - [x] Multi-discard:   discard (one,two)
 - [x] East-const rule always
 - [x] Function calls: Command syntax
+- [x] Booleans without stdbool.h  (-std=c23)
 ```
 
