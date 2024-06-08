@@ -524,7 +524,7 @@ proc mincVarSection (
   for entry in code.sons: result.add mincVariable(entry, indent, Kind.Var, special)
 #___________________
 const AsgnRawTempl = "{left} = {right}"
-const AsgnTempl    = "{indent*Tab}{asgn};\n"
+const AsgnTempl    = "{indent*Tab}"&AsgnRawTempl&";\n"
 proc mincAsgn (
     code    : PNode;
     indent  : int            = 0;
@@ -534,7 +534,6 @@ proc mincAsgn (
   const (Left, Right) = (0,1)
   let left  = MinC(code[Left], indent, Assign).c
   let right = MinC(code[Right], indent, Assign).c
-  let asgn  = fmt AsgnRawTempl
   result.c  =
     if Context.None in special : fmt AsgnTempl
     else                       : fmt AsgnRawTempl
@@ -960,7 +959,8 @@ proc mincPragma (
 #_______________________________________
 # @section Affixes
 #_____________________________
-const PrefixTempl = "{affix}{body}"
+const PrefixRawTempl = "{affix}{body}"
+const PrefixTempl    = "{indent*Tab}"&PrefixRawTempl&";"
 proc mincPrefix (
     code    : PNode;
     indent  : int            = 0;
@@ -970,15 +970,17 @@ proc mincPrefix (
   let affix = ( code.:name ).renamed(code.kind, special)
   if special.hasAny {Condition, Variable, None}:
     let body = MinC(affixes.getPrefix(code, "body"), indent, special).c
-    result.c = fmt PrefixTempl
+    result.c =
+      if Context.None in special : fmt PrefixTempl
+      else                       : fmt PrefixRawTempl
   else: code.trigger ConditionError, &"Found an unmapped special case for mincPrefix:  {special}"
 #___________________
 const ExtraCastOperators = ["as", "@"]
 const ExtraCastRawTempl  = "({right})({left})"
-const ExtraCastTempl     = "{indent*Tab}({right})({left});\n"
+const ExtraCastTempl     = "{indent*Tab}"&ExtraCastRawTempl&";\n"
 #___________________
-const InfixRawTempl = "{left} {affix} {right}"
-const InfixTempl    = "{indent*Tab}{left} {affix} {right};\n"
+const InfixRawTempl    = "{left}{spc}{affix}{spc}{right}"
+const InfixTempl       = "{indent*Tab}"&InfixRawTempl&";\n"
 proc mincInfix (
     code    : PNode;
     indent  : int            = 0;
@@ -989,6 +991,7 @@ proc mincInfix (
   let right  = MinC(affixes.getInfix(code, "right"), indent, special).c
   let affix  = ( code.:name ).renamed(code.kind, special)
   let isRaw  = special.hasAny {Variable, Condition, Return, Argument}
+  let spc    = if affix in NoSpacingInfixes: "" else: " "
   let isCast = affix in ExtraCastOperators
   if isCast:
     if  isRaw : result.c = fmt ExtraCastRawTempl
