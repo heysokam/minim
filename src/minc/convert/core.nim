@@ -237,7 +237,7 @@ proc mincFor (
 #_______________________________________
 # @section Control Flow: Conditionals
 #_____________________________
-const IfTempl = "{elseStr}{ifStr}({cond}) {{\n{body}\n{indent*Tab}}}"
+const IfTempl = "{elseStr}{ifStr}{cond} {{\n{body}\n{indent*Tab}}}"
 const TernaryRawTempl = "({cond}) ? {case1} : {case2}"
 proc mincIf (
     code    : PNode;
@@ -248,14 +248,14 @@ proc mincIf (
   if code.kind == nkIfExpr:  # if Expressions always become ternary expressions
     if code.len != 2: code.trigger ConditionError, "Support for elif branches in if `expr` is not implemented yet"
     const (Condition,IfCase,ElseCase,Body) = (0,0,^1,^1)
-    let cond  = MinC(code[IfCase][Condition], indent, Context.Condition).c
+    let cond  = MinC(code[IfCase][Condition], indent, Context.Condition).c.wrappedIn("(",")")
     let case1 = MinC(code[IfCase][Body], indent, Context.Condition).c
     let case2 = MinC(code[ElseCase][Body], indent, Context.Condition).c
     result.c = fmt TernaryRawTempl
     return
   elif Variable in special:  # nkIfStmt for variables become ternary expressions
     const (Condition,Case1,Case2) = (0,1,^1)
-    let cond  = MinC(code[Condition], indent, Context.Condition).c
+    let cond  = MinC(code[Condition], indent, Context.Condition).c.wrappedIn("(",")")
     let case1 = MinC(code[Case1], indent, Context.Condition).c
     let case2 = MinC(code[Case2], indent, Context.Condition).c
     result.c = fmt TernaryRawTempl
@@ -265,7 +265,7 @@ proc mincIf (
     let first   = id == 0
     let isElse  = branch.kind == nkElse
     let last    = id == code.sons.high
-    let cond    = if isElse: "" else: MinC(branch[Condition], indent, Context.Condition).c
+    let cond    = if isElse: "" else: MinC(branch[Condition], indent, Context.Condition).c.wrappedIn("(",")")
     let body    =
       if isElse : MinC(branch[ElseBody], indent+1, special).c
       else      : MinC(branch[Body], indent+1, special).c
