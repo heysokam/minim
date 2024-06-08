@@ -1,9 +1,4 @@
 ```md
-# Refactor Redo
-- [ ] Booleans without stdbool.h  (-std=c23)
-```
-
-```md
 # TODO: Extend C
 - [ ] Typed Pointer notation for function/array function arguments  (Modern C, page 19)
 - [ ] Compiler interface within the code:

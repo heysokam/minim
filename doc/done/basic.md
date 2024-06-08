@@ -1,16 +1,20 @@
 ```md
 # Done:
 - [x] Function Definition (proc)
-- [x] Control Flow Keywords
-  - [x] return
-  - [x] break
-  - [x] continue
 - [x] Main function
 - [x] Static/Extern
   - [x] Variables
     - [x] Top-level
     - [x] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
   - [x] Functions
+- [x] Control Flow
+  - [x] Keywords
+    - [x] return
+    - [x] break
+    - [x] continue
+  - [x] While
+  - [x] For loops
+    - [x] Basic support
 - [x] Variable definition:
   - [x] Immutable : Let/Const
   - [x] Mutable   : Var
@@ -46,7 +50,6 @@
   - [x] addr
 - [x] Conditions
   - [x] Sketch   : Single condition only
-  - [x] While
   - [x] Ternary operator   let one = if condition: 1 else: 2
   - [x] if/elif/else blocks
   - [x] Multi-condition support (recursive)
@@ -55,5 +58,11 @@
 - [x] Type declaration
   - [x] Type aliasing   typedef char* str;
   - [x] {.readonly.}    Mutable pointer to immutable data
+- [x] Explicit casting
+  - [x] cast[T](...) syntax
+  - [x] Alternative syntax
+    - [x] val as Type
+    - [x] val @ Type
+- [x] Pointer dereference   one[] = val   ->   *one = val
 ```
 
