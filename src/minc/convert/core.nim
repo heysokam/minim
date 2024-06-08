@@ -538,14 +538,20 @@ proc mincAsgn (
     if Context.None in special : fmt AsgnTempl
     else                       : fmt AsgnRawTempl
 #___________________
-const DerefTempl = "*{name}"
+const DerefTempl     = "*{name}"
+const ArrAccessTempl = "{name}[{inner}]"
 proc mincBracketExpr (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, nkBracketExpr
-  if code.isArr:
+  if code.isArrAccess:
+    const (Type,) = (1,)
+    let name  = MinC(code.getName(), indent, special).c
+    let inner = MinC(code[Type], indent, special).c
+    result.c  = fmt ArrAccessTempl
+  elif code.isArr:
     if special.hasAny {Argument}:
       result.c = mincArrayType(code, indent, special)
     else: code.trigger AssignError, &"Found a SpecialContext for arrays that hasn't been mapped yet:  {special}"
