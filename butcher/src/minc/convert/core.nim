@@ -263,40 +263,40 @@ const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 #   result.add &"{data.fix}{data.right}"
 #   if not raw: result.add ";\n"
 #_____________________________
-proc mincInfix (code :PNode; indent :int= 0; raw :bool= false) :string=
-  # assert code.kind == nkInfix, code.renderTree
-  # var data = affixes.getInfix(code)
-  # if not raw: result.add indent*Tab
-  case data.fix
-  of "++","--":
-    if data.right == "": raise newException(AffixCodegenError,
-      &"Using ++ or -- as postfixes is currently not possible. The default Nim parser interprets them as infix, and breaks the code written afterwards. Please convert them to prefixes. The code that triggered this is:\n{code.renderTree}\n")
-  # of "+=", "-=", "/=", "*=", "%=", "&=", "|=", "^=", "<<=", ">>=", "==", "<=", ">=", "!=", "->":
-  #   # TODO: Check that `->` is in a complex assignment line. Doesn't break now, but will break something eventually.
-  #   # Known Infixes. Do nothing, the line after this caseof will add their code
-  #   discard
-  of "+", "-", "*", "/", "%", "&", "|", "^", ">>", "<<",
-     "and", "or", "xor", "shr", "shl", "div", "mod":
-    # Known infixes that cannot be standalone
-    if not raw: raise newException(AffixCodegenError, &"Found an infix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}")
-  # of "in", "notin", "is", "isnot", "of", "as", "from", "@":
-  #   raise newException(AffixCodegenError, &"Found a nim infix keyword that cannot be used as an infix in MinC. The incorrect code is:\n{code.renderTree}")
-  of "not" : raise newException(AffixCodegenError, &"Found a nim infix keyword that can only be used as prefix. The incorrect code is:\n{code.renderTree}")
-  # else     : raise newException(AffixCodegenError, &"Found an unknown infix  {data.fix}  The code that contains it is:\n{code.renderTree}\n")
-  # Remap nim keywords to C
-  # case data.fix
-  # of "and" : data.fix = "&&"
-  # of "or"  : data.fix = "||"
-  # of "xor" : data.fix = "^"
-  # of "shl" : data.fix = "<<"
-  # of "shr" : data.fix = ">>"
-  # of "div" : data.fix = "/"  # TODO: Check that the types used are integers
-  # of "mod" : data.fix = "%"
-  # else:discard
-  # Add the the code as left fix right
-  # let sep = if data.fix in NoSpacingInfixes: "" else: " "
-  # result.add &"{data.left}{sep}{data.fix}{sep}{data.right}"
-  # if not raw: result.add ";\n"
+# proc mincInfix (code :PNode; indent :int= 0; raw :bool= false) :string=
+#   assert code.kind == nkInfix, code.renderTree
+#   var data = affixes.getInfix(code)
+#   if not raw: result.add indent*Tab
+#   case data.fix
+#   of "++","--":
+#     if data.right == "": raise newException(AffixCodegenError,
+#       &"Using ++ or -- as postfixes is currently not possible. The default Nim parser interprets them as infix, and breaks the code written afterwards. Please convert them to prefixes. The code that triggered this is:\n{code.renderTree}\n")
+#   of "+=", "-=", "/=", "*=", "%=", "&=", "|=", "^=", "<<=", ">>=", "==", "<=", ">=", "!=", "->":
+#     # TODO: Check that `->` is in a complex assignment line. Doesn't break now, but will break something eventually.
+#     # Known Infixes. Do nothing, the line after this caseof will add their code
+#     discard
+#   of "+", "-", "*", "/", "%", "&", "|", "^", ">>", "<<",
+#      "and", "or", "xor", "shr", "shl", "div", "mod":
+#     # Known infixes that cannot be standalone
+#     if not raw: raise newException(AffixCodegenError, &"Found an infix that cannot be used in a standalone line. The incorrect code is:\n{code.renderTree}")
+#   of "in", "notin", "is", "isnot", "of", "as", "from", "@":
+#     raise newException(AffixCodegenError, &"Found a nim infix keyword that cannot be used as an infix in MinC. The incorrect code is:\n{code.renderTree}")
+#   of "not" : raise newException(AffixCodegenError, &"Found a nim infix keyword that can only be used as prefix. The incorrect code is:\n{code.renderTree}")
+#   else     : raise newException(AffixCodegenError, &"Found an unknown infix  {data.fix}  The code that contains it is:\n{code.renderTree}\n")
+#   # Remap nim keywords to C
+#   case data.fix
+#   of "and" : data.fix = "&&"
+#   of "or"  : data.fix = "||"
+#   of "xor" : data.fix = "^"
+#   of "shl" : data.fix = "<<"
+#   of "shr" : data.fix = ">>"
+#   of "div" : data.fix = "/"  # TODO: Check that the types used are integers
+#   of "mod" : data.fix = "%"
+#   else:discard
+#   # Add the the code as left fix right
+#   let sep = if data.fix in NoSpacingInfixes: "" else: " "
+#   result.add &"{data.left}{sep}{data.fix}{sep}{data.right}"
+#   if not raw: result.add ";\n"
 #_____________________________
 # proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
 #   ## WARNING: Nim parser interprets no postfixes, other than `*` for visibility

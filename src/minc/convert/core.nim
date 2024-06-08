@@ -1051,12 +1051,17 @@ proc mincPrefix (
       else     : fmt PrefixTempl
   else: code.trigger ConditionError, &"Found an unmapped special case for mincPrefix:  {special}"
 #___________________
-const ExtraCastOperators = ["as", "@"]
+const ExtraCastOperators = @["as", "@"]
 const ExtraCastRawTempl  = "({right})({left})"
 const ExtraCastTempl     = "{indent*Tab}"&ExtraCastRawTempl&";\n"
 #___________________
-const NoSpacingInfixes = ["->"]
-const AssignInfixes    = ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]
+const NoSpacingInfixes = @["->"]
+const IllegalPostfixes = @["++", "--"]
+const AssignInfixes    = @["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]
+const NormalInfixes    = @["+", "-", "*", "/", "%", "&", "|", "^", ">>", "<<",
+                           "<", ">", "<=", ">=", "==", "!=", "&&", "||",
+                           "and", "or", "xor", "shr", "shl", "div", "mod"] & ExtraCastOperators & NoSpacingInfixes
+#___________________
 const InfixRawTempl    = "{left}{sep}{affix}{sep}{right}"
 const InfixTempl       = "{indent*Tab}"&InfixRawTempl&";\n"
 proc mincInfix (
@@ -1065,13 +1070,24 @@ proc mincInfix (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, nkInfix
-  let affix  = ( code.:name ).renamed(code.kind, special)
+  let name  = code.:name
+  let affix = name.renamed(code.kind, special)
+  let isRaw = special.hasAny {Variable, Condition, Return, Argument, Assign}
+  # Error Check
+  case name
+  of IllegalPostfixes : code.trigger AffixError,
+    "Using ++ or -- as postfixes is not possible. The Nim parser interprets them as infix, and breaks the code written afterwards. Please convert them to prefixes."
+  of AssignInfixes    :
+    if isRaw          : code.trigger AffixError, &"Assignment Infixes are only allowed in standalone lines:  {AssignInfixes}"
+  of NormalInfixes    :
+    if not isRaw      : code.trigger AffixError, &"Regular Infixes are not allowed in standalone lines:   {NormalInfixes}"
+  else                : code.trigger AffixError, &"Found an unmapped Infix:  {name}"
+  # Generate the code
   let specl  = if affix in AssignInfixes: special.with(Assign).without(When) else: special
   let left   = MinC(affixes.getInfix(code, "left"),  indent, specl).c
   let right  = MinC(affixes.getInfix(code, "right"), indent, specl).c
   let sep    = if affix in NoSpacingInfixes: "" else: " "
   let isCast = affix in ExtraCastOperators
-  let isRaw  = special.hasAny {Variable, Condition, Return, Argument, Assign}
   if isCast:
     if  isRaw : result.c = fmt ExtraCastRawTempl
     else      : result.c = fmt ExtraCastTempl
