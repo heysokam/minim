@@ -1,9 +1,8 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
-from std/strformat import `&`
-from std/strutils import join
 import nstd/paths
+import nstd/strings
 
 #_______________________________________
 # @section Package Information
@@ -45,18 +44,12 @@ const clangFmtBin *{.strdefine.}= "clang-format"
   ##  Default clang-format binary will be used from $PATH
   ##  Can be changed with --clangFmtBin:path from cli
 
+
 #_______________________________________
-# @section Compile Flags
-#_________________________________________________
-const FilterFlags = [
+# @section General Filter Flags for -Weverything
+#_____________________________
+const FilterFlags = @[  # Flags to remove from -Weverything
   "-Wno-declaration-after-statement", # Explicitly allow asignment on definition. Useless warning for >= C99
-  "-Wno-error=pre-c2x-compat",        # Explicitly allow < c2x compat, but keep the warnings
-  "-Wno-error=#warnings",             # Explicitly allow user warnings without creating errors
-  "-Wno-error=unsafe-buffer-usage",   # Explicitly avoid erroring on this (half-finished) warning group from clang.16
-  "-Wno-error=vla",                   # Explicitly avoid erroring on VLA usage, but keep the warning (todo: only for debug)
-  "-Wno-error=padded",                # Warn when structs are automatically padded, but don't error.
-  "-Wno-error=unused-macros",         # Macros cannot be declared public to not trigger this, so better to not error and keep the warning
-  "-Wno-error=documentation-unknown-command",  # Ignore Documentation errors for our custom syntax
   # Ignore C++ flags. We build C
   "-Wno-c++-compat",
   "-Wno-c++0x-compat",                   "-Wno-c++0x-extensions",                         "-Wno-c++0x-narrowing",
@@ -72,11 +65,71 @@ const FilterFlags = [
   "-Wno-c++98-compat",                   "-Wno-c++98-compat-bind-to-temporary-copy",      "-Wno-c++98-compat-extra-semi",     "-Wno-c++98-compat-local-type-template-args",      "-Wno-c++98-compat-pedantic", "-Wno-c++98-compat-unnamed-type-template-args",
   # TODO: Remove completely
   "-Wno-error=missing-braces",  # Irrelevant when using -Wmissing-field-initializers
-  ].join(" ") # Flags to remove from -Weverything
-const BaseFlags    = &"--std=c2x -Weverything -Werror -pedantic -pedantic-errors {FilterFlags} "  # C Compiler flags
-const ReleaseFlags = ""
-const DebugFlags   = "-ggdb -fno-sanitize-trap=undefined -fno-sanitize-recover=undefined -lubsan" # https://github.com/ziglang/zig/issues/5163
-const flags      * = (
+  ""
+  ] # << FilterFlags [ ... ]
+
+
+#_______________________________________
+# @section Base Flags
+#_____________________________
+const BaseFlags :string= (@[  # C Compiler flags
+  "--std=c2x",
+  "-Weverything",
+  "-Werror",
+  "-pedantic",
+  "-pedantic-errors",
+  ""
+  ] & FilterFlags ).join(" ")  # << BaseFlags [ ... ]
+
+
+#_______________________________________
+# @section Release Flags
+#_____________________________
+const ReleaseFlags :string= [
+  # Silence Syntax fixes completely
+  "-Wno-pre-c2x-compat",                # Explicitly allow < c2x compat, but keep the warnings
+  "-Wno-#warnings",                     # Explicitly allow user warnings without creating errors
+  "-Wno-unsafe-buffer-usage",           # Explicitly avoid erroring on this (half-finished) warning group from clang.16
+  "-Wno-vla",                           # Explicitly avoid erroring on VLA usage, but keep the warning (todo: only for debug)
+  "-Wno-padded",                        # Warn when structs are automatically padded, but don't error.
+  "-Wno-unused-macros",                 # Macros cannot be declared public to not trigger this, so better to not error and keep the warning
+  # Silence Documentation Errors completely
+  "-Wno-documentation",                 # Ignore for our custom syntax
+  "-Wno-documentation-unknown-command", # Ignore for our custom syntax
+  "-Wno-documentation-deprecated-sync", # Ignore deprecated tags missing their attribute  (GLFW breaks it)
+  ""
+  ].join(" ")
+
+
+#_______________________________________
+# @section Debug Flags
+#_____________________________
+const DebugFlags :string= [
+  # Syntax fixes
+  "-Wno-error=pre-c2x-compat",                # Explicitly allow < c2x compat, but keep the warnings
+  "-Wno-error=#warnings",                     # Explicitly allow user warnings without creating errors
+  "-Wno-error=unsafe-buffer-usage",           # Explicitly avoid erroring on this (half-finished) warning group from clang.16
+  "-Wno-error=vla",                           # Explicitly avoid erroring on VLA usage, but keep the warning (todo: only for debug)
+  "-Wno-error=padded",                        # Warn when structs are automatically padded, but don't error.
+  "-Wno-error=unused-macros",                 # Macros cannot be declared public to not trigger this, so better to not error and keep the warning
+  # Ignore Documentation Errors on Debug Builds
+  "-Wno-error=documentation",                 # Ignore for our custom syntax
+  "-Wno-error=documentation-unknown-command", # Ignore for our custom syntax
+  "-Wno-error=documentation-deprecated-sync", # Ignore deprecated tags missing their attribute  (GLFW breaks it)
+  # Debugger Flags
+  "-ggdb",
+  # https://github.com/ziglang/zig/issues/5163
+  "-fno-sanitize-trap=undefined",
+  "-fno-sanitize-recover=undefined",
+  "-lubsan",
+  ""
+  ].join(" ")
+
+
+#_______________________________________
+# @section Exposed Flags
+#_____________________________
+const flags * = (
   release : BaseFlags & ReleaseFlags,
   debug   : BaseFlags & DebugFlags,
   ) # << flags ( ... )
