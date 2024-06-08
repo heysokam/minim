@@ -17,7 +17,10 @@ export sets.items
 # @section Extra support for std types
 func `$` *(list :HashSet[Path]) :string=  list.toSeq.join(" ")
 
+
+#_______________________________________
 # @section CLI related types
+#_____________________________
 type BuildMode * = enum Debug, Release
 type Cmd * = enum Unknown, Compile, Codegen
 type Cfg * = object
@@ -47,6 +50,10 @@ const KnownLong  :HashSet[string]=  [
   "os","cpu",
   ].toHashSet
 
+
+#_______________________________________
+# @section CLI Help
+#_____________________________
 const Help = """
 {cfg.Prefix}  Usage
   minc [cmd] -(opt) [input] [output]
@@ -100,9 +107,15 @@ const Help = """
 proc stopAndHelp= quit fmt Help
 proc stopAndVersion= quit fmt """
 {cfg.Prefix}  Version  {cfg.Version}"""
+
+
+#_______________________________________
+# @section CLI Error check
+#_____________________________
 proc err (msg :string) :void=
   echo &"{cfg.Prefix}  Error  {msg}"
   stopAndHelp()
+#_____________________________
 proc check (cli :opts.CLI) :void=
   if "version" in cli.opts.long  : stopAndVersion()
   if "h" in cli.opts.short       : stopAndHelp()
@@ -113,12 +126,21 @@ proc check (cli :opts.CLI) :void=
   if cli.args.len < 1            : err "MinC was called without arguments."
   if cli.args.len != 3           : err "MinC was called with an incorrect number of arguments: " & $cli.args.len
   if cli.args[0] notin KnownCmds : err "Found an unknown command: "&cli.args[0]
+
+
+#_______________________________________
+# @section CLI Management Tools
+#_____________________________
 proc getCmd (cli :opts.CLI) :Cmd=
   case cli.args[0]
   of "c"  : Cmd.Compile
   of "cc" : Cmd.Codegen
   else    : Cmd.Unknown
 
+
+#_______________________________________
+# @section External API
+#_____________________________
 proc init *() :Cfg=
   let cli = opts.getCli()
   cli.check()
