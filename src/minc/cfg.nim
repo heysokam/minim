@@ -16,7 +16,7 @@ const Sep    *{.strdefine.}= "  "
 
 #_______________________________________
 # @section C values
-const NilValue *{.strdefine.}= "nullptr" #"NULL"
+const NilValue *{.strdefine.}= "nullptr" # "NULL"  ## TODO: configurable based on c23 option
 const PtrValue *{.strdefine.}= "void*"   ## `pointer` will become `void*`
 
 #_______________________________________
