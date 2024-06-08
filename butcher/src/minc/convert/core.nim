@@ -7,21 +7,21 @@
 #  which creates a cyclic dependency :_(
 #____________________________________________________________________|
 # @deps std
-import std/strutils
-import std/tables
+# import std/strutils
+# import std/tables
 # @deps *Slate
-import slate/element/base as slateBase
-import slate/element/procdef
-import slate/element/error
-import slate/element/vars
-import slate/element/incldef
-import slate/element/calls
+# import slate/element/base as slateBase
+# import slate/element/procdef
+# import slate/element/error
+# import slate/element/vars
+# import slate/element/incldef
+# import slate/element/calls
 # import slate/element/loops
-import slate/element/types
-import slate/element/affixes
+# import slate/element/types
+# import slate/element/affixes
 # @deps minc
-import ../cfg
-include ./fwdecl
+# import ../cfg
+# include ./fwdecl
 
 # #______________________________________________________
 # # @section Codegen: Errors
@@ -298,14 +298,14 @@ proc mincInfix (code :PNode; indent :int= 0; raw :bool= false) :string=
   # result.add &"{data.left}{sep}{data.fix}{sep}{data.right}"
   # if not raw: result.add ";\n"
 #_____________________________
-proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
-  ## WARNING: Nim parser interprets no postfixes, other than `*` for visibility
-  ## https://nim-lang.org/docs/macros.html#callsslashexpressions-postfix-operator-call
-  assert code.kind == nkPostfix, code.renderTree
-  case affixes.getPostfix(code).fix
-  of "*": raise newException(AffixCodegenError,
-    &"Using * as a postfix is forbidden in MinC. The code that triggered this error is:\n{code.renderTree}")
-  else: raise newException(AffixCodegenError, "Unreachable case found in mincPostfix.\n{code.treeRepr}\n{code.renderTree}")
+# proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
+#   ## WARNING: Nim parser interprets no postfixes, other than `*` for visibility
+#   ## https://nim-lang.org/docs/macros.html#callsslashexpressions-postfix-operator-call
+#   assert code.kind == nkPostfix, code.renderTree
+#   case affixes.getPostfix(code).fix
+#   of "*": raise newException(AffixCodegenError,
+#     &"Using * as a postfix is forbidden in MinC. The code that triggered this error is:\n{code.renderTree}")
+#   else: raise newException(AffixCodegenError, "Unreachable case found in mincPostfix.\n{code.treeRepr}\n{code.renderTree}")
 
 
 #______________________________________________________
@@ -888,7 +888,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   #   Pre-In-Post.fix
   # of nkInfix            : result = mincInfix(code, indent)
   # of nkPrefix           : result = mincPrefix(code, indent)
-  of nkPostfix          : result = mincPostfix(code, indent)
+  # of nkPostfix          : result = mincPostfix(code, indent)
 
 
 

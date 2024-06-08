@@ -1066,6 +1066,15 @@ proc mincInfix (
   else:
     if  isRaw : result.c = fmt InfixRawTempl
     else      : result.c = fmt InfixTempl
+#___________________
+proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
+  ## @important
+  ##  WARNING: The Nim parser interprets no postfixes, other than `*` for visibility
+  ##  https://nim-lang.org/docs/macros.html#callsslashexpressions-postfix-operator-call
+  ensure code, nkPostfix
+  case affixes.getPostfix(code, "name").strValue
+  of "*": code.trigger AffixError, &"Using * as a postfix is forbidden in MinC.")
+  else: code.trigger AffixError, "Unreachable case found in mincPostfix.")
 
 
 #______________________________________________________
@@ -1133,6 +1142,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   # └─ Affixes
   of nkPrefix           : result = mincPrefix(code, indent, special)
   of nkInfix            : result = mincInfix(code, indent, special)
+  of nkPostfix          : result = mincPostfix(code, indent, special)
   # └─ Identifiers
   of nkBracketExpr      : result = mincBracketExpr(code, indent, special)
   of nkPar              : result = mincPar(code, indent, special)
