@@ -4,7 +4,7 @@
 # @deps ndk
 import nstd/strings
 import nstd/paths
-from nstd/sets import hasAll, hasAny, with, without
+from nstd/sets import hasAll, hasAny
 # @deps *Slate
 import slate/nimc as nim
 import slate/format
@@ -219,7 +219,6 @@ proc mincFor (
   ensure code, nkForStmt
   const (Sentry,Exprs,Body) = (0,1,2)  # Root for loop items
   const (Infix,Value,Final) = (0,1,2)  # Expression items at code[Exprs]
-  report code[Body]
   # Get the sentry initializer
   let sentry = MinC(code[Sentry], indent, special.with Variable).c
   let value  = MinC(code[Exprs][Value], indent, special.with Variable).c
@@ -233,10 +232,6 @@ proc mincFor (
   let iter = fmt ForIterTempl
   let body = MinC(code[Body], indent+1, special).c
   result.c = fmt ForTempl
-  # echo "__for_________________________"
-  # echo result.c
-  # echo "______________________________"
-  # code.trigger FlowCtrlError, "For loops not implemented yet"
 
 
 #_______________________________________
@@ -266,12 +261,14 @@ proc mincIf (
     result.c = fmt TernaryRawTempl
     return
   for id,branch in code.pairs:
-    const (Condition,Body) = (0,1)
+    const (Condition,Body,ElseBody) = (0,1,0)
     let first   = id == 0
     let isElse  = branch.kind == nkElse
     let last    = id == code.sons.high
-    let cond    = MinC(branch[Condition], indent, Context.Condition).c
-    let body    = MinC(branch[Body], indent+1, special).c
+    let cond    = if isElse: "" else: MinC(branch[Condition], indent, Context.Condition).c
+    let body    =
+      if isElse : MinC(branch[ElseBody], indent+1, special).c
+      else      : MinC(branch[Body], indent+1, special).c
     let elseStr = if first: indent*Tab else: " else "  # elif or else
     let ifStr   = if not isElse: "if "  else: ""       # if or elif
     result.c.add fmt IfTempl
@@ -303,7 +300,7 @@ proc mincWhen (
       pfx = "#else"
       # Don't get the condition. Else statements don't have any
     else: code.trigger ConditionError, "Unknown branch kind in mincWhen"
-    let body = MinC(branch[Condition], indent, special).c
+    let body = MinC(branch[Body], indent, special.without Context.Condition).c
     result.c.add fmt WhenTempl
   result.c.add fmt WhenEndTempl
 
@@ -439,7 +436,7 @@ proc mincCall (
   var args :string
   let code_args = calls.get(code, "args")
   for id,arg in code_args.pairs:
-    args.add MinC(arg, indent+1, Argument).c
+    args.add MinC(arg, indent+1, special.with Argument).c
     if id != code_args.sons.high: args.add SeparatorArgs
   # Apply to the result
   let call =
@@ -971,7 +968,7 @@ proc mincPrefix (
   ) :CFilePair=
   ensure code, nkPrefix
   let affix = ( code.:name ).renamed(code.kind, special)
-  if special.hasAny {Condition, Variable}:
+  if special.hasAny {Condition, Variable, None}:
     let body = MinC(affixes.getPrefix(code, "body"), indent, special).c
     result.c = fmt PrefixTempl
   else: code.trigger ConditionError, &"Found an unmapped special case for mincPrefix:  {special}"
