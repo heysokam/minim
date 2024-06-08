@@ -49,10 +49,14 @@ when isMainModule:
       let flags = if cli.mode in {Release}: cfg.flags.release else: cfg.flags.debug
       var paths :string
       for path in cli.paths: paths.add &"-I{path.string} "
-      let verb   = if cli.verbose: "-v" else: ""
       var linkFl :string
       for pass in cli.passL: linkFl.add pass&" "
-      let cc     = &"{cli.zigBin.string} cc {verb} {flags} {linkFl} {paths} {cacheFile.string} {cli.cfiles} -o {binFile.string}"
+      let target =
+        if   cli.os == "" and cli.cpu == "" : ""
+        elif cli.os == "linux"              : &"-target {cli.cpu}-{cli.os}-gnu"
+        else                                : &"-target {cli.cpu}-{cli.os}"
+      let verb   = if cli.verbose: "-v" else: ""
+      let cc     = &"{cli.zigBin.string} cc {verb} {target} {flags} {linkFl} {paths} {cacheFile.string} {cli.cfiles} -o {binFile.string}"
       dbg "Compiling into binary with command:  ",cc
       sh cc
       #_____________________________
