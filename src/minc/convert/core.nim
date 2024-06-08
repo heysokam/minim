@@ -489,7 +489,7 @@ proc mincCommand (
 # @section Variables
 #_____________________________
 const VarDeclTempl = "{indent*Tab}extern {qual}{T} {name};\n"
-const VarDefTempl  = "{indent*Tab}{qual}{T} {name}{eq}{value};\n"
+const VarDefTempl  = "{indent*Tab}{priv}{qual}{T} {name}{eq}{value};\n"
 #___________________
 proc mincVariable (
     code    : PNode;
@@ -498,7 +498,7 @@ proc mincVariable (
     special : SpecialContext= Context.None;
   ) :CFilePair=
   # Error check
-  ensure code, Const, Let, Var, msg="Tried to generate code for a variable, but its kind is incorrect"
+  ensure code, Const, Let, Var, "Tried to generate code for a variable, but its kind is incorrect"
   let special = special.with Context.Variable
   let typ  = vars.get(code, "type")
   let body = vars.get(code, "body")
@@ -506,10 +506,13 @@ proc mincVariable (
     &"Declaring a variable without a type is forbidden."
   if kind == Const and body.kind == nkEmpty: code.trigger VariableError,
     &"Declaring a variable without a value is forbidden for `const`."
-  # Get the qualifier
+  # Get the priv qualifier
+  let isPrivate = not code.isPublic and Context.Body notin special
+  let isPersist = code.isPersist(indent) and Context.Body in special
+  let priv      = if isPrivate or isPersist: "static " else: ""
+  # Get the qualifiers
   var qual :string
-  if code.isPersist(indent) or (indent < 1 and not code.isPublic) : qual.add "static "
-  if kind == Const: qual.add "/*constexpr*/ "  # TODO: clang.19
+  if kind == Const : qual.add "/*constexpr*/ "  # TODO: clang.19
   # Get the type
   var T = code.:type
   if T == "pointer": T = PtrValue # Rename `pointer` to `void*`  ## TODO: configurable based on c23 option
