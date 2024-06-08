@@ -1025,7 +1025,7 @@ proc mincPragma (
 #_____________________________
 const IllegalPrefixes = ["&", "!", "*"]
 const ArithmPrefixes  = ["+", "-", "~"] 
-const ValidPrefixes   = ["++", "--"]
+const ValidPrefixes   = ["++", "--", "not"]
 const PrefixRawTempl  = "{affix}{body}"
 const PrefixTempl     = "{indent*Tab}"&PrefixRawTempl&";"
 proc mincPrefix (
@@ -1037,7 +1037,7 @@ proc mincPrefix (
   let affix = ( code.:name ).renamed(code.kind, special)
   let isRaw = special.hasAny RawSpecials
   # Error Check
-  case affix
+  case code.:name
   of ValidPrefixes   : discard  # Don't error on known prefixes
   of ArithmPrefixes  :
     if not isRaw     : code.trigger ConditionError, &"Found a prefix that cannot be used in a standalone line:  {affix}"
@@ -1079,14 +1079,18 @@ proc mincInfix (
     if  isRaw : result.c = fmt InfixRawTempl
     else      : result.c = fmt InfixTempl
 #___________________
-proc mincPostfix (code :PNode; indent :int= 0; raw :bool= false) :string=
+proc mincPostfix (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
   ## @important
   ##  WARNING: The Nim parser interprets no postfixes, other than `*` for visibility
   ##  https://nim-lang.org/docs/macros.html#callsslashexpressions-postfix-operator-call
   ensure code, nkPostfix
   case affixes.getPostfix(code, "name").strValue
-  of "*": code.trigger AffixError, &"Using * as a postfix is forbidden in MinC.")
-  else: code.trigger AffixError, "Unreachable case found in mincPostfix.")
+  of "*": code.trigger AffixError, &"Using * as a postfix is forbidden in MinC."
+  else: code.trigger AffixError, "Unreachable case found in mincPostfix."
 
 
 #______________________________________________________
