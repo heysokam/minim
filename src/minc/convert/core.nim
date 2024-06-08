@@ -315,7 +315,15 @@ proc mincWhen (
     else: code.trigger ConditionError, "Unknown branch kind in mincWhen"
     let body = MinC(branch[Body], indent+1, special.without Context.Condition).c
     result.c.add fmt WhenTempl
+    # let body = MinC(branch[Body], indent+1, special.without Context.Condition)
+    # if body.h != "":
+    #   let body = body.h
+    #   result.h.add fmt WhenTempl
+    # if body.c != "":
+    #   let body = body.c
+    #   result.c.add fmt WhenTempl
   result.c.add fmt WhenEndTempl
+  # if result.h != "": result.h.add fmt WhenEndTempl
 
 
 #_______________________________________
@@ -345,8 +353,9 @@ proc mincInclude (
   let module =
     if M.local : M.path.string.wrapped
     else       : "<" & M.path.string & ">"
-  if M.path.endsWith(".c") : result.c = fmt IncludeTempl  # Include .c files into other .c files, and not into the header
-  else                     : result.h = fmt IncludeTempl
+  # if M.path.endsWith(".c") : result.c = fmt IncludeTempl  # Include .c files into other .c files, and not into the header
+  # else                     : result.h = fmt IncludeTempl
+  result.c = fmt IncludeTempl
 
 
 #_______________________________________
@@ -410,10 +419,13 @@ proc mincProcDef (
   let args = mincProcArgs(procs.get(code, "args"), indent)
   let body = MinC(procs.get(code,"body"), indent+1).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
-  result.h =
+  # result.h =
+  #   if code.isPublic and name notin KnownMainNames : fmt ProcProtoTempl
+  #   else: ""
+  result.c =
     if code.isPublic and name notin KnownMainNames : fmt ProcProtoTempl
     else: ""
-  result.c = fmt ProcDefTempl
+  result.c.add fmt ProcDefTempl
 #_____________________________
 proc mincFuncDef (
     code    : PNode;
@@ -508,10 +520,13 @@ proc mincVariable (
   let value = MinC(body, indent+1, special).c
   let eq    = if value != "": " = " else: ""
   # Generate the result
-  result.h =
-    if code.isPublic and indent == 0 : fmt VarDeclTempl
+  # result.h =
+  #   if not isPrivate: fmt VarDeclTempl
+  #   else:""
+  result.c =
+    if code.isPublic: fmt VarDeclTempl
     else:""
-  result.c = fmt VarDefTempl
+  result.c.add fmt VarDefTempl
 #___________________
 proc mincConstSection (
     code    : PNode;
@@ -841,7 +856,7 @@ proc mincTypeDef (
     special   = specl,
     extraName = if codeT.kind == nkObjectTy: types.get(code, "name") else: nil,
     ).c # << mincType( ... )
-  result.h = fmt TypedefTempl
+  result.c = fmt TypedefTempl
 
 
 #_______________________________________
@@ -935,7 +950,9 @@ proc mincPragmaDefine (
   else:
     code.trigger PragmaError, "Define[value] error: Only {.define:name.} and {.define: name[sym]value.} pragmas are currently supported."
   # Assign to the result
-  result.c = fmt DefineTempl  # TODO: Should go to the header instead
+  # if code.isPublic : result.h = fmt DefineTempl
+  # else             : result.c = fmt DefineTempl  # TODO: Should go to the header instead
+  result.c = fmt DefineTempl
 #___________________
 const PragmaOnceTempl = "{indent*Tab}#pragma once"
 proc mincPragmaOnce (
@@ -944,7 +961,7 @@ proc mincPragmaOnce (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, Pragma
-  result.h = fmt PragmaOnceTempl
+  result.c = fmt PragmaOnceTempl
 #___________________
 const KnownCPragmas = ["once"]
 proc mincPragmaCPragma (
