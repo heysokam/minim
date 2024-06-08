@@ -3,6 +3,7 @@
 #:______________________________________________________
 # @deps ndk
 import nstd/paths
+from nstd/sets import with, without
 
 #_______________________________________
 type CFilePair * = object
@@ -26,6 +27,8 @@ type Context *{.pure.}= enum
 type SpecialContext * = set[Context]
   ## @descr Set of flags that define the context for how to interpret the syntax
 converter toSpecialContext *(flag :Context) :SpecialContext= {flag}
+func without *(A :SpecialContext; B :Context) :SpecialContext= sets.without(A,B)
+func with    *(A :SpecialContext; B :Context) :SpecialContext= sets.with(A.without(None), B)
 
 #_______________________________________
 type ModuleKind *{.pure.}= enum Unknown, Include, Import, NotModule
