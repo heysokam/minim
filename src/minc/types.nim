@@ -20,8 +20,8 @@ type ClangFormat * = object
 type Context *{.pure.}= enum
   ## @descr The same syntax can be interpreted differently depending on its Context usage
   None,
-  Array, Object,
-  Assign, Variable, Argument, Return, Condition, When, ForLoop
+  Array, Object, Union, Body,
+  Assign, Variable, Argument, Return, Condition, When, ForLoop,
   Typedef, ObjectField,
   Readonly, Immutable,
 type SpecialContext * = set[Context]
