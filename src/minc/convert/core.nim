@@ -500,7 +500,8 @@ proc mincVariable (
   # Get the Name
   var name = code.:name
   # Name: Array special case extras
-  name.add mincArraySuffix(code, indent, special)
+  const Type = 1
+  name.add mincArraySuffix(code[Type], indent, special)
   # Get the body (aka variable value)
   let value = MinC(body, indent+1, special).c
   let eq    = if value != "": " = " else: ""
@@ -543,8 +544,9 @@ proc mincAsgn (
   ) :CFilePair=
   ensure code, Asgn
   const (Left, Right) = (0,1)
-  let left  = MinC(code[Left], indent, Assign).c
-  let right = MinC(code[Right], indent, Assign).c
+  let specl = special.with Assign
+  let left  = MinC(code[Left], indent, specl).c
+  let right = MinC(code[Right], indent, specl).c
   result.c  =
     if Context.None in special : fmt AsgnTempl
     else                       : fmt AsgnRawTempl
