@@ -999,7 +999,8 @@ const ExtraCastRawTempl  = "({right})({left})"
 const ExtraCastTempl     = "{indent*Tab}"&ExtraCastRawTempl&";\n"
 #___________________
 const NoSpacingInfixes = ["->"]
-const InfixRawTempl    = "{left}{spc}{affix}{spc}{right}"
+const AssignInfixes    = ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]
+const InfixRawTempl    = "{left}{sep}{affix}{sep}{right}"
 const InfixTempl       = "{indent*Tab}"&InfixRawTempl&";\n"
 proc mincInfix (
     code    : PNode;
@@ -1007,10 +1008,11 @@ proc mincInfix (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, nkInfix
-  let left   = MinC(affixes.getInfix(code, "left"),  indent, special).c
-  let right  = MinC(affixes.getInfix(code, "right"), indent, special).c
   let affix  = ( code.:name ).renamed(code.kind, special)
-  let spc    = if affix in NoSpacingInfixes: "" else: " "
+  let specl  = if affix in AssignInfixes: special.with Assign else: special
+  let left   = MinC(affixes.getInfix(code, "left"),  indent, specl).c
+  let right  = MinC(affixes.getInfix(code, "right"), indent, specl).c
+  let sep    = if affix in NoSpacingInfixes: "" else: " "
   let isCast = affix in ExtraCastOperators
   let isRaw  = special.hasAny {Variable, Condition, Return, Argument, Assign}
   if isCast:
