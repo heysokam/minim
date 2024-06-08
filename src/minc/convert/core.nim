@@ -352,7 +352,7 @@ proc mincProcPragmas (code :PNode; indent :int= 0) :string=
     if   name == "noreturn"     : result.add "[[noreturn]] "
     elif name == "noreturn_C11" : result.add "_Noreturn "
     elif name == "noreturn_GNU" : result.add "__attribute__((noreturn)) "
-    elif name == "inline"       : result.add name & " "
+    elif name == "inline"       : result.add "extern " & name & " "
     else: code.trigger PragmaError, "proc pragmas error: Only {.noreturn.}, {.noreturn_C11.}, {.noreturn_GNU.}, {.inline.} are currently supported."
 #___________________
 proc mincProcQualifiers (code :PNode; indent :int= 0) :string=
