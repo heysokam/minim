@@ -436,8 +436,8 @@ proc mincFuncDef (
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  # __attribute__ ((pure))
-  # write-only memory idea from herose (like GPU write-only mem)
+  # TODO: __attribute__ ((pure))
+  # TODO: write-only memory idea from herose (like GPU write-only mem)
   ensure code, Func
   mincProcDef(code, indent, special)
   # code.trigger ProcError, "proc and func are identical in C"  # TODO : Sideffects checks
@@ -722,11 +722,11 @@ proc mincIdent (
   ) :CFilePair=
   ensure code, nkIdent
   let val =
-    if code.strValue == "pointer" : PtrValue # Rename `pointer` to `void*`  ## TODO: configurable based on c23 option
+    if code.strValue == "pointer" : PtrValue # Rename `pointer` to `void*`
     else                          : code.strValue
   if Variable in special:
     result.c =
-      if val == "_" : "{0}"  # TODO: Probably incorrect for the Object SpecialContext
+      if val == "_" : "{0}"
       else          : val
   elif special.hasAll({ Argument, Readonly }) or
        special.hasAll({ Context.Typedef, Readonly }):
