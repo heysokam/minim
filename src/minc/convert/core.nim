@@ -454,11 +454,10 @@ proc mincCall (
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  # TODO: Union special case
-  # TODO: &(StructType){...} special case
-  # TODO: StructType(_) special case
   ensure code, Call
-  if code.kind == nkCallStrLit: return mincLiteral(code, indent, special)
+  if code.kind == nkCallStrLit : return mincLiteral(code, indent, special)
+  if code.isUnion              : return mincObjConstr(code, indent, special.with Union)
+  if code.isObjConstr          : return mincObjConstr(code, indent, special.with Object)
   # Get the name
   let name = code.:name
   # Get the args code
@@ -473,8 +472,9 @@ proc mincCall (
     of "&": fmt CallAddrTempl
     else:   fmt CallRawTempl
   result.c =
-    if special == {Context.None} : fmt CallTempl  # Format it by default
-    else                         : call           # Leave it unchanged for special cases
+    if special.hasAny RawSpecials:
+      call # Leave it unchanged for special cases
+    else: fmt CallTempl  # Format it by default
 #_____________________________
 proc mincCommand (
     code    : PNode;
@@ -597,18 +597,36 @@ proc mincBracketExpr (
 const ObjConstrTempl       = "({typ}){{{args}}}"
 const ObjConstrFieldTempl  = ".{name}= {body}"
 const ObjConstrIndentTempl = "\n{(indent+1)*Tab}"
+const ObjUnionTempl        = "({typ}){{ " & ObjConstrFieldTempl & " }}"
 proc mincObjConstr (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  ## @descr Designated Initialization for Objects with syntax:  SomeType(field1: val1, field2: val2)
+  ## @descr
+  ##  Designated Initialization for Objects with syntaxes:
+  ##  1. SomeType(field1: val1, field2: val2)
+  ##  2. SomeType(_)
+  ##  3. SomeType(unionField.:[val1, val2])
   ensure code, nkObjConstr, nkCall, "Tried to codegen a Designated Initializer for an object from an incorrect node type"
-  # Redirection case
-  if code.kind == nkCall: code.trigger ObjectError, "Object construction from Call(...) syntax is not implemented yet"
-  # Object Construction Case
-  const (Type,) = (0,)
+  const (Type,Arg0, UnionInfix,UnionField,UnionBody) = (0,1,1,1,2)
+  # Data shared by all syntaxes
   let typ = MinC(code[Type], indent, special).c
+  # Redirection case
+  let redirected = code.kind == nkCall
+  # Union special case
+  if Union in special and redirected:
+    let name = MinC(code[UnionInfix][UnionField], indent, special).c
+    let body = MinC(code[UnionInfix][UnionBody], indent, special).c
+    result.c = fmt ObjUnionTempl
+    return
+  # Struct(_) special case
+  if code.isObjConstr(true) and redirected:
+    let args = "0"
+    result.c = fmt ObjConstrTempl
+    return
+  if redirected: code.trigger ObjectError, "Found an Object construction redirection case from Call(...) syntax that is not implemented yet"
+  # Object Construction Case
   var args :string
   let argCount = code.sons.high - 1
   for field in 1..argCount+1:  # For every field, skipping entry0 (the type)
