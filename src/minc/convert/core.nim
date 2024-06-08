@@ -659,8 +659,9 @@ proc mincStr (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, StrKinds, "Called mincStr with an incorrect node kind."
-  if code.isTripleStrLit : result.c = code.getTripleStrLit(indent, special)
-  else                   : result.c = &"\"{code.strValue}\""
+  if Context.When in special : result.c = code.strValue
+  elif code.isTripleStrLit   : result.c = code.getTripleStrLit(indent, special)
+  else                       : result.c = &"\"{code.strValue}\""
 #___________________
 proc mincLiteral (
     code    : PNode;
