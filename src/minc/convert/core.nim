@@ -228,9 +228,15 @@ proc mincFor (
   let sentry = MinC(code[Sentry], indent, special.with Variable).c
   let value  = MinC(code[Exprs][Value], indent, special.with Variable).c
   # Get the incrementer/finalizer
-  let infix  = MinC(code[Exprs][Infix], indent, special.with ForLoop).c
+  let infix  = MinC(code[Exprs][Infix], indent, special.with ForLoop).c.otherwise("<=")
   let final  = MinC(code[Exprs][Final], indent, special.with Variable).c
   let prefix = if value.isIncr(infix,final): "++" else: "--"
+  # Error check
+  if value  == "": code.trigger FlowCtrlError, "The starting value of a for loop was empty."
+  if sentry == "": code.trigger FlowCtrlError, "The sentry variable of a for loop was empty."
+  if infix  == "": code.trigger FlowCtrlError, "The infix of a for loop was empty."
+  if final  == "": code.trigger FlowCtrlError, "The final value of a for loop was empty."
+  if prefix == "": code.trigger FlowCtrlError, "The prefix of a for loop was empty."
   # Generate the code
   let init = fmt ForSentryTempl
   let cond = fmt ForCondTempl
