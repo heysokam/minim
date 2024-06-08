@@ -40,7 +40,11 @@ const Renames_AssignmentAffix :RenameList= @[
   ("mod", "%" ),  ("div", "/" ),
   ] # << Renames_AssignmentAffix [ ... ]
 #___________________
-func renamed (name :string; kind :TNodeKind; special :SpecialContext= Context.None) :string=
+func renamed (
+    name    : string;
+    kind    : TNodeKind;
+    special : SpecialContext = Context.None;
+  ) :string=
   let list =
     case kind
     of nkCommand, nkCall             : Renames_Calls
@@ -48,7 +52,8 @@ func renamed (name :string; kind :TNodeKind; special :SpecialContext= Context.No
     of nkInfix                       :
       if   Condition in special      : Renames_ConditionAffix
       elif Context.Return in special : Renames_ConditionAffix
-      elif Variable  in special      : Renames_AssignmentAffix
+      elif Variable in special       : Renames_AssignmentAffix
+      elif Assign in special         : Renames_AssignmentAffix
       else                           : @[]
     else                             : @[]
   for rename in list:
