@@ -43,6 +43,14 @@ const clangFmtBin *{.strdefine.}= "clang-format"
   ## @descr
   ##  Default clang-format binary will be used from $PATH
   ##  Can be changed with --clangFmtBin:path from cli
+const Debug *{.booldefine.}= not (defined(release) or defined(danger))
+  ## @descr Describes whether the compiler is built on Debug mode or not
+const Quiet *{.booldefine.}= not Debug
+  ## @descr Default option for the --quiet mode option
+
+#_______________________________________
+# @section Runtime Configurable Options
+var quiet *:bool= Quiet
 
 
 #_______________________________________

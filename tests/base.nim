@@ -42,7 +42,7 @@ proc compile *(file,outDir :Path) :string=
   let tmp = outDir/file.lastPathPart.changeFileExt(".c")
   if not dirExists(outDir): md outDir
   if fileExists(tmp): tmp.removeFile
-  try    : minc "cc", file.string, tmp.lastPathPart, "--codeDir:"&outDir.string
+  try    : minc "cc", "--quiet", file.string, tmp.lastPathPart, "--codeDir:"&outDir.string
   except : err "Something went wrong when compiling a tmp file:  ", tmp.string
   try    : result = readFile(tmp)
   except : err "Something went wrong when reading the resulting tmp file:  ", tmp.string

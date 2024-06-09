@@ -14,10 +14,11 @@ from   ./minc/convert import nil
 from   ./minc/format import nil
 
 when isMainModule:
-  # Init the logger
-  logger.init()
   # Get the arguments
   let cli = opts.init()
+  # Init the logger
+  logger.init()
+  # Run the compiler
   if cli.cmd in {Compile, Codegen}:
     block SectionBin:
       #_____________________________
