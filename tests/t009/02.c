@@ -1,4 +1,3 @@
-typedef struct Thing {
-  int   one;
-  float two;
-} Thing;
+typedef signed char            Two;
+typedef unsigned short int     Three;
+typedef unsigned long long int Four;

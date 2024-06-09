@@ -1,1 +1,4 @@
-typedef struct thing Thing;
+typedef struct Thing {
+  int   one;
+  float two;
+} Thing;
