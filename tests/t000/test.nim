@@ -10,4 +10,4 @@ template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 # @section Test
 #_____________________________
-test name "00 | dummy check": check 5+5 == 10
+test name "00 | dummy check": check "00"
