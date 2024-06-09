@@ -752,26 +752,26 @@ const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 #     result.add mincGetObjectFieldDef(field, indent+1)
 #   result.add &"{tab1}}}"
 #_____________________________
-proc mincGetProcTypeDefArgs (code :PNode; indent :int= 0) :string=
-  assert types.isProc(code), &"Tried to get the proc typedef args of a node that is not an nkProcTy:\n{code.treeRepr}\n{code.renderTree}\n"
-  const ArgType = 1
-  let args = types.procArgs(code)
-  for id,arg in args.pairs:
-    result.add mincGetValueRaw( arg[ArgType], indent )
-    if id != args.high: result.add ","
+# proc mincGetProcTypeDefArgs (code :PNode; indent :int= 0) :string=
+#   assert types.isProc(code), &"Tried to get the proc typedef args of a node that is not an nkProcTy:\n{code.treeRepr}\n{code.renderTree}\n"
+#   const ArgType = 1
+#   let args = types.procArgs(code)
+#   for id,arg in args.pairs:
+#     result.add mincGetValueRaw( arg[ArgType], indent )
+#     if id != args.high: result.add ","
 #_____________________________
-proc mincGetProcTypedef (code :PNode; indent :int= 0) :string=
-  assert types.isProc(code), &"Tried to get the proc typedef of a node that is not an nkProcTy:\n{code.treeRepr}\n{code.renderTree}\n"
-  let name = types.getName(code)
-  let ret  = mincGetValueRaw( types.procRetT(code), indent )
-  let args = mincGetProcTypeDefArgs(code, indent)
-  result = &"{indent*Tab}typedef {ret} (*{name})({args});\n"
+# proc mincGetProcTypedef (code :PNode; indent :int= 0) :string=
+#   assert types.isProc(code), &"Tried to get the proc typedef of a node that is not an nkProcTy:\n{code.treeRepr}\n{code.renderTree}\n"
+#   let name = types.getName(code)
+#   let ret  = mincGetValueRaw( types.procRetT(code), indent )
+#   let args = mincGetProcTypeDefArgs(code, indent)
+#   result = &"{indent*Tab}typedef {ret} (*{name})({args});\n"
 #_____________________________
 proc mincTypeDef (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkTypeDef, code.renderTree
-  let info = types.getType(code, KnownMultiwordPrefixes)
+  # assert code.kind == nkTypeDef, code.renderTree
+  # let info = types.getType(code, KnownMultiwordPrefixes)
   # Proc special case
-  if info.isProc: return mincGetProcTypeDef(code, indent)
+  # if info.isProc: return mincGetProcTypeDef(code, indent)
   # Other cases
   # let stub = code.isStub
   # var name = if stub: mincGetStubName(code) #else: &"{types.getName(code)}"
@@ -1030,18 +1030,18 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # of nkNilLit           : result = mincNilLit(code)
   # of nkCallStrLit       : result = mincCallStrLit(code)
   of nkExprColonExpr    : result = mincExprColonExpr(code)
-  of nkObjectTy         : result = mincObjectTy(code)  # Accessed by nkTypeDef
+  # of nkObjectTy         : result = mincObjectTy(code)  # Accessed by nkTypeDef
   # of nkPtrTy            : result = mincPtrTy(code)
   # of nkVarTy            : result = mincVarTy(code)
-  of nkRecList          : result = mincRecList(code)   # Accessed by nkObjectTy
+  # of nkRecList          : result = mincRecList(code)   # Accessed by nkObjectTy
   # of nkCast             : result = mincCast(code)
   # of nkBracketExpr      : result = mincBracketExpr(code)
-  of nkPragmaExpr       : result = mincPragmaExpr(code)
+  # of nkPragmaExpr       : result = mincPragmaExpr(code)
   # of nkPar              : result = mincPar(code)
   # of nkObjConstr        : result = mincObjConstr(code)
   # of nkDotExpr          : result = mincDotExpr(code)
-  of nkElifExpr         : result = mincElifExpr(code)
-  of nkElseExpr         : result = mincElseExpr(code)
+  # of nkElifExpr         : result = mincElifExpr(code)
+  # of nkElseExpr         : result = mincElseExpr(code)
   # Not needed
   of nkFastAsgn         : result = mincFastAsgn(code)
 

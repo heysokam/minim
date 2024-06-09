@@ -115,6 +115,7 @@ const RawSpecials = {Variable, Argument, Assign, Condition, Return}
 proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
 proc mincLiteral   (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
 proc mincObjConstr (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
+proc mincProcArgs  (code :PNode; indent :int= 0) :string
 
 #_______________________________________
 # @section Array tools
@@ -413,7 +414,7 @@ proc mincProcQualifiers (code :PNode; indent :int= 0) :string=
 #___________________
 const ArgTempl = "{typ} {name}"
 proc mincProcArgs (code :PNode; indent :int= 0) :string=
-  ensure code, nkFormalParams
+  ensure code, nkFormalParams, nkIdentDefs, "Tried to get the proc args of an invalid kind."
   if code.sons.len == 0: return "void"  # Explicit fill with void for no arguments
   # Add all arguments to the result
   var args :seq[tuple[name:string, typ:string, val:string, special:SpecialContext]]
@@ -904,14 +905,31 @@ proc mincType (
   of nkObjectTy : result = mincType_obj(code, indent+1, special, extraName)
   else: code.trigger TypeError, &"Found an unmapped kind for interpreting Type code:  {code.kind}"
 #___________________
-const TypedefTempl = "typedef {typ} {name};\n"
+const TypedefPrefixTempl = "{indent*Tab}typedef "
+const TypedefProcTempl   = TypedefPrefixTempl & "{retT} (*{name})({args});\n"
+const TypedefTempl       = TypedefPrefixTempl & "{typ} {name};\n"
+#___________________
+proc mincTypeDef_proc (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  let retT = MinC(types.getProc(code, "returnT"), indent, special).c
+  let name = MinC(types.getProc(code, "name"), indent, special).c
+  let args = mincProcArgs(types.getProc(code, "args"))
+  result.c = fmt TypedefProcTempl
+#___________________
 proc mincTypeDef (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
+  # TODO: Forward declare for Objects
   ensure code, Kind.TypeDef
   var specl = {Context.Typedef}
+  # Proc special case
+  if code.isProc: return mincTypeDef_proc(code, indent, specl)
+  # Normal case
   let pragm = types.get(code, "pragma").renderTree
   if "readonly" in pragm: specl.incl Readonly
   let name  = code.:name
