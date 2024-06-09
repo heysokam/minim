@@ -1,0 +1,2 @@
+type Thing1 * = proc () :void
+type Thing2 * = proc (two :int) :int
