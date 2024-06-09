@@ -1,0 +1,5 @@
+proc main *() :int=
+  while true:
+    var one :int= 1
+    return one
+  return 0
