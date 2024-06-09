@@ -47,8 +47,8 @@ template checkApp (id,name :string) :void=
 #_______________________________________
 # @section Test
 #_____________________________
-test name "GLFW: Hello Window"  : checkApp "00", "hellowindow"
-test name "OpenGL: Hello Clear" : checkApp "01", "helloclear"
-test name "OpenGL: Triangle"    : checkApp "02", "hellotriangle"
-test name "OpenGL: Framebuffer" : checkApp "03", "framebuffer"
+test name "00 | GLFW: Hello Window"  : checkApp "00", "hellowindow"
+test name "01 | OpenGL: Hello Clear" : checkApp "01", "helloclear"
+test name "02 | OpenGL: Triangle"    : checkApp "02", "hellotriangle"
+test name "03 | OpenGL: Framebuffer" : checkApp "03", "framebuffer"
 

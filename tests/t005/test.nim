@@ -10,6 +10,6 @@ template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 # @section Test
 #_____________________________
-test name "Single identifier" : check "01"
-test name "Multi identifier"  : check "02"
+test name "01 | Single identifier" : check "01"
+test name "02 | Multi identifier"  : check "02"
 

@@ -10,6 +10,6 @@ template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 # @section Test
 #_____________________________
-test name "Basic Doc Comment"   : check "01"
-test name "Multi-line Comments" : check "02"
+test name "01 | Basic Doc Comment"   : check "01"
+test name "02 | Multi-line Comments" : check "02"
 
