@@ -29,9 +29,9 @@ Effort on supporting the entire feature-set of C continues until the last versio
 # 0.4.0 CaseOf Support
 # 0.5.0 `proc` Typedefs and `{.persist.}` pragma
 # 0.6.0 Runic sketch
+# 0.7.0 Deep Rewrite/Refactor into `slate/fieldAccess`
 ```
 ```md
-# 0.7.0 Deep Rewrite/Refactor into `slate/fieldAccess`
 # 0.?.0 Unions
 # 0.?.0 Enums
 # 0.?.0 Varargs
