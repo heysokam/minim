@@ -20,6 +20,8 @@ proc fail (msg :string) :void= raise newException(IOError, msg)
 # @section Module management tools
 #_____________________________
 proc getPath (code :string) :Path=
+  # 0. Strip the comment out of the line
+  let code = code.split("#")[0].strip()
   # 1. Between Quotes
   if code.startsWith("\"") and code.endsWith("\""):
     return code[1..^2].getPath()
