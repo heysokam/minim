@@ -1,0 +1,3 @@
+proc one () :void {.noreturn.}= exit(0); return
+proc two () :void {.noreturn_C11.}= exit(0); return
+proc thr () :void {.noreturn_GNU.}= exit(0); return
