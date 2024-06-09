@@ -6,8 +6,13 @@ import pkg/nstd/logger as nstd_log
 # @deps minc
 import ./cfg
 
-proc init *() :void=  nstd_log.setDefaultLogger( nstd_log.newConLogger( cfg.Prefix ) )  ## TODO: Change to initialize multiple loggers when more processes are executed
+proc init *() :void=
   ## @descr Initializes the logger for the MinC compiler process.
+  ## TODO: Change to initialize multiple loggers when more processes are executed
+  nstd_log.setDefaultLogger(nstd_log.newConLogger(
+    name      = cfg.Prefix,
+    threshold = if cfg.quiet: Log.Err else: Log.All,
+    )) # << nstd_log.newConLogger( ... )
 proc info *(args :varargs[string, `$`]) :void {.inline.}=  nstd_log.info(args)
   ## @descr Logs an information message.
 proc dbg *(args :varargs[string, `$`]) :void {.inline.}=  nstd_log.dbg(args)

@@ -27,6 +27,7 @@ type Cfg * = object
   cmd      *:Cmd
   input    *:Path
   output   *:Path
+  quiet    *:bool
   verbose  *:bool
   run      *:bool
   clangFmt *:ClangFormat
@@ -41,9 +42,9 @@ type Cfg * = object
   paths    *:HashSet[Path]
   passL    *:HashSet[string]
 const KnownCmds  :HashSet[string]=  ["c","cc"].toHashSet
-const KnownShort :HashSet[string]=  ["v","h","r"].toHashSet
+const KnownShort :HashSet[string]=  ["v","q","h","r"].toHashSet
 const KnownLong  :HashSet[string]=  [
-  "help","version","verbose",
+  "help","version","verbose","quiet",
   "zigBin", "clangFmtBin",
   "binDir","cacheDir","codeDir",
   "cfile","path","passL",
@@ -67,6 +68,7 @@ const Help = """
   --help              : Print this notice and quit
   --version           : Print the version and quit
   --verbose           : Activate verbose mode
+  --quiet             : Activate quiet mode (ignored when verbose). Silences debug messages from the logger, even when the compiler is built in debug mode.
 
   --binDir:path       : Changes the default bin path where other paths will be searched for when relevant (default:  {cfg.binDir})
   --binDir:path       : Define the path where the compiled content will be output  (default:  {cfg.binDir})
@@ -149,7 +151,12 @@ proc init *() :Cfg=
   result.input    = cli.args[1].Path
   result.output   = cli.args[2].Path
   # Single Flags
+  let cliQuiet =
+    if not ("q" in cli.opts.short or "quiet" in cli.opts.long): cfg.Quiet
+    else : ("q" in cli.opts.short or "quiet" in cli.opts.long)
   result.verbose  = "v" in cli.opts.short or "verbose" in cli.opts.long
+  result.quiet    = cliQuiet and not result.verbose
+  cfg.quiet       = result.quiet  # TODO: CLI should be separate files. TEMP Fix: Store --quiet in cfg.quiet so that the logger can use it
   result.run      = "r" in cli.opts.short
   # Folders
   result.cacheDir = if "cacheDir" in cli.opts.long : cli.getLong("cacheDir").Path else: cfg.mincCache
