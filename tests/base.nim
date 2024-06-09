@@ -3,6 +3,7 @@
 # @section Dependencies used by all tests
 # @deps std
 import std/unittest
+unittest.abortOnError = on
 # @deps ndk
 import nstd/paths
 import nstd/shell
