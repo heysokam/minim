@@ -844,7 +844,8 @@ proc mincDot (
 #_______________________________________
 # @section Types
 #_____________________________
-const ObjBodyTempl  = "struct {name} {{{bfr}{body}{spc}}}" # After-name is added by the typedef already
+const ObjStubTempl  = "struct {name}"  # {.stub.} objects have a special case without body
+const ObjBodyTempl  = ObjStubTempl & " {{{bfr}{body}{spc}}}" # After-name is added by the typedef already
 const ObjFieldTempl = "{typ} {name};"
 proc mincType_obj (
     code      : PNode;
@@ -853,7 +854,13 @@ proc mincType_obj (
     extraName : PNode          = nil;
   ) :CFilePair=
   ensure code, nkObjectTy
-  const (Fields,Inherit) = (^1,1)
+  const (Fields,Inherit,Type) = (^1,1,0)
+  # Stub special case
+  if extras.isStub(code):
+    let name = MinC(code[Inherit][Type], indent, special).c
+    result.c = fmt ObjStubTempl
+    return
+  # Normal case
   let fieldCount = code[Fields].sons.len
   discard Inherit # TODO: object of T
   let name = MinC(extraName, indent, special).c

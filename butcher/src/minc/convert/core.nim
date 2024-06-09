@@ -62,9 +62,9 @@
 #   "mod": "%" ,  "div": "/" ,
 #   }.toTable()
 # const KnownMainNames         = ["main", "WinMain"]
-const KnownKeywords          = ["addr", "sizeof"]
+# const KnownKeywords          = ["addr", "sizeof"]
 # const KnownPragmas           = ["define", "error", "warning", "namespace", "emit"]
-const KnownForInfix          = ["..", "..<"]
+# const KnownForInfix          = ["..", "..<"]
 const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 
 #______________________________________________________
@@ -724,25 +724,25 @@ const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 #   result.add &"{indent*Tab}{typ.name} {name};\n"
 
 #_____________________________
-proc isStub (code :PNode) :bool=
-  ## Returns true if the given nkTypeDef node meets all of the conditions to be a stub object
-  code.kind == nkTypeDef and code[^1].kind == nkObjectTy and
-  code[0].kind == nkPragmaExpr and code[0][^1].kind == nkPragma and
-  code[0][^1][0].kind == nkIdent and code[0][^1][0].strValue == "stub" and
-  code[^1][1].kind == nkOfInherit and code[^1][1][0].kind == nkIdent and
-  code[^1][^1].kind == nkEmpty
+# proc isStub (code :PNode) :bool=
+#   ## Returns true if the given nkTypeDef node meets all of the conditions to be a stub object
+#   code.kind == nkTypeDef and code[^1].kind == nkObjectTy and
+#   code[0].kind == nkPragmaExpr and code[0][^1].kind == nkPragma and
+#   code[0][^1][0].kind == nkIdent and code[0][^1][0].strValue == "stub" and
+#   code[^1][1].kind == nkOfInherit and code[^1][1][0].kind == nkIdent and
+#   code[^1][^1].kind == nkEmpty
 #_____________________________
-proc mincGetStubName (code :PNode) :string= code[^1][1][0].strValue
-  ## Get the `of T` as the name for stub definitions
-proc mincGetStubBody (code :PNode) :string=
-  ## Get the name of the object as the body for stub definitions
-  if   code[0][0].kind == nkIdent   : result = code[0][0].strValue
-  elif code[0][0].kind == nkPostfix : result = code[0][0][1].strValue
-  else: raise newException(ObjectCodegenError, &"Tried to get the stub body of a node that is not recognized.\n{code.treeRepr}\n{code.renderTree}\n")
+# proc mincGetStubName (code :PNode) :string= code[^1][1][0].strValue
+#   ## Get the `of T` as the name for stub definitions
+# proc mincGetStubBody (code :PNode) :string=
+#   ## Get the name of the object as the body for stub definitions
+#   if   code[0][0].kind == nkIdent   : result = code[0][0].strValue
+#   elif code[0][0].kind == nkPostfix : result = code[0][0][1].strValue
+#   else: raise newException(ObjectCodegenError, &"Tried to get the stub body of a node that is not recognized.\n{code.treeRepr}\n{code.renderTree}\n")
 #_____________________________
-proc mincGetObjectBody (code :PNode; indent :int= 0) :string=
+#proc mincGetObjectBody (code :PNode; indent :int= 0) :string=
 #   assert code[^1].kind == nkObjectTy, code.renderTree
-  if code.isStub: return mincGetStubBody(code)
+#  if code.isStub: return mincGetStubBody(code)
 #   # Get the body normally
 #   assert code[^1][^1].kind == nkRecList, &"Unknown kind {code[^1][^1].kind} in:\n{code.renderTree}"
 #   let tab1 = (indent+1)*Tab
@@ -773,8 +773,8 @@ proc mincTypeDef (code :PNode; indent :int= 0) :string=
   # Proc special case
   if info.isProc: return mincGetProcTypeDef(code, indent)
   # Other cases
-  let stub = code.isStub
-  var name = if stub: mincGetStubName(code) #else: &"{types.getName(code)}"
+  # let stub = code.isStub
+  # var name = if stub: mincGetStubName(code) #else: &"{types.getName(code)}"
   # let mut  = if stub: "" elif info.isRead: " const" else: ""
   # var typ  =
   #   if info.isObj    : &"struct {name}{mut}"
@@ -783,7 +783,7 @@ proc mincTypeDef (code :PNode; indent :int= 0) :string=
   # var body :string= ""
   # var other :string= ""
   # if info.isObj: body.add mincGetObjectBody(code, indent)
-  if stub: return &"{indent*Tab}typedef {typ} {body};\n"  # {.stub.} objects have a special case
+  # if stub: return &"{indent*Tab}typedef {typ} {body};\n"  # {.stub.} objects have a special case
   result = &"{indent*Tab}typedef {typ} {name};\n"         # Normal decl for non-obj and fw.decl for objects
   if info.isObj and not stub: result.add &"{indent*Tab}{typ} {body};\n"
 #_____________________________
