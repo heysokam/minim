@@ -1,0 +1,15 @@
+proc thing (one :ptr int) :u32= return 0
+
+proc other (
+    one : int;
+    two : var i32;
+    thr : var ptr i32;
+  ) :u32=
+  return 0
+
+proc stuff (
+    one             : ptr unsigned long;
+    two {.readonly.}: ptr i32;
+  ) :signed char=
+  return 0
+

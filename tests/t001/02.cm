@@ -1,0 +1,2 @@
+proc thing (one :int) :u32= return 0
+proc other (one :int; two :var i32) :u32= return 0
