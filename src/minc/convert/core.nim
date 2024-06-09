@@ -245,6 +245,39 @@ proc mincFor (
   let iter = fmt ForIterTempl
   let body = MinC(code[Body], indent+1, special).c
   result.c = fmt ForTempl
+#___________________
+const SwitchTempl    = "{tab0}switch ({cond}) {{{cases}{tab0}}}\n"
+const CaseTempl      = "{tab1}case {caseN}:{nl}{body}"
+const CaseElseTempl  = "{tab1}default:{nl}{body}"
+const CaseBreakTempl = "{nl2}break;"
+proc mincCase (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  # TODO: /*fall-through*/ cases
+  ensure code, nkCaseStmt
+  const (Condition,Case,First,Last, ElseBody,CaseBody) = (0,0,1,^1, 0,1)
+  let tab0 = indent*Tab
+  let tab1 = (indent+1)*Tab
+  let tab2 = (indent+2)*Tab
+  let nl   = "\n{tab1}"
+  let nl2  = "\n{tab2}"
+  let cond = MinC(code[Condition], indent, special).c
+  # Get the cases code
+  var cases :string
+  for entry in code.sons[First..Last]: # For every of/else entry. [0] is the condition itself
+    var shouldBreak = true
+    if entry.kind == nkElse:
+      let body = MinC(entry[ElseBody], indent, special).c
+      cases.add fmt CaseElseTempl
+    elif entry.kind == nkOfBranch:
+      let caseN = MinC(entry[Case], indent, special).c
+      let body  = MinC(entry[CaseBody], indent, special).c
+      if entry[CaseBody][^1].kind == nkReturnStmt: shouldBreak = false
+    else: code.trigger FlowCtrlError, "Unknown node kind found in caseof statement."
+    if shouldBreak: cases.add fmt CaseBreakTempl
+  result.c = fmt SwitchTempl
 
 
 #_______________________________________
@@ -1163,6 +1196,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkIfExpr           : result = mincIf(code, indent, special)
   of nkWhenStmt         : result = mincWhen(code, indent, special)
   of nkForStmt          : result = mincFor(code, indent, special)
+  of nkCaseStmt         : result = mincCase(code, indent, special)
   # └─ Variables
   of nkConstSection     : result = mincConstSection(code, indent, special)
   of nkLetSection       : result = mincLetSection(code, indent, special)
