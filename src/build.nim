@@ -9,7 +9,7 @@ cfg.quiet         = on
 cfg.libdir        = cfg.srcDir/"lib"
 cfg.nim.systemBin = off
 
-var minc = Program.new(
+let minc = Program.new(
   src  = cfg.srcDir/"minc.nim",
   deps = Dependencies.new(
     submodule( "nstd",  "https://github.com/heysokam/nstd"  ),
