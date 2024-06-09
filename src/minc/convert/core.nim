@@ -69,7 +69,7 @@ template `.:`*(code :PNode; prop :untyped) :string=
     try : id = field.parseInt
     except NodeAccessError: code.err "MinC: Tried to access a Statement List, but the keyword passed was not a number:  "&field
     strValue( statement.get(code, id) )
-  of nkProcDef:
+  of nkProcDef, nkFuncDef:
     var id       = int.high
     var property = field
     if "arg_" in field:
