@@ -684,22 +684,22 @@ const KnownMultiwordPrefixes = ["unsigned", "signed", "long", "short"]
 #    result.add &"{pfx}{condition}\n{body}"
 #   result.add &"{tab}#endif\n"
 #_____________________________
-proc mincCaseStmt (code :PNode; indent :int= 0) :string=
-  assert code.kind == nkCaseStmt, code.renderTree
-  let tab  :string= indent*Tab
-  let tab1 :string= (indent+1)*Tab
-  let tab2 :string= (indent+2)*Tab
-  result.add &"{tab}switch ({mincGetValueRaw(code[0])}) {{\n"
-  for entry in code.sons[1..^1]: # For every of/else entry. [0] is the condition itself
-    var shouldBreak :bool= true
-    if entry.kind == nkOfBranch:
-      result.add &"{tab1}case {mincGetValueRaw(entry[0])}:\n{tab2}{MinC(entry[1], indent+1)}"
-      if entry[1][0].kind == nkReturnStmt: shouldBreak = false
-    elif entry.kind == nkElse:
-      result.add &"{tab1}default:\n{tab2}{MinC(entry[0], indent+1)}"
-    if shouldBreak: result.add &"{tab2}break;"
-    result.add "\n"
-  result.add &"{tab}}}\n"
+# proc mincCaseStmt (code :PNode; indent :int= 0) :string=
+#   assert code.kind == nkCaseStmt, code.renderTree
+#   let tab  :string= indent*Tab
+#   let tab1 :string= (indent+1)*Tab
+#   let tab2 :string= (indent+2)*Tab
+#   result.add &"{tab}switch ({mincGetValueRaw(code[0])}) {{\n"
+#   for entry in code.sons[1..^1]: # For every of/else entry. [0] is the condition itself
+#     var shouldBreak :bool= true
+#     if entry.kind == nkOfBranch:
+#       result.add &"{tab1}case {mincGetValueRaw(entry[0])}:\n{tab2}{MinC(entry[1], indent+1)}"
+#       if entry[1][0].kind == nkReturnStmt: shouldBreak = false
+#     elif entry.kind == nkElse:
+#       result.add &"{tab1}default:\n{tab2}{MinC(entry[0], indent+1)}"
+#     if shouldBreak: result.add &"{tab2}break;"
+#     result.add "\n"
+#   result.add &"{tab}}}\n"
 
 
 #______________________________________________________
@@ -874,7 +874,7 @@ proc MinC *(code :PNode; indent :int= 0) :string=
   # of nkIfStmt           : result = mincIfStmt(code, indent)
   # of nkWhenStmt         : result = mincWhenStmt(code, indent)
   # of nkElifBranch       : result = mincElifBranch(code)
-  of nkCaseStmt         : result = mincCaseStmt(code)
+  # of nkCaseStmt         : result = mincCaseStmt(code)
   #   Control flow
   # of nkReturnStmt       : result = mincReturnStmt(code, indent)
   # of nkBreakStmt        : result = mincBreakStmt(code, indent)
