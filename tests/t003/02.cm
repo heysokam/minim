@@ -1,11 +1,1 @@
-include "<stdint.h>"
 include @stdio.h
-
-include "./test/path/file1.h"
-include ./test/path/file2.h
-
-include ./incl1
-include incl2
-include sub/incl3
-
-proc main *() :int32_t= return 42
