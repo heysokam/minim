@@ -1,6 +1,5 @@
 # ᛟ minc | Minimalistic C Language
-`Min> C <niM`  
-MinC is a minimalistic C language with nim syntax.  
+`ᛟ MinC` is a minimalistic C language with nim syntax.  
 It does not try to be feature-full, its only goal is to write Modern and Pure C.  
 
 See the @[What is MinC](./doc/minc.md) doc file for an overview of the lang.  
@@ -11,10 +10,9 @@ TL;DR: **Early** :)
 ```text
 The language works, and can create full applications.  
 
-The current way to work with the language involves continuously hitting assertions,  
-with very little (or at times none) error information, other than the backtrace and a treeRepr of the code that crashed.  
+The current best way to learn about MinC is the `./tests` folder.
 
-See the todo and done folders for a complete list of features implemented and tbd.  
+The todo and done folders have a complete list of features implemented and tbd.  
 There is also a roadmap file, used for version planning and goal-setting.  
 ```
 
@@ -47,17 +45,16 @@ Change the `../12/..` to whatever version of gcc your system is using.
 
 ## Compiler
 MinC uses an StoS compiler that generates C code.  
-The generated output code is standard, human-readable and editable C code.  
+It can create C libraries, and use C libraries without bindings,
+because its generated output code is standard, human-readable and editable C code.  
 The output code is then compiled with a regular C compiler as usual.  
 
-MinC can be used to create C libraries, because the output is normal C code.  
-
 Cross-compilation is a first class citizen.  
-Thanks to the internal usage of the ZigCC compiler interface,  
-building for any target is as easy as passing -target= to the compiler command.  
+Thanks to the internal usage of the ZigCC compiler,  
+building for any target is as easy as passing `--os:XX` and `--cpu:YY` to the compiler command.  
 
 ## *Slate | Compiler Helper Library
-Code generation relies on its companion library @[*Slate](https://github.com/heysokam/slate),  
-which is also in early stages of development.  
-Over time, many of its internal features will be removed from the compiler and moved to *Slate instead,  
+Code generation heavily relies on its companion library @[*Slate](https://github.com/heysokam/slate), which provides tools for dealing with AST member access, AST parsing and error checking.  
+Any language-agnostic features will be removed from the compiler and moved to *Slate,  
 in order to make them usable for compilation of Nim into other languages.  
+
