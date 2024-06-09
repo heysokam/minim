@@ -572,7 +572,7 @@ proc mincVariable (
   var qual :string
   if kind == Const : qual.add "/*constexpr*/ "  # TODO: clang.19
   # Get the type
-  var T = code.:type
+  var T = MinC(vars.get(code, "type"), indent, special).c
   if T == "pointer": T = PtrValue # Rename `pointer` to `void*`  ## TODO: configurable based on c23 option
   if not code.isMutable(kind): T.add " const"
   # TODO: {.readonly.} variable without explicit typedef
