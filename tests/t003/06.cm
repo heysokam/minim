@@ -1,0 +1,3 @@
+include ./incl1
+include incl2
+include sub/incl3
