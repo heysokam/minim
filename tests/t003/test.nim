@@ -10,6 +10,6 @@ template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 # @section Test
 #_____________________________
-test name "Simple case" : check "01"
-test name "All cases"   : check "02"
+test name "01 | Simple case" : check "01"
+test name "02 | All cases"   : check "02"
 

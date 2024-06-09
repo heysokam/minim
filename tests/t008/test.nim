@@ -10,9 +10,9 @@ template tName:Path= thisDir.lastPathPart()
 #_______________________________________
 # @section Test
 #_____________________________
-test name "Basic Call"          : check "01"
-test name "Basic Command"       : check "02"
-test name "Multi-args: Call"    : check "03"
-test name "Multi-args: Command" : check "04"
-test name "Reserved Names"      : check "05"
+test name "01 | Basic Call"          : check "01"
+test name "02 | Basic Command"       : check "02"
+test name "03 | Multi-args: Call"    : check "03"
+test name "04 | Multi-args: Command" : check "04"
+test name "05 | Reserved Names"      : check "05"
 # TODO: ObjectType(_) case
