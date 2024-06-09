@@ -1020,7 +1020,7 @@ proc mincPragmaDefine (
   # else             : result.c = fmt DefineTempl  # TODO: Should go to the header instead
   result.c = fmt DefineTempl
 #___________________
-const PragmaOnceTempl = "{indent*Tab}#pragma once"
+const PragmaOnceTempl = "{indent*Tab}#pragma once\n"
 proc mincPragmaOnce (
     code    : PNode;
     indent  : int            = 0;
