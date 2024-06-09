@@ -106,6 +106,28 @@ template `.:`*(code :PNode; prop :untyped) :string=
   of nkInfix:
     strValue( affixes.getInfix(code, field) )
   else: code.err "MinC: Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
+#___________________
+const ValidMultiwordKinds    = {nkCommand}
+const ValidMultiwordPrefixes = @["unsigned", "signed", "long", "short"]
+const ValidMultiwordTypes    = @["char", "int"] & ValidMultiwordPrefixes
+#___________________
+proc getMultiwordTypename *(code :PNode) :string=
+  if code.kind notin ValidMultiwordKinds: code.trigger TypeError, "Tried to get the multiword type of an invalid node kind."
+  result = code.renderTree
+#___________________
+proc checkMultiwordTypename *(code :PNode; crash :bool= false) :bool {.discardable.}=
+  let render = code.getMultiwordTypename().split()
+  # Error check: Every word in the type must be part of the Types list 
+  for word in render:  # Check every word against the known types
+    if word notin ValidMultiwordTypes and crash:
+      code.trigger TypeError, &"Found a foreign type in a multiword typename:  {render}"
+  # The type must contain at least one of the prefixes
+  for typ in ValidMultiwordPrefixes:  # Check every prefix against the render
+    if typ in render: return true
+#___________________
+proc isMultiwordType *(code :PNode) :bool=
+  if code.kind notin ValidMultiwordKinds: return false
+  result = code.checkMultiwordTypename(crash=false)
 
 
 #_______________________________________
@@ -116,6 +138,7 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
 proc mincLiteral   (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
 proc mincObjConstr (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
 proc mincProcArgs  (code :PNode; indent :int= 0) :string
+proc mincType_multiword (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
 
 #_______________________________________
 # @section Array tools
@@ -492,6 +515,7 @@ proc mincCall (
   if code.kind == nkCallStrLit : return mincLiteral(code, indent, special)
   if code.isUnion              : return mincObjConstr(code, indent, special.with Union)
   if code.isObjConstr          : return mincObjConstr(code, indent, special.with Object)
+  if code.isMultiwordType      : return mincType_multiword(code, indent, special)
   # Get the name
   let name = code.:name
   # Get the args code
@@ -845,6 +869,15 @@ proc mincDot (
 #_______________________________________
 # @section Types
 #_____________________________
+proc mincType_multiword (
+    code      : PNode;
+    indent    : int            = 0;
+    special   : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkCommand
+  let name = code.getMultiwordTypename
+  result.c = name
+#___________________
 const ObjStubTempl  = "struct {name}"  # {.stub.} objects have a special case without body
 const ObjBodyTempl  = ObjStubTempl & " {{{bfr}{body}{spc}}}" # After-name is added by the typedef already
 const ObjFieldTempl = "{typ} {name};"
@@ -894,8 +927,9 @@ proc mincType (
     special   : SpecialContext = Context.None;
     extraName : PNode          = nil;
   ) :CFilePair=
+  if code.isMultiwordType : return mincType_multiword(code, indent, special.with Context.Typename)
   case code.kind
-  of nkIdent : return MinC(code, indent, special)
+  of nkIdent : return MinC(code, indent, special.with Context.Typename)
   else       : discard
   ensure code, Type
   let special = if code.kind == nkVarTy: special.without Immutable else: special

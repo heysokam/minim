@@ -1,1 +1,3 @@
-type Thing *{.stub.}= object of thing
+type Thing = object
+  one  :int
+  two *:float
