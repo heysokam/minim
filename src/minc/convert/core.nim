@@ -390,7 +390,7 @@ proc getModule *(code :PNode) :Module=
   ensure code, Kind.Module # TODO: Support for Import
   const Module = 0
   let module = code[Module]
-  ensure module, nkStrLit, nkInfix, nkDotExpr, nkIdent, &"Tried to get the module of a {code.kind} from an unsupported field kind:  {module.kind}"
+  ensure module, nkStrLit, nkInfix, nkDotExpr, nkIdent, nkPrefix, &"Tried to get the module of a {code.kind} from an unsupported field kind:  {module.kind}"
   var line :string
   if   code.kind == nkIncludeStmt : line = "include "
   elif code.kind == nkImportStmt  : line = "import "
