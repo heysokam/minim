@@ -21,6 +21,8 @@ clang vers status -> https://clang.llvm.org/c_status.html
 ```
 
 ------------------------------------------------------------------------
+# Signals
+https://www.youtube.com/watch?v=d0gS5TXarXc
 
 # Other
 ``` c
