@@ -1,0 +1,1 @@
+var thing :Thing= Thing(float32.:[0.111'f, 0.222'f, 0.333'f, 0.444'f])

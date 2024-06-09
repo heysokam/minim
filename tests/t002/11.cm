@@ -1,0 +1,10 @@
+var thing1 :Thing1= Thing1(_)
+var thing2 :Thing2= Thing2(one:1, two:2)
+var thing3 :Thing3= Thing3(
+  one   : 11,
+  two   : 22,
+  three : addr Thing2(
+    one : 111,
+    two : 222,
+    ) # << three: addr Thing2( ... )
+  ) # << Thing3( ... )

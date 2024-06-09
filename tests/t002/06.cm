@@ -1,3 +1,6 @@
-proc main *() :int=
-  var persisted {.persist.}:int= 8
-  return 42
+const one  :int= 1
+const two *:int= 2
+let   thr  :int= 3
+let   fou *:int= 4
+var   fiv  :int= 5
+var   six *:int= 6

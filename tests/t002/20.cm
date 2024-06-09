@@ -1,0 +1,3 @@
+proc main *() :int=
+  var persisted {.persist.}:int= 8
+  return 42
