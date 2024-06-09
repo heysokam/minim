@@ -40,6 +40,7 @@ type Cfg * = object
   cpu      *:string
   cfiles   *:HashSet[Path]
   paths    *:HashSet[Path]
+  passC    *:HashSet[string]
   passL    *:HashSet[string]
 const KnownCmds  :HashSet[string]=  ["c","cc"].toHashSet
 const KnownShort :HashSet[string]=  ["v","q","h","r"].toHashSet
@@ -47,7 +48,7 @@ const KnownLong  :HashSet[string]=  [
   "help","version","verbose","quiet",
   "zigBin", "clangFmtBin",
   "binDir","cacheDir","codeDir",
-  "cfile","path","passL",
+  "cfile","path","passL","passC",
   "os","cpu",
   ].toHashSet
 
@@ -81,6 +82,7 @@ const Help = """
 
   --cfile:path        : Extra C source code file that should be added to the compilation command for building the final binary.
   --path:path         : Defines a path that will be `-Ipath` included in the compilation command for building the final binary.
+  --passC:"arg"       : Defines an extra argument that will be passed to the compiler command when building the final binary.
   --passL:"arg"       : Defines an extra argument that will be passed to the linking command when building the final binary.
   --os:value          : Defines the target OS that the final binary will be built for.
   --cpu:value         : Defines the target CPU architecture that the final binary will be built for.
@@ -174,9 +176,6 @@ proc init *() :Cfg=
   result.cpu      = cli.getLong("cpu")
   for path in cli.getLongIter("path")  : result.paths.incl path.Path
   for path in cli.getLongIter("cfile") : result.cfiles.incl path.Path
+  for pass in cli.getLongIter("passC") : result.passC.incl pass
   for pass in cli.getLongIter("passL") : result.passL.incl pass
-
-# TODO: Options
-# --passC:
-
 
