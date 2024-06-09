@@ -1,7 +1,5 @@
 ```md
 # Internal C compiler todo
-- [ ] Support includes with comments
-- [ ] --verbose-cc
 - [ ] Bundle zigcc
 - [ ] Docs:
   - [ ] Link to an always-up-to-date list of natively supported cross-compilation targets

@@ -15,6 +15,9 @@
   - [x] While
   - [x] For loops
     - [x] Basic support
+  - [x] Switch case
+    - [x] case ... of:
+    - [x] else: == default:
 - [x] Variable definition:
   - [x] Immutable : Let/Const
   - [x] Mutable   : Var
@@ -38,7 +41,14 @@
     - [x] Unknown size  one :array[_,char]   ->   char one[]
     - [x] Initialization
     - [x] Designated Initialization
-- [x] Header include
+    - [x] indexed access
+- [x] Modules  (include/import)
+  - [x] Include keyword
+    - [x] Global
+    - [x] Local
+    - [x] .c files
+  - [x] Header Include Guards
+    - [x] {.pragma:once.}   #pragma once
 - [x] Standalone Pragmas
   - [x] {.error:"msg".}
   - [x] {.define: name.}, {.define: name[sym]value.} and {.define: name [sym]value.}
@@ -53,8 +63,18 @@
   - [x] Ternary operator   let one = if condition: 1 else: 2
   - [x] if/elif/else blocks
   - [x] Multi-condition support (recursive)
+  - [x] when defined(symbol)
+  - [x] Operators:  (and,&&) (or,||) (&,&) (|,|)
+  - [x] Arbitrary condition tree support
 - [x] Operators
   - [x] Prefix   + - & ! * -- ++
+  - [x] Infix
+    - [x] Arithmetic : + - * / %
+    - [x] Bitwise    : & | << >>
+    - [x] Asignment  : += -= *= /= %=  |= ^= ~=   <<= >>=
+    - [x] Logical    : && || == != < > <= >=
+    - [x] Postfix    : ++ --  (nim parser has no postfix, other than * for visibility)
+    - [x] obj->field   pointer access syntax ->
 - [x] Type declaration
   - [x] Type aliasing   typedef char* str;
   - [x] {.readonly.}    Mutable pointer to immutable data
@@ -64,5 +84,24 @@
     - [x] val as Type
     - [x] val @ Type
 - [x] Pointer dereference   one[] = val   ->   *one = val
+- [x] Types
+  - [x] Structs
+    - [x] Declaration
+    - [x] Definition
+    - [x] Designated Initialization
+    - [x] Field access
+      - [x] Value access    thing.sub
+      - [x] Pointer access  thing->sub
+    - [x] {.stub.} for using the non-typedef version of the struct
+    - [x] Compound Literals
+    - [x] Construction: Function Parameters
+    - [x] Construction: Reassignment
+  - [x] Procs
+  - [x] Multi-word types  (eg: unsigned T)
+    - [x] signed
+    - [x] unsigned
+    - [x] long
+    - [x] short
+    - [x] double, triple and quadruple worded types
 ```
 
