@@ -476,7 +476,7 @@ proc mincProcDef (
   let special = special.without(When).with(Context.Body)
   let name = code.:name
   let qual = mincProcQualifiers(code, indent)
-  let T    = code.:returnT
+  let T    = MinC(procs.get(code, "returnT"), indent, special).c # code.:returnT
   let args = mincProcArgs(procs.get(code, "args"), indent)
   let body = MinC(procs.get(code,"body"), indent+1, special).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
