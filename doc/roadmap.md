@@ -32,9 +32,10 @@ Effort on supporting the entire feature-set of C continues until the last versio
 # 0.7.0 Deep Rewrite/Refactor into `slate/fieldAccess`
 ```
 ```md
-# 0.?.0 Unions
+# 0.8.0 Full UnitTests coverage
 # 0.?.0 Enums
 # 0.?.0 Varargs
+# 0.?.0 Unions
 # 0.?.0 Advanced For Loops
 # 0.?.0 General Fixes   (leftovers at ./todo/0_basic.md)
 # 0.?.0 Compiler Ergonomics
