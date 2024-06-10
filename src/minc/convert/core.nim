@@ -1136,7 +1136,7 @@ proc mincPrefix (
   of IllegalPrefixes : code.trigger ConditionError, &"Found a prefix that cannot be used in MinC:  {affix}"
   else               : code.trigger ConditionError, &"Found an unmapped prefix:  {affix}"
   # Generate the code
-  if special.hasAny {Condition, Variable, None}:
+  if special.hasAny {Condition, Variable, None, Body}:
     let body = MinC(affixes.getPrefix(code, "body"), indent, special).c
     result.c =
       if isRaw : fmt PrefixRawTempl
