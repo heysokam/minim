@@ -1,0 +1,3 @@
+type Thing1 * = proc (one :var ptr unsigned long long int) :ptr signed char
+type Thing2 * = proc (two :ptr unsigned short i32) :var signed short u8
+type Thing3 * = proc (thr {.readonly.}:var ptr long long) :u32
