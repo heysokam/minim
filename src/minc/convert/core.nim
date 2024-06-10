@@ -419,7 +419,8 @@ proc mincInclude (
 #_______________________________________
 # @section Procedures
 #_____________________________
-const KnownMainNames = ["main", "WinMain"]
+const KnownMainNames   = ["main", "WinMain"]
+const KnownProcPragmas = ["inline", "noreturn", "noreturn_C11", "noreturn_GNU"]
 proc mincProcPragmas (code :PNode; indent :int= 0) :string=
   let pragmas = procs.get(code, "pragmas")
   for prag in pragmas:
@@ -428,7 +429,7 @@ proc mincProcPragmas (code :PNode; indent :int= 0) :string=
     elif name == "noreturn_C11" : result.add "_Noreturn "
     elif name == "noreturn_GNU" : result.add "__attribute__((noreturn)) "
     elif name == "inline"       : result.add "extern " & name & " "
-    else: code.trigger PragmaError, "proc pragmas error: Only {.noreturn.}, {.noreturn_C11.}, {.noreturn_GNU.}, {.inline.} are currently supported."
+    else: code.trigger PragmaError, &"proc pragmas error: Only {KnownProcPragmas} are currently supported."
 #___________________
 proc mincProcQualifiers (code :PNode; indent :int= 0) :string=
   let name = code.:name
