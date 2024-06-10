@@ -1,2 +1,2 @@
 typedef void (*Thing1)(void);
-typedef int (*Thing2)(int const two);
+typedef int const (*Thing2)(int const two);
