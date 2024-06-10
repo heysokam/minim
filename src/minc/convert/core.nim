@@ -308,7 +308,7 @@ proc mincCase (
 # @section Control Flow: Conditionals
 #_____________________________
 const IfTempl = "{elseStr}{ifStr}{cond} {{\n{body}\n{indent*Tab}}}"
-const TernaryRawTempl = "({cond}) ? {case1} : {case2}"
+const TernaryRawTempl = "{cond} ? {case1} : {case2}"
 proc mincIf (
     code    : PNode;
     indent  : int            = 0;
