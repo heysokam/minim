@@ -476,7 +476,7 @@ proc mincProcDef (
   let special = special.without(When).with(Context.Body)
   let name = code.:name
   let qual = mincProcQualifiers(code, indent)
-  let T    = MinC(procs.get(code, "returnT"), indent, special).c # code.:returnT
+  let T    = MinC(procs.get(code, "returnT"), indent, special.with Immutable).c # code.:returnT
   let args = mincProcArgs(procs.get(code, "args"), indent)
   let body = MinC(procs.get(code,"body"), indent+1, special).c # TODO: Could Header stuff happen inside a body ??
   # Generate the result
@@ -803,12 +803,15 @@ proc mincIdent (
   let val =
     if code.strValue == "pointer" : PtrValue # Rename `pointer` to `void*`
     else                          : code.strValue
-  if Variable in special:
+  if val == "void":
+    result.c = val
+  elif Variable in special:
     result.c =
       if val == "_" : "{0}"
       else          : val
   elif special.hasAll({ Argument, Readonly }) or
-       special.hasAll({ Context.Typedef, Readonly }):
+       special.hasAll({ Context.Typedef, Readonly }) or
+       special.hasAll({ Context.Typedef, Immutable }):
     result.c = &"{val} const"
   elif special.hasAny {Context.None, Body, Argument, Condition, Typedef, Assign, Return, ForLoop}:
     result.c = val
@@ -877,6 +880,8 @@ proc mincType_multiword (
   ensure code, nkCommand
   let name = code.getMultiwordTypename
   result.c = name
+  if special.hasAny {Context.Readonly}:
+    result.c.add " const"  # NOTE: This is another terminal case, just like mincIdent
 #___________________
 const ObjStubTempl  = "struct {name}"  # {.stub.} objects have a special case without body
 const ObjBodyTempl  = ObjStubTempl & " {{{bfr}{body}{spc}}}" # After-name is added by the typedef already
@@ -920,6 +925,8 @@ proc mincType_ptr (
   const Type = 0
   let typ = MinC(code[Type], indent, special).c
   result.c = fmt PointerTempl
+  if special.hasAll({ Context.Typedef, Immutable }):
+    result.c.add " const" # TODO: Should this be here? It works, but feels hacky
 #___________________
 proc mincType (
     code      : PNode;
@@ -948,9 +955,9 @@ proc mincTypeDef_proc (
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  let retT = MinC(types.getProc(code, "returnT"), indent, special).c
+  let retT = MinC(types.getProc(code, "returnT"), indent, special.with Immutable).c
   let name = MinC(types.getProc(code, "name"), indent, special).c
-  let args = mincProcArgs(types.getProc(code, "args"))
+  let args = mincProcArgs(types.getProc(code, "args"), indent)
   result.c = fmt TypedefProcTempl
 #___________________
 proc mincTypeDef (
