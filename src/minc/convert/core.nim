@@ -307,7 +307,7 @@ proc mincCase (
 #_______________________________________
 # @section Control Flow: Conditionals
 #_____________________________
-const IfTempl = "{elseStr}{ifStr}{cond} {{\n{body}\n{indent*Tab}}}"
+const IfTempl = "{elseStr}{ifStr}{cond} {{\n{body}{indent*Tab}}}"
 const TernaryRawTempl = "{cond} ? {case1} : {case2}"
 proc mincIf (
     code    : PNode;
@@ -467,7 +467,7 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
     if id != args.high: result.add SeparatorArgs
 #___________________
 const ProcProtoTempl = "{qual}{T} {name} ({args});\n"
-const ProcDefTempl   = "{qual}{T} {name} ({args}) {{\n{body}\n}}\n"
+const ProcDefTempl   = "{qual}{T} {name} ({args}) {{\n{body}}}\n"
 proc mincProcDef (
     code    : PNode;
     indent  : int            = 0;
