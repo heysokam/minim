@@ -1,0 +1,2 @@
+var one :int= thing div 1
+var two :f32= thing / 1

@@ -1,0 +1,2 @@
+var one :int= 1
+one <<= 2
