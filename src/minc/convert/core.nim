@@ -359,8 +359,7 @@ proc mincWhen (
   ) :CFilePair=
   # TODO: Support for when cases in .h files
   ensure code, nkWhenStmt
-  let extra   = {Context.Condition, Context.When}
-  let special = (special.without Context.None) + extra
+  let special = special.with(Context.Condition).with(Context.When)
   let tab = indent*Tab
   for id,branch in code.pairs:
     const (Condition,Body) = (0,^1)
