@@ -1,0 +1,10 @@
+if debug or release:
+  var one :int= 1
+elif not release or thing:
+  var one :int= 2
+elif not thing and not other:
+  var one :int= 3
+elif one or two or thr and not fou or not fiv:
+  var one :int= 4
+else:
+  var one :int= 5
