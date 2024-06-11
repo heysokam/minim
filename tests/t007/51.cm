@@ -1,0 +1,1 @@
+var one :int= if thing or other and not stuff: 1 else: 2
