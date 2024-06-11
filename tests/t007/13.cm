@@ -1,0 +1,10 @@
+when defined(debug) or defined(release):
+  var one :int= 1
+elif not defined(release) and defined(thing):
+  var one :int= 2
+elif not defined(thing) and not defined(other):
+  var one :int= 3
+elif defined(one) or defined(two) and defined(thr) and not defined(fou) or not defined(fiv):
+  var one :int= 4
+else:
+  var one :int= 5

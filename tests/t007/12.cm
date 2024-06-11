@@ -1,0 +1,10 @@
+when defined(debug):
+  var one :int= 1
+elif defined(release):
+  var one :int= 2
+elif defined(thing):
+  var one :int= 3
+elif defined(other):
+  var one :int= 4
+else:
+  var one :int= 5
