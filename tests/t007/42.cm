@@ -1,0 +1,10 @@
+if debug:
+  var one :int= 1
+elif release:
+  var one :int= 2
+elif thing:
+  var one :int= 3
+elif other:
+  var one :int= 4
+else:
+  var one :int= 5
