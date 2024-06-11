@@ -1,0 +1,3 @@
+case thing
+of 1: one = 1
+else: one = 2

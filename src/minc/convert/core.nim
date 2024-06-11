@@ -1,6 +1,8 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
+# @deps std
+from std/sequtils import anyIt
 # @deps ndk
 import nstd/strings
 import nstd/paths
@@ -134,12 +136,13 @@ proc isMultiwordType *(code :PNode) :bool=
 # @section Forward Declares
 #_____________________________
 const RawSpecials = {Variable, Argument, Assign, Condition, Return}
-proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
-proc mincLiteral   (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
-proc mincObjConstr (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
-proc mincProcArgs  (code :PNode; indent :int= 0) :string
+proc MinC              *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
+proc mincLiteral        (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
+proc mincObjConstr      (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
 proc mincType_multiword (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
+proc mincProcArgs       (code :PNode; indent :int= 0) :string
 const FallThroughTempl = "[[fallthrough]];\n"
+
 
 #_______________________________________
 # @section Array tools
@@ -271,23 +274,22 @@ proc mincFor (
   let body = MinC(code[Body], indent+1, special).c
   result.c = fmt ForTempl
 #___________________
-const SwitchTempl    = "{tab0}switch ({cond}) {{{cases}{tab0}}}\n"
-const CaseTempl      = "{tab1}case {caseN}:{nl}{body}"
-const CaseElseTempl  = "{tab1}default:{nl}{body}"
-const CaseBreakTempl = "{nl2}break;"
+const SwitchTempl      = "{tab0}switch ({cond}) {{{cases}{tab0}}}\n"
+const CaseTempl        = "{tab1}case {caseC}:{nl}{body}"
+const CaseElseTempl    = "{tab1}default:{nl}{body}"
+const CaseBreakTempl   = "{nl2}break;"
 proc mincCase (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  # TODO: /*fall-through*/ cases
   ensure code, nkCaseStmt
   const (Condition,Case,First,Last, ElseBody,CaseBody) = (0,0,1,^1, 0,1)
   let tab0 = indent*Tab
   let tab1 = (indent+1)*Tab
   let tab2 = (indent+2)*Tab
-  let nl   = "\n{tab1}"
-  let nl2  = "\n{tab2}"
+  let nl   = &"\n{tab1}"
+  let nl2  = &"\n{tab2}"
   let cond = MinC(code[Condition], indent, special).c
   # Get the cases code
   var cases :string
@@ -297,9 +299,12 @@ proc mincCase (
       let body = MinC(entry[ElseBody], indent, special).c
       cases.add fmt CaseElseTempl
     elif entry.kind == nkOfBranch:
-      let caseN = MinC(entry[Case], indent, special).c
-      let body  = MinC(entry[CaseBody], indent, special).c
-      if entry[CaseBody][^1].kind == nkReturnStmt: shouldBreak = false
+      let caseC = MinC(entry[Case], indent, special).c
+      let bodyN = entry[CaseBody]
+      let body  = MinC(bodyN, indent, special).c
+      if bodyN.sons.anyIt( it.isFallthrough or it.kind in {nkReturnStmt, nkBreakStmt} ):
+        shouldBreak = false
+      cases.add fmt CaseTempl
     else: code.trigger FlowCtrlError, "Unknown node kind found in caseof statement."
     if shouldBreak: cases.add fmt CaseBreakTempl
   result.c = fmt SwitchTempl
