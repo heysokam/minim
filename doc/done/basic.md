@@ -18,6 +18,7 @@
   - [x] Switch case
     - [x] case ... of:
     - [x] else: == default:
+    - [x] Mandatory explicit fallthrough, otherwise (break;) auto
 - [x] Variable definition:
   - [x] Immutable : Let/Const
   - [x] Mutable   : Var
@@ -103,5 +104,6 @@
     - [x] long
     - [x] short
     - [x] double, triple and quadruple worded types
+    - [x] Multi-word pointer types  (eg: ptr unsigned long long int)
 ```
 

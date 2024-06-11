@@ -5,22 +5,22 @@
   - [ ] Unions
 - [ ] Function Definition (proc)
   - [ ] varargs
+    - [ ] ... operator
+    - [ ] varargs keyword
 ```
 
 ```md
 # Important
 - [ ] Conditions
-  - [ ] do {...} while (cond);
+  - [ ] do {...} while (cond);   (nkDo ?)
   - [ ] Switch case
     - [ ] discard = donothing
-    - [ ] Mandatory explicit fallthrough, otherwise (break;) auto
-- [ ] Array compound literals  (int[]){0,1,2}
+- [ ] Array compound literals  array[int](0,1,2)  ->  (int[]){0,1,2}
 ```
 
 ```md
 # Complete C
 - [ ] For loops:  Complete support
-- [ ] Multi-word pointer types  (eg: ptr unsigned long long int)
 - [ ] Include
   - [ ] (maybe?) Header include guards support  (todo: research if compilers still get confused about file names or not)
 ```
@@ -45,7 +45,7 @@ _Post Refactor_
 ## Arguments
 - [ ] `{.restrict.}`
 ## Properties
-- [ ] pure functions `__attribute__ ((pure))`
+- [ ] pure functions   `__attribute__ ((const))` and `__attribute__ ((pure))`
 - [ ] compile time only `{.comptime.}`
 ```
 
