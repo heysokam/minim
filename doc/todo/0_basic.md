@@ -36,7 +36,6 @@ _Post Refactor_
 
 # Variables
 - [ ] `{.volatile.}`
-- [ ] `{.readonly.}` without explicit typedef
 
 # Literals and Values
 - [ ] Arrays: nested

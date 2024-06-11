@@ -4,7 +4,7 @@
 
 # Package Information
 packageName   = "minc"
-version       = "0.7.6"
+version       = "0.7.8"
 author        = "sOkam"
 description   = "ᛟ minc | Minimalistic C Language"
 license       = "MIT"
