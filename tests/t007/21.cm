@@ -1,0 +1,4 @@
+case thing
+of 1: {.fallthrough.}
+of 2: one = 2
+else: one = 3
