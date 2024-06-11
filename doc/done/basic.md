@@ -1,12 +1,8 @@
 ```md
 # Done:
 - [x] Function Definition (proc)
-- [x] Main function
-- [x] Static/Extern
-  - [x] Variables
-    - [x] Top-level
-    - [x] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
-  - [x] Functions
+  - [x] Main function
+  - [x] Static/Extern
 - [x] Control Flow
   - [x] Keywords
     - [x] return
@@ -24,6 +20,9 @@
   - [x] Mutable   : Var
   - [x] Variable asignment
   - [x] Tentative variable definition
+  - [x] Top-level  (Static/Extern)
+  - [x] {.persistent.}  (aka static memory)  https://modelingwithdata.org/arch/00000070.htm
+  - [x] `{.readonly.}` without explicit typedef
 - [ ] Values and Literals
   - [x] Char : Resolve to 'c'
   - [x] Ints

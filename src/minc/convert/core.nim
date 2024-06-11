@@ -563,17 +563,20 @@ proc mincVariable (
   ) :CFilePair=
   # Error check
   ensure code, Const, Let, Var, "Tried to generate code for a variable, but its kind is incorrect"
-  let special = special.with Context.Variable
+  var special = special.with Context.Variable
   let typ  = vars.get(code, "type")
   let body = vars.get(code, "body")
+  let prag = vars.get(code, "pragmas")
   if typ.kind == nkEmpty: code.trigger VariableError,
     &"Declaring a variable without a type is forbidden."
   if kind == Const and body.kind == nkEmpty: code.trigger VariableError,
     &"Declaring a variable without a value is forbidden for `const`."
   # Get the priv qualifier
-  let isPrivate = not code.isPublic and Context.Body notin special
-  let isPersist = code.isPersist(indent) and Context.Body in special
-  let priv      = if isPrivate or isPersist: "static " else: ""
+  let isPrivate  = not code.isPublic and Context.Body notin special
+  let isPersist  = code.isPersist(indent) and Context.Body in special
+  let priv       = if isPrivate or isPersist: "static " else: ""
+  # Add readonly context when needed
+  if prag.isReadonly: special = special.with(Context.Readonly)
   # Get the qualifiers
   var qual :string
   if kind == Const : qual.add "/*constexpr*/ "  # TODO: clang.19
