@@ -1,0 +1,4 @@
+when defined(debug):
+  var one :int= 1
+else:
+  var one :int= 2
