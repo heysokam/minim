@@ -139,6 +139,7 @@ proc mincLiteral   (code :PNode; indent :int= 0; special :SpecialContext= Contex
 proc mincObjConstr (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
 proc mincProcArgs  (code :PNode; indent :int= 0) :string
 proc mincType_multiword (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
+const FallThroughTempl = "[[fallthrough]];\n"
 
 #_______________________________________
 # @section Array tools
@@ -1089,6 +1090,14 @@ proc mincPragmaOnce (
   ensure code, Pragma
   result.c = fmt PragmaOnceTempl
 #___________________
+proc mincPragmaFallthrough (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, Pragma
+  result.c = fmt FallThroughTempl
+#___________________
 const KnownCPragmas = ["once"]
 proc mincPragmaCPragma (
     code    : PNode;
@@ -1116,6 +1125,7 @@ proc mincPragma (
   of "emit"      : result = mincPragmaEmit(code, indent, special)
   of "namespace" : result = mincPragmaNamespace(code, indent, special)
   of "define"    : result = mincPragmaDefine(code, indent, special)
+  of FallThrough : result = mincPragmaFallthrough(code, indent, special)
   of "pragma"    : result = mincPragmaCPragma(code, indent, special)
   else: code.trigger PragmaError, &"Only {KnownPragmas} pragmas are currently supported."
 
