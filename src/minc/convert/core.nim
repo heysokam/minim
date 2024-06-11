@@ -1100,7 +1100,7 @@ proc mincPragmaFallthrough (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, Pragma
-  result.c = fmt FallThroughTempl
+  result.c = fmt FallThroughTempl  ## TODO: Comment version. Configurable based on c23 option
 #___________________
 const KnownCPragmas = ["once"]
 proc mincPragmaCPragma (
