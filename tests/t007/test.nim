@@ -25,7 +25,8 @@ test name "13 | When: Multi-condition" : check "13"
 test name "20 | Case: Basic"           : check "20"
 test name "21 | Case: Fallthrough"     : check "21"
 # test name "22 | Case: Should-break"    : check "22"
+# For
+test name "30 | For: Basic"            : check "30"
 
 # TODO:
 # If
-# For

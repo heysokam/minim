@@ -1,0 +1,5 @@
+for id in 0..thing1:
+  one = id
+
+for id in 0..<thing2:
+  two = id
