@@ -1,4 +1,4 @@
-proc main *() :int=
+proc main *() :var int=
 
   var t00 :pointer= nil
   t00 = nil

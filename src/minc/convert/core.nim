@@ -459,14 +459,14 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
         if arg.kind == nkPragmaExpr : arg.getName()
         else                        : arg
       args.add (
-        name    : MinC(arg, indent+1, special.without Readonly).c,
+        name    : MinC(arg, indent+1, special.without(Readonly).without(Immutable)).c,
         typ     : typ,
         val     : val,  # TODO: Default values
         special : special,
         ) # << args.add ( ... )
       args[id].name.add mincArraySuffix(group[Type], indent, special)
   for id,arg in args.pairs:
-    let typ  = if Immutable in arg.special: arg.typ & " const" else: arg.typ
+    let typ  = arg.typ
     let name = arg.name
     result.add fmt ArgTempl
     if id != args.high: result.add SeparatorArgs
@@ -584,7 +584,6 @@ proc mincVariable (
   var T = MinC(vars.get(code, "type"), indent, special).c
   if T == "pointer": T = PtrValue # Rename `pointer` to `void*`  ## TODO: configurable based on c23 option
   if not code.isMutable(kind): T.add " const"
-  # TODO: {.readonly.} variable without explicit typedef
   # Get the Name
   var name = code.:name
   # Name: Array special case extras
@@ -809,20 +808,15 @@ proc mincIdent (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, nkIdent
+  let value = code.strValue
   let val =
-    if code.strValue == "pointer" : PtrValue # Rename `pointer` to `void*`
-    else                          : code.strValue
-  if val == "void":
-    result.c = val
-  elif Variable in special:
-    result.c =
-      if val == "_" : "{0}"
-      else          : val
-  elif special.hasAll({ Argument, Readonly }) or
-       special.hasAll({ Context.Typedef, Readonly }) or
-       special.hasAll({ Context.Typedef, Immutable }):
-    result.c = &"{val} const"
-  elif special.hasAny {Context.None, Body, Argument, Condition, Typedef, Assign, Return, ForLoop}:
+    if   value == "pointer" : PtrValue   # Rename `pointer` to `void*`
+    elif value == "_"       : ZeroValue  # Rename _ to {0}
+    else                    : code.strValue
+  if val == "void" or val == "_": return CFilePair(c: val)
+  if special.hasAny({ Readonly, Immutable }):
+    result.c = val + "const"
+  elif special.hasAny {Context.None, Body, Argument, Condition, Typedef, Assign, Variable, Return, ForLoop}:
     result.c = val
     if ForLoop in special and result.c.startsWith(".."):
       result.c = result.c[2..^1] # Remove .. from ForLoop infixes
@@ -889,7 +883,7 @@ proc mincType_multiword (
   ensure code, nkCommand
   let name = code.getMultiwordTypename
   result.c = name
-  if special.hasAny {Context.Readonly}:
+  if special.hasAny {Context.Readonly, Context.Immutable}:
     result.c.add " const"  # NOTE: This is another terminal case, just like mincIdent
 #___________________
 const ObjStubTempl  = "struct {name}"  # {.stub.} objects have a special case without body
@@ -932,10 +926,10 @@ proc mincType_ptr (
   ) :CFilePair=
   ensure code, nkPtrTy
   const Type = 0
-  let typ = MinC(code[Type], indent, special).c
+  let typ = MinC(code[Type], indent, special.without(Immutable)).c
   result.c = fmt PointerTempl
-  if special.hasAll({ Context.Typedef, Immutable }):
-    result.c.add " const" # TODO: Should this be here? It works, but feels hacky
+  if special.hasAll({ Immutable }):
+    result.c.add " const" # todo: This should be ok here. Its technically a terminal case for ptr types
 #___________________
 proc mincType (
     code      : PNode;
@@ -964,7 +958,7 @@ proc mincTypeDef_proc (
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  let retT = MinC(types.getProc(code, "returnT"), indent, special.with Immutable).c
+  let retT = MinC(types.getProc(code, "returnT"), indent, special.with(Immutable).without(Readonly) ).c
   let name = MinC(types.getProc(code, "name"), indent, special).c
   let args = mincProcArgs(types.getProc(code, "args"), indent)
   result.c = fmt TypedefProcTempl

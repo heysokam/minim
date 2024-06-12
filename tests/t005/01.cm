@@ -1,4 +1,4 @@
-proc main *() :int=
+proc main *() :var int=
   var one :int= 1
   discard one
   return 42

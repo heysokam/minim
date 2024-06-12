@@ -1,4 +1,4 @@
 include @stdio.h
-proc main *() :int=
+proc main *() :var int=
   printf "Hello World"
   return 42
