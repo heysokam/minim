@@ -44,7 +44,9 @@ _Post Refactor_
 ## Arguments
 - [ ] `{.restrict.}`
 ## Properties
-- [ ] pure functions   `__attribute__ ((const))` and `__attribute__ ((pure))`
+- [ ] pure functions
+  - [ ] `__attribute__ ((const))` and `__attribute__ ((pure))`
+  - [ ] {.noconst.} pragma : Mark function as ((pure)) instead of ((const))
 - [ ] compile time only `{.comptime.}`
 ```
 
