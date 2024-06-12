@@ -2,7 +2,6 @@
 # Essentials
 - [ ] Type declaration
   - [ ] Enums
-    - [ ] Explicit values
     - [ ] What could be the purpose of {.pure.} for MinC enums? Maybe change the prefix?
     - [ ] {.unsafe.} pragma   skips prefixing the values with the type
   - [ ] Unions
@@ -26,27 +25,17 @@
 - [ ] For loops:  Complete support
 - [ ] Include
   - [ ] (maybe?) Header include guards support  (todo: research if compilers still get confused about file names or not)
-```
-
----
-
-```md
-_Post Refactor_
-
-# Types
+## Types
 - [ ] Structs
   - [ ] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
-
-# Variables
+## Variables
 - [ ] `{.volatile.}`
-
-# Literals and Values
+## Literals and Values
 - [ ] Arrays: nested
-
-# Functions
-## Arguments
+## Functions
+### Arguments
 - [ ] `{.restrict.}`
-## Properties
+### Properties
 - [ ] pure functions
   - [ ] `__attribute__ ((const))` and `__attribute__ ((pure))`
   - [ ] {.noconst.} pragma : Mark function as ((pure)) instead of ((const))

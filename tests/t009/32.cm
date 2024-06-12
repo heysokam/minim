@@ -1,0 +1,7 @@
+type Thing * = enum
+  forty2 = 42,
+  one    = 1,
+  two    = 2,
+  three,
+  four,
+  seven = 7,

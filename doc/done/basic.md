@@ -107,5 +107,6 @@
   - [x] Enums
     - [x] Implicit values
     - [x] Field Prefixes
+    - [x] Explicit values
 ```
 

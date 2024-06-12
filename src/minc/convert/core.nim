@@ -819,9 +819,21 @@ proc mincType_ptr (
   if special.hasAll({ Immutable }):
     result.c.add " const" # @note: This is ok here. Its a terminal case for ptr types
 #___________________
-const EnumTempl       = "enum {T} {{{body}}}"
 const EnumFieldTempl  = "{name}{val}"
-const EnumPrefixTempl = "{T}"& cfg.SeparatorEnum  # enum T { [T][sep]name }
+proc mincEnumField (
+    code      : PNode;
+    indent    : int            = 0;
+    special   : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkEnumFieldDef
+  const (Name,Value) = (0,1)
+  let name  = MinC(code[Name], indent, special).c
+  let value = MinC(code[Value], indent, special).c
+  let val   = if value != "":  " = "&value else: ""
+  result.c = fmt EnumFieldTempl
+#___________________
+const EnumTempl       = "enum {T} {{{body}}}"
+const EnumPrefixTempl = "{T}" & cfg.SeparatorEnum  # enum T { [T][sep]name }
 proc mincType_enum (
     code      : PNode;
     indent    : int            = 0;
@@ -835,13 +847,11 @@ proc mincType_enum (
   let tab  = indent*Tab
   let nl   = &"\n{tab}"
   let list = code.sons[First..Last]
-  for id,field in list.pairs:
+  for id,entry in list.pairs:
     if list.len == 1 : body.add " " # Start+End with space for single entry enums
     else             : body.add nl  # Start     with newline+indent for multi entry enums
-    let val  = ""  # TODO: Explicit Enum Field values
-    let pfx  = fmt EnumPrefixTempl
-    let name = pfx & MinC(field, indent, special).c
-    body.add fmt EnumFieldTempl
+    let pfx = fmt EnumPrefixTempl
+    body.add pfx & MinC(entry, indent, special).c
     if id != list.high: body.add SeparatorAll
     if list.len == 1     : body.add " " # Start+End with space for single entry enums
     elif id == list.high : body.add nl  # End       with newline+indent for multi entry enums
@@ -1209,19 +1219,24 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkPar              : result = mincPar(code, indent, special)
   of nkObjConstr        : result = mincObjConstr(code, indent, special)
   of nkDotExpr          : result = mincDot(code, indent, special)
+  # └─ Types
+  of nkEnumFieldDef     : result = mincEnumField(code, indent, special)
+  of nim.SomeType       : result = mincType(code, indent, special)
+  of nkTypeDef          : result = mincTypeDef(code, indent, special)
+  # └─ Calls
+  of nkCall             : result = mincCall(code, indent, special)
+  of nkCommand          : result = mincCommand(code, indent, special)
+  of nkCast             : result = mincCast(code, indent, special)
+  # └─ Others
+  of nkBracket          : result = mincBracket(code, indent, special)
+
   # Terminal cases
   of nkEmpty            : result = CFilePair()
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
   of nkCallStrLit       : result = mincLiteral(code, indent, special)
-  of nkCall             : result = mincCall(code, indent, special)
-  of nkCommand          : result = mincCommand(code, indent, special)
-  of nkBracket          : result = mincBracket(code, indent, special)
   of nkIdent            : result = mincIdent(code, indent, special)
   of nkIncludeStmt      : result = mincInclude(code, indent, special)
   of nkCommentStmt      : result = mincComment(code, indent, special)
-  of nim.SomeType       : result = mincType(code, indent, special)
-  of nkTypeDef          : result = mincTypeDef(code, indent, special)
-  of nkCast             : result = mincCast(code, indent, special)
   # └─ Control flow
   of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
   of nkContinueStmt     : result = mincContinueStmt(code, indent, special)
