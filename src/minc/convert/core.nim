@@ -5,7 +5,6 @@
 from std/sequtils import anyIt
 # @deps ndk
 import nstd/strings
-import nstd/paths
 from nstd/sets import hasAll, hasAny
 # @deps *Slate
 import slate/nimc as nim
@@ -19,128 +18,17 @@ import ../cfg
 import ../errors
 import ../types as minc
 import ../tools
+# @deps minc.convert
+import ./multiword
+import ./renames
+import ./nodes
 
 
 #_______________________________________
-# @section MinC+Slate Node Access
+# @section Multi-context aliases
 #_____________________________
-const Renames_Calls :RenameList= @[
-  ("addr", "&")
-  ] # << Renames_Calls [ ... ]
-#___________________
-const Renames_ConditionPrefix :RenameList= @[
-  ("not", "!"),
-  ] # << Renames_ConditionPrefix [ ... ]
-#___________________
-const Renames_ConditionAffix :RenameList= @[
-  ("shl", "<<"),  ("shr", ">>"),
-  ("and", "&&"),  ("or" , "||"),  ("xor", "^"),
-  ("mod", "%" ),  ("div", "/" ),
-  ] # << Renames_ConditionAffix [ ... ]
-const Renames_AssignmentAffix :RenameList= @[
-  ("shl", "<<"),  ("shr", ">>"),
-  ("and", "&" ),  ("or" , "|" ),  ("xor", "^" ),
-  ("mod", "%" ),  ("div", "/" ),
-  ] # << Renames_AssignmentAffix [ ... ]
-#___________________
-func renamed (
-    name    : string;
-    kind    : TNodeKind;
-    special : SpecialContext = Context.None;
-  ) :string=
-  let list =
-    case kind
-    of nkCommand, nkCall             : Renames_Calls
-    of nkPrefix                      : Renames_ConditionPrefix
-    of nkInfix                       :
-      if   Condition in special      : Renames_ConditionAffix
-      elif Context.Return in special : Renames_ConditionAffix
-      elif Variable in special       : Renames_AssignmentAffix
-      elif Assign in special         : Renames_AssignmentAffix
-      else                           : @[]
-    else                             : @[]
-  for rename in list:
-    if name == rename.og: return rename.to
-  result = name
-#___________________
-template `.:`*(code :PNode; prop :untyped) :string=
-  let field = astToStr(prop)
-  case code.kind
-  of nkStmtList:
-    var id = int.high
-    try : id = field.parseInt
-    except NodeAccessError: code.err "MinC: Tried to access a Statement List, but the keyword passed was not a number:  "&field
-    strValue( statement.get(code, id) )
-  of nkProcDef, nkFuncDef:
-    var id       = int.high
-    var property = field
-    if "arg_" in field:
-      property = field.split("_")[0]
-      try : id = field.split("_")[1].parseInt
-      except NodeAccessError: code.err "MinC: Tried to access an Argument ID for a nkProcDef, but the keyword passed has an incorrect format:  "&field
-    let prop = procs.get(code, property, id)
-    case prop.kind
-    of nkPtrTy : strValue( prop[0] ) & "*"
-    else       : strValue( prop )
-  of nkConstDef, nkIdentDefs:
-    let typ = vars.get(code, field)
-    case typ.kind
-    of nkCommand,nkPtrTy:
-      var tmp :string
-      for field in typ: tmp.add strValue( field ) & " "
-      if typ.isPtr: tmp = tmp.strip & "*"
-      tmp
-    else: strValue( typ )
-  of nkPragma:
-    strValue( pragmas.get(code, field) )
-  of nkCommand, nkCall:
-    var id       = int.high
-    var property = field
-    if "arg_" in field:
-      property = field.split("_")[0]
-      try : id = field.split("_")[1].parseInt
-      except NodeAccessError: code.err "MinC: Tried to access an Argument ID for a Call, but the keyword passed has an incorrect format:  "&field
-    strValue( calls.get(code, property, id) ).renamed(code.kind)
-  of nkTypeDef:
-    strValue( types.get(code, field) )
-  of nkPrefix:
-    strValue( affixes.getPrefix(code, field) )
-  of nkInfix:
-    strValue( affixes.getInfix(code, field) )
-  else: code.err "MinC: Tried to access a field for an unmapped Node kind: " & $code.kind & "." & field; ""
-#___________________
-const ValidMultiwordKinds    = {nkCommand}
-const ValidMultiwordPrefixes = @["unsigned", "signed", "long", "short"]
-const ValidMultiwordTypes    = @["char", "int"] & ValidMultiwordPrefixes
-#___________________
-proc getMultiwordTypename *(code :PNode) :string=
-  if code.kind notin ValidMultiwordKinds: code.trigger TypeError, "Tried to get the multiword type of an invalid node kind."
-  result = code.renderTree
-#___________________
-proc checkMultiwordTypename *(code :PNode; crash :bool= false) :bool {.discardable.}=
-  let render = code.getMultiwordTypename().split()
-  # Error check: Every word in the type must be part of the Types list 
-  for word in render:  # Check every word against the known types
-    if word notin ValidMultiwordTypes and crash:
-      code.trigger TypeError, &"Found a foreign type in a multiword typename:  {render}"
-  # The type must contain at least one of the prefixes
-  for typ in ValidMultiwordPrefixes:  # Check every prefix against the render
-    if typ in render: return true
-#___________________
-proc isMultiwordType *(code :PNode) :bool=
-  if code.kind notin ValidMultiwordKinds: return false
-  result = code.checkMultiwordTypename(crash=false)
-
-
-#_______________________________________
-# @section Forward Declares
-#_____________________________
-const RawSpecials = {Variable, Argument, Assign, Condition, Return}
-proc MinC              *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
-proc mincLiteral        (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
-proc mincObjConstr      (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
-proc mincType_multiword (code :PNode; indent :int= 0; special :SpecialContext= Context.None) :CFilePair
-proc mincProcArgs       (code :PNode; indent :int= 0) :string
+include ./fwdecl
+const RawSpecials      = {Variable, Argument, Assign, Condition, Return}
 const FallThroughTempl = "[[fallthrough]];\n"
 
 
@@ -881,7 +769,7 @@ proc mincType_multiword (
     special   : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, nkCommand
-  let name = code.getMultiwordTypename
+  let name = multiword.getTypename(code)
   result.c = name
   if special.hasAny {Context.Readonly, Context.Immutable}:
     result.c.add " const"  # NOTE: This is another terminal case, just like mincIdent
