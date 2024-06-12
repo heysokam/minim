@@ -1,7 +1,4 @@
-int main(void) {
-  while (true) {
-    int one = 1;
-    return one;
-  }
-  return 0;
+while (true) {
+  static int one = 1;
+  continue;
 }

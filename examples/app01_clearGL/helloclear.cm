@@ -54,7 +54,7 @@ const cfg_W     :int=  960
 const cfg_H     :int=  540
 
 ##_______________________________________
-proc main *() :var int=
+proc main *() :int=
   ## Application Entry Point
   echo cfg_Title
 

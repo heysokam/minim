@@ -1,5 +1,3 @@
-proc main *() :var int=
-  var forty2 :int
-  let one :int= 42
-  forty2 = one
-  return forty2
+var forty2 :int
+let one :int= 42
+forty2 = one

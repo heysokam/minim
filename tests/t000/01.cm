@@ -1,1 +1,1 @@
-proc main *() :var int= return 42
+proc main *() :int= return 42

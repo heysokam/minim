@@ -1,5 +1,3 @@
-proc main *() :var int=
-  while true:
-    var one :int= 1
-    return one
-  return 0
+while true:
+  var one :int= 1
+  continue

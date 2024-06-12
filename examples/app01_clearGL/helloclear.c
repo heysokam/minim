@@ -39,7 +39,7 @@ static /*constexpr*/ str const cfg_Title = "MinC | Hello OpenGL 3.3";
 static /*constexpr*/ int const cfg_W     = 960;
 static /*constexpr*/ int const cfg_H     = 540;
 /// _______________________________________
-int main(void) {
+int const main(void) {
   /// Application Entry Point
   echo(cfg_Title);
   glfwSetErrorCallback(cb_error);

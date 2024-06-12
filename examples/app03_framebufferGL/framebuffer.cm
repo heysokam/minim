@@ -164,7 +164,7 @@ proc msr_update (pix :ptr byte; size :u32) :void=
 {.namespace: _.}
 
 ##_______________________________________
-proc main *() :var i32=
+proc main *() :i32=
   ## Application Entry Point
   echo cfg_Title
 

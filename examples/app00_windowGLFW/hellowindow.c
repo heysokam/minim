@@ -15,7 +15,7 @@ static void resize(GLFWwindow* win, int W, int H) {
   (void)H;   /*discard*/
 }
 /// Entry Point
-int main(void) {
+int const main(void) {
   glfwInit();
   glfwWindowHint(ClientApi, NoApi);
   glfwWindowHint(Resizable, false);

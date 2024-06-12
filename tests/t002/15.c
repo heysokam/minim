@@ -1,1 +1,2 @@
-*one = *two;
+static int one = *thing;
+*one           = *thing;
