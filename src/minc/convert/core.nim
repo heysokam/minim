@@ -817,7 +817,35 @@ proc mincType_ptr (
   let typ = MinC(code[Type], indent, special.without(Immutable)).c
   result.c = fmt PointerTempl
   if special.hasAll({ Immutable }):
-    result.c.add " const" # todo: This should be ok here. Its technically a terminal case for ptr types
+    result.c.add " const" # @note: This is ok here. Its a terminal case for ptr types
+#___________________
+const EnumTempl       = "enum {T} {{{body}}}"
+const EnumFieldTempl  = "{name}{val}"
+const EnumPrefixTempl = "{T}"& cfg.SeparatorEnum  # enum T { [T][sep]name }
+proc mincType_enum (
+    code      : PNode;
+    indent    : int            = 0;
+    special   : SpecialContext = Context.None;
+    extraName : PNode          = nil;
+  ) :CFilePair=
+  # TODO: {.pure.} or {.unsafe.}
+  const (First,Last) = (1,^1)
+  let T    = MinC(extraName, indent, special).c
+  var body = ""
+  let tab  = indent*Tab
+  let nl   = &"\n{tab}"
+  let list = code.sons[First..Last]
+  for id,field in list.pairs:
+    if list.len == 1 : body.add " " # Start+End with space for single entry enums
+    else             : body.add nl  # Start     with newline+indent for multi entry enums
+    let val  = ""  # TODO: Explicit Enum Field values
+    let pfx  = fmt EnumPrefixTempl
+    let name = pfx & MinC(field, indent, special).c
+    body.add fmt EnumFieldTempl
+    if id != list.high: body.add SeparatorAll
+    if list.len == 1     : body.add " " # Start+End with space for single entry enums
+    elif id == list.high : body.add nl  # End       with newline+indent for multi entry enums
+  result.c = fmt EnumTempl
 #___________________
 proc mincType (
     code      : PNode;
@@ -835,6 +863,7 @@ proc mincType (
   of nkVarTy    : result = MinC(code[0], indent+1, special)
   of nkPtrTy    : result = mincType_ptr(code, indent+1, special)
   of nkObjectTy : result = mincType_obj(code, indent+1, special, extraName)
+  of nkEnumTy   : result = mincType_enum(code, indent+1, special, extraName)
   else: code.trigger TypeError, &"Found an unmapped kind for interpreting Type code:  {code.kind}"
 #___________________
 const TypedefPrefixTempl = "{indent*Tab}typedef "
@@ -870,7 +899,7 @@ proc mincTypeDef (
     code      = codeT,
     indent    = indent,
     special   = specl,
-    extraName = if codeT.kind == nkObjectTy: types.get(code, "name") else: nil,
+    extraName = if codeT.kind in {nkObjectTy,nkEnumTy}: types.get(code, "name") else: nil,
     ).c # << mincType( ... )
   result.c = fmt TypedefTempl
 

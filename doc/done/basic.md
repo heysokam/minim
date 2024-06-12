@@ -104,5 +104,8 @@
     - [x] short
     - [x] double, triple and quadruple worded types
     - [x] Multi-word pointer types  (eg: ptr unsigned long long int)
+  - [x] Enums
+    - [x] Implicit values
+    - [x] Field Prefixes
 ```
 

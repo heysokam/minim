@@ -24,7 +24,8 @@ const ZeroValue *{.strdefine.}= "{0}"     ## Zero Initializer value for Objects,
 # @section C Format
 const SeparatorAll  *{.strdefine.}= ","
 const SeparatorObj  *{.strdefine.}= SeparatorAll
-const SeparatorArgs *{.strdefine.}= SeparatorAll&" "  ## thing(arg1[sep]arg2[sep]arg3)  ->  thing(arg1, arg2, arg3)
+const SeparatorArgs *{.strdefine.}= SeparatorAll&" "     ## thing(arg1[sep]arg2[sep]arg3)  ->  thing(arg1, arg2, arg3)
+const SeparatorEnum *{.strdefine.}= "_"                  ## enum Thing { Thing[sep]name }
 
 #_______________________________________
 # @section Configuration Defaults

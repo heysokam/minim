@@ -22,7 +22,7 @@ type FlowCtrlError  * = object of CatchableError
 type TypeError      * = object of CatchableError
 type AssignError    * = object of CatchableError
 type ObjectError    * = object of CatchableError
-# TODO
+type EnumError      * = object of CatchableError
 type ProcError      * = object of CatchableError
 type AffixError     * = object of CatchableError
 type ConditionError * = object of CatchableError
@@ -31,7 +31,7 @@ type SomeCodegenError =
   AffixError     | CallError    | VariableError | PragmaError   |
   ConditionError | ObjectError  | AssignError   | ProcError     |
   LiteralError   | BracketError | IdentError    | FlowCtrlError |
-  TypeError
+  TypeError      | EnumError
 #_____________________________
 proc trigger *(
     code : PNode;
