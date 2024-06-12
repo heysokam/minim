@@ -1,11 +1,11 @@
 ```md
 # Essentials
-- [ ] Type declaration
-  - [ ] Unions
 - [ ] Function Definition (proc)
   - [ ] varargs
     - [ ] ... operator
     - [ ] varargs keyword
+- [ ] Type declaration
+  - [ ] Unions
 ```
 
 ```md
@@ -25,7 +25,7 @@
 ## Types
 - [ ] Structs
   - [ ] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
-  - [ ] Bitfields
+  - [ ] Bitfields https://en.cppreference.com/w/c/language/bit_field
 ## Variables
 - [ ] `{.volatile.}`
 ## Literals and Values
