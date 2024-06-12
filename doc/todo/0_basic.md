@@ -28,6 +28,7 @@
 ## Types
 - [ ] Structs
   - [ ] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
+  - [ ] Bitfields
 ## Variables
 - [ ] `{.volatile.}`
 ## Literals and Values
