@@ -912,7 +912,6 @@ proc mincTypeDef (
   if "unsafe"   in pragm: specl.incl Unsafe
   let name  = code.:name
   let codeT = types.get(code, "type")
-  if codeT.kind == nkEnumTy: report code
   let typ   = mincType(
     code      = codeT,
     indent    = indent,
