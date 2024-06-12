@@ -1,4 +1,4 @@
-proc main *() :int=
+proc main *() :var int=
   while someCall(1) and otherThing 42:
     var one :int= 1
     if one : return one

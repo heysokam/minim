@@ -1,5 +1,5 @@
 include @stdio.h
-proc main *() :int=
+proc main *() :var int=
   let one :int= 1
   printf( "Hello World %p", addr(one) )
   printf  "Hello World %p", addr one

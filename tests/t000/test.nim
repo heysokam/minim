@@ -1,4 +1,4 @@
-const Title = "DummyTemplate"
+const Title = "Basic Checks"
 #_______________________________________
 # @deps tests
 include ../base

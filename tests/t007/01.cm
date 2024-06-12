@@ -1,7 +1,7 @@
 ## @note
 ##  Contains illegal code. Simplified just for this test
 ##  break and continue cannot be outside of control flow blocks
-proc main *() :int=
+proc main *() :var int=
   continue
   break
   return 42

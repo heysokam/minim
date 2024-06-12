@@ -1,4 +1,4 @@
-proc main *() :int=
+proc main *() :var int=
   while true:
     var one :int= 1
     return one

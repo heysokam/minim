@@ -16,8 +16,9 @@ const Sep    *{.strdefine.}= "  "
 
 #_______________________________________
 # @section C values
-const NilValue *{.strdefine.}= "nullptr" # "NULL"  ## TODO: configurable based on c23 option
-const PtrValue *{.strdefine.}= "void*"   ## `pointer` will become `void*`
+const NilValue  *{.strdefine.}= "nullptr" # "NULL"  ## TODO: configurable based on c23 option
+const PtrValue  *{.strdefine.}= "void*"   ## `pointer` will become `void*`
+const ZeroValue *{.strdefine.}= "{0}"     ## Zero Initializer value for Objects, Arrays, etc
 
 #_______________________________________
 # @section C Format
