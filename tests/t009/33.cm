@@ -1,0 +1,2 @@
+type Thing *{.unsafe.}= enum
+  forty2 = 42

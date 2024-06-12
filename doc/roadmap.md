@@ -26,10 +26,10 @@ Effort on supporting the entire feature-set of C continues until the last versio
 # 0.7.5 `{.fallthrough.}` pragma
 # 0.7.6 Explicit `{.fallthrough.}` for `case` blocks
 # 0.7.8 `{.readonly.}` ptr T variables
+# 0.8.0 Full UnitTests coverage
+# 0.9.0 Enums   (including `{.unsafe.}` and `{.pure.}`)
 ```
 ```md
-# 0.8.0 Full UnitTests coverage
-# 0.9.0 Enums
 # 0.10.0 Varargs
 # 0.11.0 Unions
 # 0.12.0 func

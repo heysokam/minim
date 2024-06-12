@@ -108,5 +108,7 @@
     - [x] Implicit values
     - [x] Field Prefixes
     - [x] Explicit values
+    - [x] {.unsafe.} pragma    Skips prefixing the values with the type
+    - [x] {.pure.} for fields  Adds prefix even inside {.unsafe.} enums
 ```
 

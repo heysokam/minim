@@ -23,7 +23,7 @@ type Context *{.pure.}= enum
   Array, Object, Union, Body, Typename,
   Assign, Variable, Argument, Return, Condition, When, ForLoop,
   Typedef, ObjectField,
-  Readonly, Immutable,
+  Readonly, Immutable, Unsafe, Pure,
 type SpecialContext * = set[Context]
   ## @descr Set of flags that define the context for how to interpret the syntax
 converter toSpecialContext *(flag :Context) :SpecialContext= {flag}
