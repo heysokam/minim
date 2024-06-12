@@ -12,13 +12,6 @@ Comments/Description right under a label are relevant only to the label right ab
 ```
 
 ```md
-Note:
-  Its really hard to organize C features into versions
-  Raising version to v0.1.0 has been randomnly chosen after app03_framebufferGL was achieved
-  Almost all of the important things are already there, but they have a lot of broken cases
-  The decision feels rushed, but... its gonna be arbitrary anyway
-  Not sure if proper version structuring for C features is worth the effort,
-  but will keep thinking of a better solution while progress continues
 # 0.1.0 First Publishable
 The language works, and can create complete applications.
 Effort on supporting the entire feature-set of C continues until the last version before v1.0.0
@@ -30,15 +23,18 @@ Effort on supporting the entire feature-set of C continues until the last versio
 # 0.5.0 `proc` Typedefs and `{.persist.}` pragma
 # 0.6.0 Runic sketch
 # 0.7.0 Deep Rewrite/Refactor into `slate/fieldAccess`
+# 0.7.5 `{.fallthrough.}` pragma
+# 0.7.6 Explicit `{.fallthrough.}` for `case` blocks
+# 0.7.8 `{.readonly.}` ptr T variables
 ```
 ```md
 # 0.8.0 Full UnitTests coverage
-# 0.?.0 Enums
-# 0.?.0 Varargs
-# 0.?.0 Unions
-# 0.?.0 Advanced For Loops
-# 0.?.0 General Fixes   (leftovers at ./todo/0_basic.md)
-# 0.?.0 Compiler Ergonomics
+# 0.9.0 Enums
+# 0.10.0 Varargs
+# 0.11.0 Unions
+# 0.12.0 Advanced For Loops
+# 0.13.0 General Fixes   (leftovers at ./todo/0_basic.md)
+# 0.14.0 Compiler Ergonomics
 # ?.?.? ...
 ```
 
