@@ -825,9 +825,11 @@ proc mincEnumField (
     indent    : int            = 0;
     special   : SpecialContext = Context.None;
   ) :CFilePair=
-  ensure code, nkEnumFieldDef
+  # TODO: {.pure.} enum field specifiers
+  ensure code, nkEnumFieldDef, nkIdent, "Tried to get an enum field from an unmapped node kind."
+  if code.kind == nkIdent: return MinC(code, indent, special)
   const (Name,Value) = (0,1)
-  let name  = MinC(code[Name], indent, special).c
+  let name  = MinC(code.getName(), indent, special).c
   let value = MinC(code[Value], indent, special).c
   let val   = if value != "":  " = "&value else: ""
   result.c = fmt EnumFieldTempl
@@ -840,21 +842,25 @@ proc mincType_enum (
     special   : SpecialContext = Context.None;
     extraName : PNode          = nil;
   ) :CFilePair=
-  # TODO: {.pure.} or {.unsafe.}
-  const (First,Last) = (1,^1)
+  const (First,Last, Name) = (1,^1, 0)
   let T    = MinC(extraName, indent, special).c
-  var body = ""
   let tab  = indent*Tab
   let nl   = &"\n{tab}"
   let list = code.sons[First..Last]
+  # Get the body of the enum
+  var body = ""
   for id,entry in list.pairs:
     if list.len == 1 : body.add " " # Start+End with space for single entry enums
     else             : body.add nl  # Start     with newline+indent for multi entry enums
-    let pfx = fmt EnumPrefixTempl
-    body.add pfx & MinC(entry, indent, special).c
+    let isPure = Unsafe notin special or entry[Name].hasPragma("pure")
+    let pfx =
+      if isPure : fmt EnumPrefixTempl
+      else      : ""
+    body.add pfx & mincEnumField(entry, indent, special).c
     if id != list.high: body.add SeparatorAll
     if list.len == 1     : body.add " " # Start+End with space for single entry enums
     elif id == list.high : body.add nl  # End       with newline+indent for multi entry enums
+  # Generate the result
   result.c = fmt EnumTempl
 #___________________
 proc mincType (
@@ -903,8 +909,10 @@ proc mincTypeDef (
   # Normal case
   let pragm = types.get(code, "pragma").renderTree
   if "readonly" in pragm: specl.incl Readonly
+  if "unsafe"   in pragm: specl.incl Unsafe
   let name  = code.:name
   let codeT = types.get(code, "type")
+  if codeT.kind == nkEnumTy: report code
   let typ   = mincType(
     code      = codeT,
     indent    = indent,
@@ -1220,9 +1228,9 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nkObjConstr        : result = mincObjConstr(code, indent, special)
   of nkDotExpr          : result = mincDot(code, indent, special)
   # └─ Types
-  of nkEnumFieldDef     : result = mincEnumField(code, indent, special)
   of nim.SomeType       : result = mincType(code, indent, special)
   of nkTypeDef          : result = mincTypeDef(code, indent, special)
+  of nkEnumFieldDef     : result = mincEnumField(code, indent, special)
   # └─ Calls
   of nkCall             : result = mincCall(code, indent, special)
   of nkCommand          : result = mincCommand(code, indent, special)

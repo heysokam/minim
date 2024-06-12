@@ -1,9 +1,6 @@
 ```md
 # Essentials
 - [ ] Type declaration
-  - [ ] Enums
-    - [ ] What could be the purpose of {.pure.} for MinC enums? Maybe change the prefix?
-    - [ ] {.unsafe.} pragma   skips prefixing the values with the type
   - [ ] Unions
 - [ ] Function Definition (proc)
   - [ ] varargs
