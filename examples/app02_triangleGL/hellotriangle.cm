@@ -91,7 +91,7 @@ const cfg_W      :i32=  960
 const cfg_H      :i32=  540
 
 ##_______________________________________
-proc main *() :var i32=
+proc main *() :i32=
   ## Application Entry Point
   echo cfg_Title
 

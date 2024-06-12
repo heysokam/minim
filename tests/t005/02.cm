@@ -1,5 +1,1 @@
-proc main *() :var int=
-  var one :int= 1
-  var two :int= 2
-  discard (one,two)
-  return 42
+discard (one,two)

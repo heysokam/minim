@@ -1,7 +1,4 @@
-## @note
-##  Contains illegal code. Simplified just for this test
-##  break and continue cannot be outside of control flow blocks
-proc main *() :var int=
+proc main *() :int=
   continue
   break
   return 42

@@ -70,7 +70,7 @@ static /*constexpr*/ str const cfg_Title = "MinC | Hello Triangle";
 static /*constexpr*/ i32 const cfg_W     = 960;
 static /*constexpr*/ i32 const cfg_H     = 540;
 /// _______________________________________
-i32 main(void) {
+i32 const main(void) {
   /// Application Entry Point
   echo(cfg_Title);
   glfwSetErrorCallback(cb_error);

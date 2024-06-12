@@ -1,2 +1,2 @@
 include "<stdint.h>"
-proc main *() :var int32_t= return 42
+var thing :int32_t= 42

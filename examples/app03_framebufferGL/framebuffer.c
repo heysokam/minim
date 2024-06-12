@@ -121,7 +121,7 @@ static byte*                   fb_pixels = nullptr;
 static void msr_update(byte* const pix, u32 const size) { memset(pix, 255, size); }
 // namespace _
 /// _______________________________________
-i32 main(void) {
+i32 const main(void) {
   /// Application Entry Point
   echo(cfg_Title);
   glfwSetErrorCallback(cb_error);

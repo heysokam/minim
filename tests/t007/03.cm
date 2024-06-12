@@ -1,7 +1,5 @@
-proc main *() :var int=
-  while someCall(1) and otherThing 42:
-    var one :int= 1
-    if one : return one
-    elif 2 : continue
-    else   : break
-  return 0
+while someCall(1) and otherThing 42:
+  var one :int= 1
+  if one : return one
+  elif 2 : continue
+  else   : break
