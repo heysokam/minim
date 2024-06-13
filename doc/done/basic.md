@@ -3,6 +3,9 @@
 - [x] Function Definition (proc)
   - [x] Main function
   - [x] Static/Extern
+  - [x] varargs
+    - [_] ... operator   (@note cant. parsing `..` alone breaks the syntax. needs to be ...args or similar)
+    - [x] varargs keyword
 - [x] Control Flow
   - [x] Keywords
     - [x] return

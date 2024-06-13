@@ -28,9 +28,9 @@ Effort on supporting the entire feature-set of C continues until the last versio
 # 0.7.8 `{.readonly.}` ptr T variables
 # 0.8.0 Full UnitTests coverage
 # 0.9.0 Enums   (including `{.unsafe.}` and `{.pure.}`)
+# 0.10.0 Varargs
 ```
 ```md
-# 0.10.0 Varargs
 # 0.11.0 Unions
 # 0.12.0 func
 # 0.13.0 Advanced For Loops

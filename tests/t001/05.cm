@@ -1,1 +1,49 @@
-proc one *() :void {.inline.}= return
+proc echo (format :ptr char; _:varargs) :void=
+  var fmt :ptr char= malloc strlen(format) + 2
+  strcpy fmt, format
+  strcat fmt, "\n"
+  # Create the varargs
+  var args :va_list
+  va_start(args, fmt)
+  # Print it
+  vprintf fmt, args
+  # Cleanup after done
+  va_end(args)
+  free fmt
+  return
+
+
+#[ @important Example just for completeness.
+#____________________________________________________________________
+# @descr                                                             |
+#   va_list version of `echo`.                                       |
+#   This is not how C `...` varargs are handled in MinC's syntax     |
+#   See `echo` and `echo_2` for how to declare  `varargs`  functions |
+#____________________________________________________________________|
+proc vecho (format :ptr char; args :va_list) :void=
+  var fmt :ptr char= malloc strlen(format) + 2
+  strcpy fmt, format
+  strcat fmt, "\n"
+  # Print with the given varargs
+  vprintf fmt, args
+  # Cleanup after done
+  free fmt
+  return
+#_______________________________________
+# Pair function to `vecho`. Meant to be used together.
+#  1. `echo_2` creates the va_list to pass to `vecho`
+#  2. `vecho` adds the `\n` character
+#  3. `vecho` does the printing with `vprintf`
+#_____________________________
+proc echo_2 (format :ptr char; _:varargs) :void=
+  # Create the varargs
+  var args :va_list
+  va_start(args, format)
+  # Print it
+  vecho format, args
+  # Cleanup after done
+  va_end(args)
+  return
+#____________________________________________________________________
+]#
+
