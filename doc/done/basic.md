@@ -6,6 +6,9 @@
   - [x] varargs
     - [_] ... operator   (@note cant. parsing `..` alone breaks the syntax. needs to be ...args or similar)
     - [x] varargs keyword
+  - [x] pure functions
+    - [x] `__attribute__((const))`
+    - [x] {.pure.} pragma : Mark function as `__attribute__((pure))` instead of `((const))`
 - [x] Control Flow
   - [x] Keywords
     - [x] return

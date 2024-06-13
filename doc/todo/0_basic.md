@@ -24,9 +24,6 @@
 - [ ] `{.restrict.}`
 - [ ] ...args version of varargs (@note parsing ... alone breaks the syntax. needs to be ...args or some alternative)
 ### Properties
-- [ ] pure functions
-  - [ ] `__attribute__ ((const))` and `__attribute__ ((pure))`
-  - [ ] {.noconst.} pragma : Mark function as ((pure)) instead of ((const))
 - [ ] compile time only `{.comptime.}`
 ```
 
