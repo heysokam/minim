@@ -1,0 +1,2 @@
+# funcs are procs with __attribute__((const))
+func one () :void= return

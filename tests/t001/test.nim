@@ -19,5 +19,6 @@ test name "05 | Varargs"          : check "05"
 test name "10 | Pragma: inline"   : check "10"
 test name "11 | Pragma: noreturn" : check "11"
 # Func
-test name "90 | Basic func"       : check "90"
+test name "50 | Func: Basic"      : check "50"
+test name "51 | Func: pure"       : check "51"
 

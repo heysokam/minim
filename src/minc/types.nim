@@ -20,7 +20,7 @@ type ClangFormat * = object
 type Context *{.pure.}= enum
   ## @descr The same syntax can be interpreted differently depending on its Context usage
   None,
-  Array, Object, Union, Body, Typename,
+  Array, Object, Union, Body, Typename, Func,
   Assign, Variable, Argument, Return, Condition, When, ForLoop,
   Typedef, ObjectField,
   Readonly, Immutable, Unsafe, Pure, Varargs,
