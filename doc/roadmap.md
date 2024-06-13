@@ -30,9 +30,9 @@ Effort on supporting the entire feature-set of C continues until the last versio
 # 0.9.0 Enums   (including `{.unsafe.}` and `{.pure.}`)
 # 0.10.0 Varargs
 # 0.11.0 Unions
+# 0.12.0 func
 ```
 ```md
-# 0.12.0 func
 # 0.13.0 Advanced For Loops
 # 0.14.0 General Fixes   (leftovers at ./todo/0_basic.md)
 # 0.15.0 Compiler Ergonomics

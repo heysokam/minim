@@ -33,7 +33,6 @@
   - [ ] --noDiscard
   - [ ] Forbid asignment in conditionals
   - [ ] Sideffects
-    - [ ] __attribute__ ((pure))
     - [ ] write-only memory idea from herose (like GPU write-only mem)
   - [ ] Forbid tentative definitions in const (aka /*comptime*/ constexpr) but allow in var/let
   - [ ] Bounds Safety

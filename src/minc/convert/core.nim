@@ -314,19 +314,33 @@ proc mincInclude (
 #_____________________________
 const KnownMainNames   = ["main", "WinMain"]
 const KnownProcPragmas = ["inline", "noreturn", "noreturn_C11", "noreturn_GNU"]
-proc mincProcPragmas (code :PNode; indent :int= 0) :string=
+proc mincProcPragmas (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :string=
   let pragmas = procs.get(code, "pragmas")
+  var isConst = Context.Func in special
   for prag in pragmas:
     let name = MinC(prag, 0).c
-    if   name == "noreturn"     : result.add "[[noreturn]] "
+    if   name == "pure"         : isConst = false  # Mark {.pure.} func as non-const
+    elif name == "noreturn"     : result.add "[[noreturn]] "
     elif name == "noreturn_C11" : result.add "_Noreturn "
     elif name == "noreturn_GNU" : result.add "__attribute__((noreturn)) "
     elif name == "inline"       : result.add "extern " & name & " "
     else: code.trigger PragmaError, &"proc pragmas error: Only {KnownProcPragmas} are currently supported."
+  if Context.Func in special:  # Add no-sideffects attribute if SpecialContext is marked with Func
+    result =
+      if isConst : "__attribute__((const)) " & result
+      else       : "__attribute__((pure)) "  & result
 #___________________
-proc mincProcQualifiers (code :PNode; indent :int= 0) :string=
+proc mincProcQualifiers (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :string=
   let name = code.:name
-  result = mincProcPragmas(code, indent)
+  result = mincProcPragmas(code, indent, special)
   if not code.isPublic and name notin KnownMainNames: result.add "static "
 #___________________
 const ArgTempl = "{typ} {name}"
@@ -374,7 +388,7 @@ proc mincProcDef (
   ensure code, Proc
   let special = special.without(When).with(Context.Body)
   let name = code.:name
-  let qual = mincProcQualifiers(code, indent)
+  let qual = mincProcQualifiers(code, indent, special)
   let T    = MinC(procs.get(code, "returnT"), indent, special.with Immutable).c # code.:returnT
   let args = mincProcArgs(procs.get(code, "args"), indent)
   let body = MinC(procs.get(code,"body"), indent+1, special).c # TODO: Could Header stuff happen inside a body ??
@@ -392,11 +406,8 @@ proc mincFuncDef (
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  # TODO: __attribute__ ((pure))
-  # TODO: write-only memory idea from herose (like GPU write-only mem)
-  ensure code, Func
-  mincProcDef(code, indent, special)
-  # code.trigger ProcError, "proc and func are identical in C"  # TODO : Sideffects checks
+  ensure code, Kind.Func
+  mincProcDef(code, indent, special.with(Context.Func))
 
 
 #_______________________________________
