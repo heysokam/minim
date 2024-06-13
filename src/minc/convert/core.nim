@@ -341,6 +341,7 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
     if group[Type].kind == nkVarTy : special.excl Immutable  # Remove Immutable for `var T`
     if group.isReadonly            : special.incl Readonly
     let typ     = MinC(group[Type], indent+1, special).c
+    if "varargs" in typ: special.incl Varargs
     let val     = MinC(group[Value], indent+1, special).c
     for id,arg in group.sons[0..LastArg].pairs:
       let arg =
@@ -356,8 +357,12 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
   for id,arg in args.pairs:
     let typ  = arg.typ
     let name = arg.name
-    result.add fmt ArgTempl
-    if id != args.high: result.add SeparatorArgs
+    if Varargs in arg.special:
+      result.add "..."
+      if id != args.high: code.trigger ProcError, "Tried to get the varargs of a proc/func, but the varargs declaration is not the last argument."
+    else:
+      result.add fmt ArgTempl
+      if id != args.high: result.add SeparatorArgs
 #___________________
 const ProcProtoTempl = "{qual}{T} {name} ({args});\n"
 const ProcDefTempl   = "{qual}{T} {name} ({args}) {{\n{body}}}\n"

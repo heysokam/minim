@@ -1,9 +1,6 @@
 ```md
 # Essentials
 - [ ] Function Definition (proc)
-  - [ ] varargs
-    - [ ] ... operator
-    - [ ] varargs keyword
 - [ ] Type declaration
   - [ ] Unions
 ```
@@ -33,6 +30,7 @@
 ## Functions
 ### Arguments
 - [ ] `{.restrict.}`
+- [ ] ...args version of varargs (@note parsing ... alone breaks the syntax. needs to be ...args or some alternative)
 ### Properties
 - [ ] pure functions
   - [ ] `__attribute__ ((const))` and `__attribute__ ((pure))`
