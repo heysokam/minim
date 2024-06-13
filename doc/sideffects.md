@@ -3,7 +3,8 @@ References:
 - [GCC's Manual](https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#Common-Function-Attributes)
 - [const vs pure attributes](https://stackoverflow.com/questions/29117836/attribute-const-vs-attribute-pure-in-gnu-c)
 
-## TL;DR: In MinC ...
+## TL;DR
+In `ᛟ minc`...
 1. `func name (arg :T) :T` definitions are always marked with the `const` attribute
 2. `func name (arg :T) :T {.pure.}` definitions are always marked with the `pure` attribute
 3. Marking a `proc` with `{.pure.}` won't do anything
