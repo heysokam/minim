@@ -33,10 +33,25 @@ Effort on supporting the entire feature-set of C continues until the last versio
 # 0.12.0 func
 ```
 ```md
-# 0.13.0 Advanced For Loops
-# 0.14.0 General Fixes   (leftovers at ./todo/0_basic.md)
-# 0.15.0 Compiler Ergonomics
+# 0.13.0 Arbitrary Blocks  (`block: thing`)
+# 0.14.0 do..while
+# 0.15.0 General Fixes   (leftovers at ./todo/0_basic.md)
+- [ ] Switch case
+  - [ ] discard = donothing
+- [ ] Structs
+  - [ ] Forward declare  https://gist.github.com/CMCDragonkai/aa6bfcff14abea65184a
+  - [ ] Bitfields https://en.cppreference.com/w/c/language/bit_field
+- [ ] Arrays: nested
+- [ ] Array compound literals  array[int](0,1,2)  ->  (int[]){0,1,2}
+- [ ] `{.volatile.}` variables
+- [ ] `{.restrict.}`
+# 0.16.0 Advanced For Loops
+# 0.17.0 Compiler Ergonomics
+- [ ] compile time only `{.comptime.}`
 # ?.?.? ...
+- [ ] ...args version of varargs (@note parsing ... alone breaks the syntax. needs to be ...args or some alternative)
+# ?.?.? Bugfixes
+- [ ] `raw  *:array[32, unsigned char]`   -X->   `unsigned char raw[32];`   -bug->   `char raw;`
 ```
 
 ---

@@ -8,9 +8,9 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] `//`
 - [ ] Punctuation
   - [ ] { }
-    - [ ] In a struct or union definition, delimit the struct-declaration-list.
-    - [ ] In an enum definition, delimit the enumerator list.
-    - [ ] Delimit a compound statement. The compound statement may be part of a function definition.
+    - [x] In a struct or union definition, delimit the struct-declaration-list.
+    - [x] In an enum definition, delimit the enumerator list.
+    - [x] Delimit a compound statement. The compound statement may be part of a function definition.
     - [x] In initialization, delimit the initializers.
   - [x] [ ]
     - [x] Subscript operator.
@@ -24,18 +24,20 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] ( )
     - [x] In an expression, indicate grouping.
     - [x] Function call operator.
-    - [ ] Delimit the operand in expressions:
+    - [x] Delimit the operand in expressions:
       - [x] sizeof
-      - [ ] Alignof (since C11)
-      - [ ] typeof (since C23)
-      - [ ] typeof_unqual (since C23)
+      - [x] Alignof (since C11)
+      - [x] typeof (since C23)
+      - [x] typeof_unqual (since C23)
     - [x] In an explicit cast, delimit the type-id.
     - [x] In a compound literal, delimit the type-id. (since C99)
     - [x] In a declaration or a type-id, indicate grouping.
     - [x] In a function declarator (in a declaration or a type-id), delimit the parameter list.
     - [x] In an if, switch, while, do-while, or for statement, delimit the controlling clause.
     - [ ] In a function-like macro definition, delimit the macro parameters.
-    - [ ] In a function-like macro invocation, delimit the macro arguments or prevent commas from being interpreted as argument separators.
+    - [ ] In a function-like macro invocation,
+      - [x] delimit the macro arguments
+      - [ ] prevent commas from being interpreted as argument separators.
     - [x] Part of a defined, __has_include, __has_embed or __has_c_attribute (since C23) preprocessing operator.
     - [ ] Part of a generic selection expression. (since C11)
     - [ ] In an _Atomic type specifier, delimit the type-id. (since C11)
@@ -64,7 +66,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] ::
     - [ ] In an attribute, indicate attribute scope. (since C23)
     - [ ] In a preprocessor prefixed parameter (used by #embed and __has_embed), indicate scope. (since C23)
-  - [ ] .
+  - [x] .
     - [x] Member access operator.
     - [x] In initialization, introduce a designator for a struct/union member. (since C99)
   - [x] -> Member access operator.
@@ -88,9 +90,9 @@ From [C language reference](https://en.cppreference.com/w/c/language)
     - [x] Address-of operator.
     - [x] Bitwise and operator.
   - [x] | Bitwise or operator.
-  - [ ] = Simple assignment operator.
+  - [x] = Simple assignment operator.
     - [x] In initialization, delimit the object and the initializer list.
-    - [ ] In an enum definition, introduce the value of enumeration constant.
+    - [x] In an enum definition, introduce the value of enumeration constant.
   - [x] += Compound assignment operator.
   - [x] -= Compound assignment operator.
   - [x] *= Compound assignment operator.
@@ -130,17 +132,19 @@ From [C language reference](https://en.cppreference.com/w/c/language)
       - [x] the declarator list in a declaration
       - [x] initializer list in initialization, including compound literals (since C99)
       - [x] the argument list in a function call expression
-      - [ ] the enumerator list in an enum declaration
+      - [x] the enumerator list in an enum declaration
       - [x] a function parameter list
       - [ ] the macro parameter list in a function-like macro definition
-      - [ ] the macro argument list in a function-like macro invocation, unless found between an inner set of parentheses
+      - [x] the macro argument list in a function-like macro invocation, unless found between an inner set of parentheses
       - [ ] the generic association list in a generic selection expression (since C11)
       - [ ] an attribute list (since C23)
     - [ ] In a static assertion declaration, separate the arguments. (since C11)
     - [ ] In a generic selection expression, separate the controlling expression and the generic association list. (since C11)
 - [ ] Identifier
+  - [x] Standard behavior
   - [ ] Unbounded: Reserved Keywords checks
 - [ ] Scope, Lookup and Name Spaces
+  - [x] Standard behavior
   - [ ] Unbounded: Disallow name shadowing, even through nested scopes
 - [ ] Type
   - [ ] Type classification
@@ -180,11 +184,11 @@ From [C language reference](https://en.cppreference.com/w/c/language)
         - [ ] float _Imaginary
         - [ ] double _Imaginary
         - [ ] long double _Imaginary
-    - [ ] Enumerated types  https://en.cppreference.com/w/c/language/enum
+    - [x] Enumerated types  https://en.cppreference.com/w/c/language/enum
     - [ ] Derived types
       - [x] Array  https://en.cppreference.com/w/c/language/array
       - [x] Structure  https://en.cppreference.com/w/c/language/struct
-      - [ ] Union  https://en.cppreference.com/w/c/language/union
+      - [x] Union  https://en.cppreference.com/w/c/language/union
       - [x] Function  https://en.cppreference.com/w/c/language/functions
       - [x] Pointer  https://en.cppreference.com/w/c/language/pointer
       - [ ] Atomic  https://en.cppreference.com/w/c/language/atomic
@@ -197,6 +201,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
       - [x] NULL
     - [x] size_t
   - [ ] Compatible types  https://en.cppreference.com/w/c/language/type
+    - [x] Standard behavior
     - [ ] Unbounded:
       - [ ] Disallow matching Compatible types
       - [ ] Require explicit cast mandatory (unless unbounded)
@@ -216,7 +221,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] Type Keywords
     - [x] bool, true, false, char, int, short, long, signed, unsigned, float, double
     - [ ] _Bool, _BitInt, _Complex, _Imaginary, _Decimal32, _Decimal64, _Decimal128.
-- [ ] Arithmetic types
+- [x] Arithmetic types
 - [ ] Objects and Alignment
   - [ ] _Alignof vs alignof
   - [ ] _Alignas vs alignas
@@ -235,7 +240,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
 - [ ] Keywords
   - [ ] alignas (C23)
   - [ ] alignof (C23)
-  - [ ] auto
+  - [_] auto
   - [x] bool (C23)
   - [x] break
   - [x] case
@@ -247,7 +252,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] do
   - [x] double
   - [x] else
-  - [ ] enum
+  - [x] enum
   - [x] extern
   - [x] false (C23)
   - [x] float
@@ -273,7 +278,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [x] typedef
   - [ ] typeof (C23)
   - [ ] typeof_unqual (C23)
-  - [ ] union
+  - [x] union
   - [x] unsigned
   - [x] void
   - [ ] volatile
@@ -356,6 +361,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
   - [ ] Compound literals(C99)
 - [ ] Constant expressions
 - [ ] Implicit conversions  https://en.cppreference.com/w/c/language/conversion
+  - [x] Standard Behavior
   - [ ] Unbounded: Disallow any form of implicit conversion
 - [ ] Operators
   - [x] Member access
@@ -381,28 +387,28 @@ From [C language reference](https://en.cppreference.com/w/c/language)
 - [x] Scalar
 - [x] Array
 - [x] Structure
-- [ ] Union
+- [x] Union
 ```
 
 ```md
 # Declarations
 - [x] Pointers
 - [x] Arrays
-- [ ] Enumerations
+- [x] Enumerations
 - [ ] Storage duration
 - [ ] Linkage
 - [x] const
 - [ ] volatile
 - [ ] restrict(C99)
 - [x] struct
-- [ ] union
+- [x] union
 - [ ] Bit-fields
 - [ ] _Alignas(C11)
 - [x] typedef
 - [ ] _Static_assert(C11)
 - [ ] Atomic types(C11)
-- [ ] External definitions
-- [ ] Tentative definitions
+- [x] External definitions
+- [x] Tentative definitions
 - [x] Attributes(C23)
 ```
 
@@ -412,7 +418,7 @@ From [C language reference](https://en.cppreference.com/w/c/language)
 - [x] Function definition
 - [x] inline(C99)
 - [x] _Noreturn (C11) (deprecated in C23)
-- [ ] Variadic arguments
+- [x] Variadic arguments
 ```
 
 ```md
