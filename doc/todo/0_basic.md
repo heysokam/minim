@@ -1,7 +1,6 @@
 ```md
 # Complete C
 ## Modules and Namespacing
-- [ ] arbitrary blocks   `block: thing`   ->  `{ thing }`
 - [ ] Include
   - [ ] (maybe?) Header include guards support  (todo: research if compilers still get confused about file names or not)
 ## Conditions

@@ -1,0 +1,6 @@
+proc main *() :int=
+  var one :int= 1
+  block thing:
+    var two :int= 2
+    break
+    two = 3
