@@ -55,6 +55,9 @@
     - [x] .c files
   - [x] Header Include Guards
     - [x] {.pragma:once.}   #pragma once
+  - [x] arbitrary blocks   `block: thing`   ->  `{ thing }`
+    - [x] Unnamed
+    - [x] Named
 - [x] Standalone Pragmas
   - [x] {.error:"msg".}
   - [x] {.define: name.}, {.define: name[sym]value.} and {.define: name [sym]value.}

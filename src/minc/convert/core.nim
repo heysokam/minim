@@ -310,6 +310,26 @@ proc mincInclude (
 
 
 #_______________________________________
+# @section Namespaces
+#_____________________________
+const BlockTempl      = "{tab}{{{body}{tab}}}\n"
+const BlockNamedTempl = "{tab}do {{ /* block {name} */\n{body}{tab}}} while(false); /* << block {name}: ... */\n"
+proc mincBlock (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkBlockStmt
+  const (Name,Body) = (0,1)
+  let tab   = indent*Tab
+  let name  = MinC(code[Name], indent, special).c
+  let body  = MinC(code[Body], indent+1, special).c
+  result.c =
+    if name == "" : fmt BlockTempl
+    else          : fmt BlockNamedTempl
+
+
+#_______________________________________
 # @section Procedures
 #_____________________________
 const KnownMainNames   = ["main", "WinMain"]
@@ -1261,8 +1281,10 @@ proc MinC *(code :PNode; indent :int= 0; special :SpecialContext= Context.None) 
   of nim.SomeLit        : result = mincLiteral(code, indent, special)
   of nkCallStrLit       : result = mincLiteral(code, indent, special)
   of nkIdent            : result = mincIdent(code, indent, special)
-  of nkIncludeStmt      : result = mincInclude(code, indent, special)
   of nkCommentStmt      : result = mincComment(code, indent, special)
+  # └─ Modules and Namespaces
+  of nkIncludeStmt      : result = mincInclude(code, indent, special)
+  of nkBlockStmt        : result = mincBlock(code, indent, special)
   # └─ Control flow
   of nkBreakStmt        : result = mincBreakStmt(code, indent, special)
   of nkContinueStmt     : result = mincContinueStmt(code, indent, special)

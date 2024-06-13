@@ -1,10 +1,11 @@
 #:______________________________________________________
 #  ᛟ minc  |  Copyright (C) Ivan Mar (sOkam!)  |  MIT  :
 #:______________________________________________________
+when not defined(nimscript): import system/nimscript
 
 # Package Information
 packageName   = "minc"
-version       = "0.12.0"
+version       = "0.13.0"
 author        = "sOkam"
 description   = "ᛟ minc | Minimalistic C Language"
 license       = "MIT"
