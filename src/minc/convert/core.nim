@@ -412,7 +412,7 @@ proc mincCall (
   ) :CFilePair=
   ensure code, Call
   if code.kind == nkCallStrLit : return mincLiteral(code, indent, special)
-  if code.isUnion              : return mincObjConstr(code, indent, special.with Union)
+  if code.isUnionConstr        : return mincObjConstr(code, indent, special.with Union)
   if code.isObjConstr          : return mincObjConstr(code, indent, special.with Object)
   if code.isMultiwordType      : return mincType_multiword(code, indent, special)
   # Get the name
@@ -780,7 +780,8 @@ proc mincType_multiword (
     result.c.add " const"  # NOTE: This is another terminal case, just like mincIdent
 #___________________
 const ObjStubTempl  = "struct {name}"  # {.stub.} objects have a special case without body
-const ObjBodyTempl  = ObjStubTempl & " {{{bfr}{body}{spc}}}" # After-name is added by the typedef already
+const ObjKeyTempl   = "{key} {name}"   # {.union.} will make `key` become `union` instead of `struct`
+const ObjBodyTempl  = ObjKeyTempl & " {{{bfr}{body}{spc}}}" # After-name is added by the typedef already
 const ObjFieldTempl = "{typ} {name};"
 proc mincType_obj (
     code      : PNode;
@@ -798,6 +799,7 @@ proc mincType_obj (
   # Normal case
   let fieldCount = code[Fields].sons.len
   discard Inherit # TODO: object of T
+  let key  = if Union in special: "union" else: "struct"
   let name = MinC(extraName, indent, special).c
   let spc  = if fieldCount > 1: fmt "\n{indent*Tab}" else: " "
   let bfr  = if fieldCount > 1: "\n" else: " "
@@ -915,6 +917,7 @@ proc mincTypeDef (
   let pragm = types.get(code, "pragma").renderTree
   if "readonly" in pragm: specl.incl Readonly
   if "unsafe"   in pragm: specl.incl Unsafe
+  if "union"    in pragm: specl.incl Union
   let name  = code.:name
   let codeT = types.get(code, "type")
   let typ   = mincType(

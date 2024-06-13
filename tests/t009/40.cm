@@ -1,0 +1,4 @@
+type Thing *{.union.}= object
+  one  *:int
+  two  *:unsigned int
+  thr  *:float
