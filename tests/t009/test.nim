@@ -29,5 +29,7 @@ test name "32 | Enum: Explicit Values"       : check "32"
 test name "33 | Enum: {.unsafe.}"            : check "33"
 test name "34 | Enum: {.unsafe.} + {.pure.}" : check "34"
 
-# TODO: Unions
+# Unions
+test name "40 | Union: Basic"                : check "40"
+# test name "41 | Union: Array field types"    : check "41"
 

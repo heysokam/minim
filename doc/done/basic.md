@@ -45,7 +45,7 @@
     - [x] Initialization
     - [x] Designated Initialization
     - [x] indexed access
-- [x] Modules  (include/import)
+- [x] Modules (include/import) and Namespacing
   - [x] Include keyword
     - [x] Global
     - [x] Local
@@ -113,5 +113,6 @@
     - [x] Explicit values
     - [x] {.unsafe.} pragma    Skips prefixing the values with the type
     - [x] {.pure.} for fields  Adds prefix even inside {.unsafe.} enums
+  - [x] Unions
 ```
 
