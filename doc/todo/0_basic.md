@@ -24,6 +24,8 @@
 ### Arguments
 - [ ] `{.restrict.}`
 - [ ] ...args version of varargs (@note parsing ... alone breaks the syntax. needs to be ...args or some alternative)
+## Attributes
+- [ ] Arbitrary attributes with {.attribute: "name".} and {.attribute: name.}
 ```
 
 ```md
