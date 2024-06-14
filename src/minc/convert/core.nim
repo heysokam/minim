@@ -756,7 +756,7 @@ proc mincIdent (
   if val == "void" or val == "_": return CFilePair(c: val)
   if special.hasAny({ Readonly, Immutable }):
     result.c = val + "const"
-  elif special.hasAny {Context.None, Body, Argument, Condition, Typedef, Assign, Variable, Return, ForLoop}:
+  elif special.hasAny {Context.None, Body, Argument, Condition, Typedef, Assign, Variable, Return, ForLoop, Discard}:
     result.c = val
     if ForLoop in special and result.c.startsWith(".."):
       result.c = result.c[2..^1] # Remove .. from ForLoop infixes
