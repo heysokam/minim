@@ -28,7 +28,7 @@ import ./nodes
 # @section Multi-context aliases
 #_____________________________
 include ./fwdecl
-const RawSpecials      = {Variable, Argument, Assign, Condition, Return}
+const RawSpecials      = {Variable, Argument, Assign, Condition, Return, Discard, Object}
 const FallThroughTempl = "[[fallthrough]];\n"
 
 
@@ -1172,7 +1172,7 @@ proc mincInfix (
   ensure code, nkInfix
   let name  = code.:name
   let affix = name.renamed(code.kind, special)
-  let isRaw = special.hasAny {Variable, Condition, Return, Argument, Assign, Context.Object}
+  let isRaw = special.hasAny RawSpecials
   # Error Check
   case name
   of "->"             : discard  # Accept `->` for both raw and non-raw
@@ -1219,7 +1219,8 @@ proc mincDiscard (
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  ensure code, Discard
+  ensure code, Kind.Discard
+  let special = special.with(Context.Discard)
   let D = code[0]
   case D.kind
   of nkTupleConstr,nkPar:
