@@ -60,6 +60,7 @@ var quiet *:bool= Quiet
 #_____________________________
 const FilterFlags = @[  # Flags to remove from -Weverything
   "-Wno-declaration-after-statement", # Explicitly allow asignment on definition. Useless warning for >= C99
+  "-Wno-ignored-qualifiers",          # Explicitly allow const return type qualifiers. Returning a const type spams this warning
   # Ignore C++ flags. We build C
   "-Wno-c++-compat",
   "-Wno-c++0x-compat",                   "-Wno-c++0x-extensions",                         "-Wno-c++0x-narrowing",
@@ -73,6 +74,10 @@ const FilterFlags = @[  # Flags to remove from -Weverything
   "-Wno-c++98-c++11-c++14-c++17-compat", "-Wno-c++98-c++11-c++14-c++17-compat-pedantic",  "-Wno-c++98-c++11-c++14-compat",    "-Wno-c++98-c++11-c++14-compat-pedantic",
   "-Wno-c++98-c++11-compat",             "-Wno-c++98-c++11-compat-binary-literal",        "-Wno-c++98-c++11-compat-pedantic",
   "-Wno-c++98-compat",                   "-Wno-c++98-compat-bind-to-temporary-copy",      "-Wno-c++98-compat-extra-semi",     "-Wno-c++98-compat-local-type-template-args",      "-Wno-c++98-compat-pedantic", "-Wno-c++98-compat-unnamed-type-template-args",
+  # Silence Documentation Errors completely. They don't work for anything other than doxygen rules
+  "-Wno-documentation",                 # Ignore for our custom syntax
+  "-Wno-documentation-unknown-command", # Ignore for our custom syntax
+  "-Wno-documentation-deprecated-sync", # Ignore deprecated tags missing their attribute  (GLFW breaks it)
   # TODO: Remove completely
   "-Wno-error=missing-braces",  # Irrelevant when using -Wmissing-field-initializers
   ""
@@ -103,10 +108,6 @@ const ReleaseFlags :string= [
   "-Wno-vla",                           # Explicitly avoid erroring on VLA usage, but keep the warning (todo: only for debug)
   "-Wno-padded",                        # Warn when structs are automatically padded, but don't error.
   "-Wno-unused-macros",                 # Macros cannot be declared public to not trigger this, so better to not error and keep the warning
-  # Silence Documentation Errors completely
-  "-Wno-documentation",                 # Ignore for our custom syntax
-  "-Wno-documentation-unknown-command", # Ignore for our custom syntax
-  "-Wno-documentation-deprecated-sync", # Ignore deprecated tags missing their attribute  (GLFW breaks it)
   ""
   ].join(" ")
 
@@ -122,10 +123,6 @@ const DebugFlags :string= [
   "-Wno-error=vla",                           # Explicitly avoid erroring on VLA usage, but keep the warning (todo: only for debug)
   "-Wno-error=padded",                        # Warn when structs are automatically padded, but don't error.
   "-Wno-error=unused-macros",                 # Macros cannot be declared public to not trigger this, so better to not error and keep the warning
-  # Ignore Documentation Errors on Debug Builds
-  "-Wno-error=documentation",                 # Ignore for our custom syntax
-  "-Wno-error=documentation-unknown-command", # Ignore for our custom syntax
-  "-Wno-error=documentation-deprecated-sync", # Ignore deprecated tags missing their attribute  (GLFW breaks it)
   # Debugger Flags
   "-ggdb",
   # https://github.com/ziglang/zig/issues/5163
