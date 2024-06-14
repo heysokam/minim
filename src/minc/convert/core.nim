@@ -619,6 +619,7 @@ proc mincObjConstr (
   ensure code, nkObjConstr, nkCall, "Tried to codegen a Designated Initializer for an object from an incorrect node type"
   const (Type,Arg0, UnionInfix,UnionField,UnionBody) = (0,1,1,1,2)
   # Data shared by all syntaxes
+  let special = special.with(Context.Object)
   let typ = MinC(code[Type], indent, special).c
   # Redirection case
   let redirected = code.kind == nkCall
@@ -944,7 +945,7 @@ proc mincTypeDef_proc (
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  let retT = MinC(types.getProc(code, "returnT"), indent, special.with(Immutable).without(Readonly) ).c
+  let retT = MinC(types.getProc(code, "returnT"), indent, special.without(Readonly).with(Immutable)).c
   let name = MinC(types.getProc(code, "name"), indent, special).c
   let args = mincProcArgs(types.getProc(code, "args"), indent)
   result.c = fmt TypedefProcTempl
@@ -1159,7 +1160,7 @@ const IllegalPostfixes = @["++", "--"]
 const AssignInfixes    = @["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]
 const NormalInfixes    = @["+", "-", "*", "/", "%", "&", "|", "^", ">>", "<<",
                            "<", ">", "<=", ">=", "==", "!=", "&&", "||",
-                           "and", "or", "xor", "shr", "shl", "div", "mod"] & ExtraCastOperators & NoSpacingInfixes
+                           "and", "or", "xor", "shr", "shl", "div", "mod"] & ExtraCastOperators
 #___________________
 const InfixRawTempl    = "{left}{sep}{affix}{sep}{right}"
 const InfixTempl       = "{indent*Tab}"&InfixRawTempl&";\n"
@@ -1171,9 +1172,10 @@ proc mincInfix (
   ensure code, nkInfix
   let name  = code.:name
   let affix = name.renamed(code.kind, special)
-  let isRaw = special.hasAny {Variable, Condition, Return, Argument, Assign}
+  let isRaw = special.hasAny {Variable, Condition, Return, Argument, Assign, Context.Object}
   # Error Check
   case name
+  of "->"             : discard  # Accept `->` for both raw and non-raw
   of IllegalPostfixes : code.trigger AffixError,
     "Using ++ or -- as postfixes is not possible. The Nim parser interprets them as infix, and breaks the code written afterwards. Please convert them to prefixes."
   of AssignInfixes    :
