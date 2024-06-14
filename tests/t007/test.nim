@@ -44,3 +44,6 @@ test name "50 | Ternary: Basic"           : check "50"
 test name "51 | Ternary: Multi-condition" : check "51"
 # test name "52 | Ternary: elif branches"   : check "52"
 
+# do..while
+test name "60 | DoWhile: Basic"           : check "60"
+

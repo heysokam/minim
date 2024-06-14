@@ -21,6 +21,7 @@
     - [x] case ... of:
     - [x] else: == default:
     - [x] Mandatory explicit fallthrough, otherwise (break;) auto
+  - [x] do..while     doWhile cond: body   ->   do {...} while (cond)
 - [x] Variable definition:
   - [x] Immutable : Let/Const
   - [x] Mutable   : Var

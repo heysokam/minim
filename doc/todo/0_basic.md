@@ -4,7 +4,6 @@
 - [ ] Include
   - [ ] (maybe?) Header include guards support  (todo: research if compilers still get confused about file names or not)
 ## Conditions
-- [ ] do {...} while (cond);   (nkDo ?)
 - [ ] Switch case
   - [ ] discard = donothing
 ## Loops

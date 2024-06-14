@@ -162,40 +162,19 @@ proc mincFor (
   let body = MinC(code[Body], indent+1, special).c
   result.c = fmt ForTempl
 #___________________
-const SwitchTempl      = "{tab0}switch ({cond}) {{{cases}{tab0}}}\n"
-const CaseTempl        = "{tab1}case {caseC}:{nl}{body}"
-const CaseElseTempl    = "{tab1}default:{nl}{body}"
-const CaseBreakTempl   = "{nl2}break;"
-proc mincCase (
+const DoWhileTempl = "{tab}do {{\n{body}}} while ({cond});\n"
+proc mincDoWhile (
     code    : PNode;
     indent  : int            = 0;
     special : SpecialContext = Context.None;
   ) :CFilePair=
-  ensure code, nkCaseStmt
-  const (Condition,Case,First,Last, ElseBody,CaseBody) = (0,0,1,^1, 0,1)
-  let tab0 = indent*Tab
-  let tab1 = (indent+1)*Tab
-  let tab2 = (indent+2)*Tab
-  let nl   = &"\n{tab1}"
-  let nl2  = &"\n{tab2}"
-  let cond = MinC(code[Condition], indent, special).c
-  # Get the cases code
-  var cases :string
-  for entry in code.sons[First..Last]: # For every of/else entry. [0] is the condition itself
-    var shouldBreak = true
-    if entry.kind == nkElse:
-      let body = MinC(entry[ElseBody], indent, special).c
-      cases.add fmt CaseElseTempl
-    elif entry.kind == nkOfBranch:
-      let caseC = MinC(entry[Case], indent, special).c
-      let bodyN = entry[CaseBody]
-      let body  = MinC(bodyN, indent, special).c
-      if bodyN.sons.anyIt( it.isFallthrough or it.kind in {nkReturnStmt, nkBreakStmt} ):
-        shouldBreak = false
-      cases.add fmt CaseTempl
-    else: code.trigger FlowCtrlError, "Unknown node kind found in caseof statement."
-    if shouldBreak: cases.add fmt CaseBreakTempl
-  result.c = fmt SwitchTempl
+  ensure code, nkCommand
+  report code
+  const (Condition,Body) = (1,^1)
+  let tab  = indent*Tab
+  let cond = MinC(code[Condition], indent, special.with Context.Condition).c
+  let body = MinC(code[Body], indent+1, special).c
+  result.c = fmt DoWhileTempl
 
 
 #_______________________________________
@@ -274,6 +253,41 @@ proc mincWhen (
     #   result.c.add fmt WhenTempl
   result.c.add fmt WhenEndTempl
   # if result.h != "": result.h.add fmt WhenEndTempl
+#___________________
+const SwitchTempl      = "{tab0}switch ({cond}) {{{cases}{tab0}}}\n"
+const CaseTempl        = "{tab1}case {caseC}:{nl}{body}"
+const CaseElseTempl    = "{tab1}default:{nl}{body}"
+const CaseBreakTempl   = "{nl2}break;"
+proc mincCase (
+    code    : PNode;
+    indent  : int            = 0;
+    special : SpecialContext = Context.None;
+  ) :CFilePair=
+  ensure code, nkCaseStmt
+  const (Condition,Case,First,Last, ElseBody,CaseBody) = (0,0,1,^1, 0,1)
+  let tab0 = indent*Tab
+  let tab1 = (indent+1)*Tab
+  let tab2 = (indent+2)*Tab
+  let nl   = &"\n{tab1}"
+  let nl2  = &"\n{tab2}"
+  let cond = MinC(code[Condition], indent, special).c
+  # Get the cases code
+  var cases :string
+  for entry in code.sons[First..Last]: # For every of/else entry. [0] is the condition itself
+    var shouldBreak = true
+    if entry.kind == nkElse:
+      let body = MinC(entry[ElseBody], indent, special).c
+      cases.add fmt CaseElseTempl
+    elif entry.kind == nkOfBranch:
+      let caseC = MinC(entry[Case], indent, special).c
+      let bodyN = entry[CaseBody]
+      let body  = MinC(bodyN, indent, special).c
+      if bodyN.sons.anyIt( it.isFallthrough or it.kind in {nkReturnStmt, nkBreakStmt} ):
+        shouldBreak = false
+      cases.add fmt CaseTempl
+    else: code.trigger FlowCtrlError, "Unknown node kind found in caseof statement."
+    if shouldBreak: cases.add fmt CaseBreakTempl
+  result.c = fmt SwitchTempl
 
 
 #_______________________________________
@@ -443,6 +457,7 @@ proc mincCall (
   ) :CFilePair=
   ensure code, Call
   if code.kind == nkCallStrLit : return mincLiteral(code, indent, special)
+  if code.isDoWhile            : return mincDoWhile(code, indent, special)
   if code.isUnionConstr        : return mincObjConstr(code, indent, special.with Union)
   if code.isObjConstr          : return mincObjConstr(code, indent, special.with Object)
   if code.isMultiwordType      : return mincType_multiword(code, indent, special)
