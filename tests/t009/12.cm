@@ -1,0 +1,3 @@
+type Thing * = object
+  one   :int
+  field :array[4,char]

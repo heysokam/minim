@@ -388,9 +388,9 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
     var special = {Argument, Immutable}                      # const by default
     if group[Type].kind == nkVarTy : special.excl Immutable  # Remove Immutable for `var T`
     if group.isReadonly            : special.incl Readonly
-    let typ     = MinC(group[Type], indent+1, special).c
+    let typ = MinC(group[Type], indent+1, special).c
     if "varargs" in typ: special.incl Varargs
-    let val     = MinC(group[Value], indent+1, special).c
+    let val = MinC(group[Value], indent+1, special).c
     for id,arg in group.sons[0..LastArg].pairs:
       let arg =
         if arg.kind == nkPragmaExpr : arg.getName()
@@ -837,7 +837,7 @@ proc mincType_obj (
     extraName : PNode          = nil;
   ) :CFilePair=
   ensure code, nkObjectTy
-  const (Fields,Inherit,Type) = (^1,1,0)
+  const (Fields,Inherit,Type,FieldType) = (^1,1,0,1)
   # Stub special case
   if extras.isStub(code):
     let name = MinC(code[Inherit][Type], indent, special).c
@@ -853,7 +853,8 @@ proc mincType_obj (
   var body :string
   for id,entry in code[Fields].pairs:
     let specl = special.with ObjectField
-    let name  = MinC(entry.getName(), indent, specl).c
+    let typN  = entry[FieldType]
+    let name  = MinC(entry.getName(), indent, specl).c & mincArraySuffix(typN, indent, specl)
     let typ   = MinC(entry.getType(), indent, specl).c
     if fieldCount > 1: body.add indent*Tab
     body.add fmt ObjFieldTempl
