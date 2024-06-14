@@ -13,3 +13,24 @@ proc stuff (
   ) :signed char=
   return 0
 
+
+proc withArrays (
+    arg00 : array[1, i32];
+    arg01 : array[1, ptr i32];
+    arg02 : array[_, i32];
+    arg03 : array[_, ptr i32];
+    arg04 : array[SomeSymbol, i32];
+    arg05 : array[SomeSymbol, ptr i32];
+    arg06 : var array[6, i32];
+    arg07 : var array[7, ptr i32];
+    arg08 : var array[_, i32];
+    arg09 : var array[_, ptr i32];
+    arg10 : var array[SomeSymbol, i32];
+    arg11 : var array[SomeSymbol, ptr i32];
+    arg12 {.readonly.}: var array[12, ptr i32];
+    arg13 {.readonly.}: var array[_, ptr i32];
+    arg14 {.readonly.}: var array[SomeSymbol, ptr i32];
+  ) :i32=
+  return 0
+  # @note: `var` and `{.readonly.}` for array arguments affects the contained type
+
