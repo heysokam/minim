@@ -16,7 +16,7 @@ test name "02 | Multiword types"             : check "02"
 # Objects
 test name "10 | Object: Basic"               : check "10"
 test name "11 | Object: Stub"                : check "11"
-# test name "12 | Object: Nested" : check "12"
+test name "12 | Object: With Arrays"         : check "12"
 
 # Procs
 test name "20 | Proc: Basic"                 : check "20"
