@@ -45,11 +45,9 @@ Effort on supporting the entire feature-set of C continues until the last versio
 - [ ] Array compound literals  array[int](0,1,2)  ->  (int[]){0,1,2}
 - [ ] `{.volatile.}` variables
 - [ ] `{.restrict.}`
+- [ ] ...args version of varargs (@note parsing ... alone breaks the syntax. needs to be ...args or some alternative)
 # 0.16.0 Advanced For Loops
 # 0.17.0 Compiler Ergonomics
-- [ ] compile time only `{.comptime.}`
-# ?.?.? ...
-- [ ] ...args version of varargs (@note parsing ... alone breaks the syntax. needs to be ...args or some alternative)
 # ?.?.? Bugfixes
 - [ ] `raw  *:array[32, unsigned char]`   -X->   `unsigned char raw[32];`   -bug->   `char raw;`
 ```
@@ -59,16 +57,16 @@ Effort on supporting the entire feature-set of C continues until the last versio
 # 0.?.0 Crash-Test to prepare for v1.0.0
 ```
 ```md
-- [ ] Complete ./todo/0_basic.rst
-- [ ] Complete ./todo/1_compiler.rst
-- [ ] Complete ./todo/C_features.rst
+- [ ] Complete ./todo/0_basic.md
+- [ ] Complete ./todo/2_compiler.md
+- [ ] Complete ./todo/C_features.md
 # 1.0.0 Complete C support
 Focused Work on extensions can be started
 ```
 ```md
-- [ ] Complete ./todo/2_extend.rst
-- [ ] Complete ./todo/3_parser.rst
-- [ ] Solve    ./todo/problems.rst
+- [ ] Complete ./todo/1_extend.md
+- [ ] Complete ./todo/3_parser.md
+- [ ] Solve    ./todo/problems.md
 # 2.0.0 Complete MinC Features
 ```
 ```md
