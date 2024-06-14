@@ -5,7 +5,7 @@ when not defined(nimscript): import system/nimscript  # Silence nimsuggest error
 
 # Package Information
 packageName   = "minc"
-version       = "0.14.3"
+version       = "0.14.4"
 author        = "sOkam"
 description   = "ᛟ minc | Minimalistic C Language"
 license       = "MIT"
