@@ -17,15 +17,17 @@
 ## Literals and Values
 - [ ] Arrays: nested
 - [ ] Array compound literals  array[int](0,1,2)  ->  (int[]){0,1,2}
+- [ ] Hexadecimal notation  0xFFAA
+- [ ] Octal notation        0o8800
+- [ ] Binary notation       0b0101
 ## Functions
 ### Arguments
 - [ ] `{.restrict.}`
 - [ ] ...args version of varargs (@note parsing ... alone breaks the syntax. needs to be ...args or some alternative)
-### Properties
-- [ ] compile time only `{.comptime.}`
 ```
 
 ```md
 # Bugfixes
 - [ ] `raw  *:array[32, unsigned char]`   -X->   `unsigned char raw[32];`   -bug->   `char raw;`
 ```
+

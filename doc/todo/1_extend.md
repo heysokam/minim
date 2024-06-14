@@ -1,6 +1,7 @@
 ```md
 # TODO: Extend C
 - [ ] Typed Pointer notation for function/array function arguments  (Modern C, page 19)
+- [ ] compile time only `{.comptime.}`
 - [ ] Compiler interface within the code:
   - [ ] {.compile: "file.c".}         # Passes the file to zigcc as one of the files to cache
   - [ ] {.compile: "/some/folder/".}  # Passes a glob of all files in the given folder to zigcc
