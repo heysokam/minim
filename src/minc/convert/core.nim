@@ -41,11 +41,12 @@ proc mincArrSize (
     special   : SpecialContext = Context.None;
   ) :string=
   ## @descr Returns the array size defined by {@arg code}
-  const (Type,ArraySize) = (1,1)
+  const (Type,ArraySize,VarType) = (1,1,0)
   let typ =
     if   code.kind == nkIdent       : code
     elif code.kind == nkBracketExpr : code
     elif code.kind == nkIdentDefs   : code[Type]
+    elif code.kind == nkVarTy       : code[VarType]
     else                            : code.getType()
   if   typ.kind in {nkIdent}+nim.Literals : result = typ.strValue
   elif typ.kind == nkBracketExpr          : result = typ[ArraySize].strValue
@@ -169,7 +170,6 @@ proc mincDoWhile (
     special : SpecialContext = Context.None;
   ) :CFilePair=
   ensure code, nkCommand
-  report code
   const (Condition,Body) = (1,^1)
   let tab  = indent*Tab
   let cond = MinC(code[Condition], indent, special.with Context.Condition).c
@@ -401,7 +401,7 @@ proc mincProcArgs (code :PNode; indent :int= 0) :string=
         val     : val,  # TODO: Default values
         special : special,
         ) # << args.add ( ... )
-      args[id].name.add mincArraySuffix(group[Type], indent, special)
+      args[^1].name.add mincArraySuffix(group[Type], indent, special)
   for id,arg in args.pairs:
     let typ  = arg.typ
     let name = arg.name
