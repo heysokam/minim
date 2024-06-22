@@ -14,8 +14,7 @@ const M = @import("./minim.zig");
 /// @section Entry Point
 //____________________________
 pub fn main() !void {
-  try zstd.echo("Some stuff");
-  // Use your favorite allocator
+  // try zstd.echo("Some stuff");
   var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
   defer arena.deinit();
   const A = arena.allocator();
