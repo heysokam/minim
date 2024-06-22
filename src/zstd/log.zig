@@ -6,6 +6,12 @@
 // @deps std
 const std = @import("std");
 
+//______________________________________
+// @section Aliased exports from std
+//____________________________
+pub const prnt = @import("std").debug.print;
+pub const fail = @import("std").debug.panic;
+
 
 //______________________________________
 /// @descr Outputs the {@arg msg} to CLI with an added \n at the end.

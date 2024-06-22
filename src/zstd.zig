@@ -9,6 +9,8 @@ const zstd_log = @import("./zstd/log.zig");
 //______________________________________
 // @section Logger.Core Exports
 //____________________________
-pub const log = zstd_log;
+pub const log  = zstd_log;
 pub const echo = zstd_log.echo;
+pub const prnt = zstd_log.prnt;
+pub const fail = zstd_log.fail;
 
