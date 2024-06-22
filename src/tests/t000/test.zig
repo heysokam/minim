@@ -1,7 +1,14 @@
+//:____________________________________________________________________
+//  mins  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
+//:____________________________________________________________________
+// @deps std
 const std = @import("std");
 const expect = std.testing.expect;
+// @deps zstd
 const echo = @import("../../zstd.zig").log.echo;
-const Lex = @import("../../msyn.zig").Lex;
+// @deps mins
+const Lex = @import("../../mins.zig").Lex;
+
 
 const Title = "Basic Checks";
 test "00 | dummy check" {
@@ -24,6 +31,7 @@ test "01 | Basic Code Generation" {
   const z = @embedFile("./01.zig");
   _=c;_=z;
   var L = try Lex.create_with(A, cm);
+  defer L.destroy();
   try L.process();
 
   try expect(true);

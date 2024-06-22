@@ -1,6 +1,7 @@
 //:____________________________________________________________________
-//  msyn  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
+//  mins  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
 //:____________________________________________________________________
+// @deps std
 const std = @import("std");
 
 test {
