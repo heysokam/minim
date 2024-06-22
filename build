@@ -1,0 +1,33 @@
+#!/bin/sh
+set -eu
+#_______________________________________
+# Folders
+thisDir=$(pwd)
+srcDir=$thisDir/src
+binDir=$thisDir/bin
+zigDir=$binDir/.zig
+cacheDir=$binDir/.cache
+testsDir=$srcDir/tests
+#_______________________________________
+# Zig Compiler Setup
+Z=$zigDir/zig
+flags="-fPIE -fcompiler-rt --verbose-cc --verbose-link"
+cache="--cache-dir $cacheDir --global-cache-dir $cacheDir"
+# Compiler Commands
+tests()     { $Z test $srcDir/tests.zig; }
+build()     { $Z build-exe $flags $cache -femit-bin=$2 $1; }
+build_lib() { $Z build-lib $flags $cache -femit-bin=$2 $1; }
+#_______________________________________
+
+
+
+#_______________________________________
+# Source Code Setup
+src=$srcDir/mins.zig
+trg=$binDir/mins
+
+#_______________________________________
+# Order to build
+tests
+build $src $trg
+$trg
