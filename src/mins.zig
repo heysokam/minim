@@ -6,11 +6,11 @@ const std = @import("std");
 const assert = std.debug.assert;
 // @deps z*std
 const zstd = @import("./zstd.zig");
-// @deps msyn
-pub const Lex = @import("./msyn/lex.zig").Lex;
-pub const Par = @import("./msyn/par.zig").Par;
-pub const Ast = @import("./msyn/ast.zig").Ast;
-pub const Gen = @import("./msyn/gen.zig").Gen;
+// @deps mins
+pub const Lex = @import("./mins/lex.zig").Lex;
+pub const Par = @import("./mins/par.zig").Par;
+pub const Ast = @import("./mins/ast.zig").Ast;
+pub const Gen = @import("./mins/gen.zig").Gen;
 
 
 //______________________________________

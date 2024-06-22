@@ -1,6 +1,8 @@
 //:____________________________________________________________________
 //  mins  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
 //:____________________________________________________________________
+//! @fileoverview Character identification tools
+//________________________________________________|
 // @deps std
 const std = @import("std");
 
