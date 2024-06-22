@@ -1,6 +1,8 @@
 //:____________________________________________________________________
-//  mins  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
+//  zstd  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
 //:____________________________________________________________________
+//! @fileoverview Core Type Aliases
+//__________________________________|
 // @deps std
 const std = @import("std");
 

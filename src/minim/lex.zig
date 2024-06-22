@@ -1,6 +1,6 @@
-//:____________________________________________________________________
-//  mins  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
-//:____________________________________________________________________
+//:_______________________________________________________________________
+//  ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
+//:_______________________________________________________________________
 // @deps std
 const std = @import("std");
 // @deps zstd
@@ -8,7 +8,7 @@ const echo = @import("../zstd.zig").echo;
 const prnt = @import("../zstd.zig").prnt;
 const fail = @import("../zstd.zig").fail;
 const ByteBuffer = @import("../zstd/types.zig").ByteBuffer;
-// @deps mins.lex
+// @deps minim.lex
 pub const Ch = @import("./lex/char.zig");
 
 const Tk = struct {

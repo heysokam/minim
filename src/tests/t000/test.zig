@@ -1,13 +1,13 @@
-//:____________________________________________________________________
-//  mins  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
-//:____________________________________________________________________
+//:_______________________________________________________________________
+//  ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
+//:_______________________________________________________________________
 // @deps std
 const std = @import("std");
 const expect = std.testing.expect;
 // @deps zstd
 const echo = @import("../../zstd.zig").log.echo;
-// @deps mins
-const Lex = @import("../../mins.zig").Lex;
+// @deps minim
+const Lex = @import("../../minim.zig").Lex;
 
 
 const Title = "Basic Checks";

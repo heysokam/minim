@@ -1,5 +1,12 @@
 #!/bin/sh
 set -eu
+#:_______________________________________________________________________
+#   ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
+#:_______________________________________________________________________
+## @fileoverview Dummy buildsystem. Temporary until confy rework
+#________________________________________________________________|
+
+
 #_______________________________________
 # Folders
 thisDir=$(pwd)
@@ -24,11 +31,12 @@ build_lib() { $Z build-lib $flags $cache -femit-bin=$2 $1; }
 
 #_______________________________________
 # Source Code Setup
-src=$srcDir/mins.zig
-trg=$binDir/mins
+src=$srcDir/M.zig
+trg=$binDir/M
 
 #_______________________________________
 # Order to build
 tests
 build $src $trg
 $trg
+

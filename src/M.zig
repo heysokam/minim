@@ -1,16 +1,13 @@
-//:____________________________________________________________________
-//  mins  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
-//:____________________________________________________________________
+//:_______________________________________________________________________
+//  ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
+//:_______________________________________________________________________
 // @deps std
 const std = @import("std");
 const assert = std.debug.assert;
 // @deps z*std
 const zstd = @import("./zstd.zig");
-// @deps mins
-pub const Lex = @import("./mins/lex.zig").Lex;
-pub const Par = @import("./mins/par.zig").Par;
-pub const Ast = @import("./mins/ast.zig").Ast;
-pub const Gen = @import("./mins/gen.zig").Gen;
+// @deps minim
+const M = @import("./minim.zig");
 
 
 //______________________________________
@@ -23,7 +20,7 @@ pub fn main() !void {
   defer arena.deinit();
   const A = arena.allocator();
 
-  var L = Lex.create(A);
+  var L = M.Lex.create(A);
   defer L.destroy();
 }
 
