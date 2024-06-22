@@ -1,1 +1,2 @@
 *.cm linguist-language=nim
+*.zm linguist-language=nim
