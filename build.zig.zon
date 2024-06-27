@@ -1,0 +1,33 @@
+.{
+  // @descr
+  //  Name used by packages depending on this one.
+  //  When a user runs `zig fetch --save <url>`, this field is used as the key in the `dependencies` table.
+  //  The user can choose a different name, but most users will stick with this value.
+  .name = "minim",
+
+  // @descr [Semantic Version](https://semver.org/) of the package.
+  .version = "0.0.0",
+
+  // @descr Minimum Zig version required to use this package
+  .minimum_zig_version = "0.13.0", // Optional
+
+  // @descr
+  //  Set of files and directories included in this package (relative to the build root).
+  //  A directory means that all files within, recursively, are included.   The empty string (`""`) refers to the build root itself.
+  // @note
+  //  Only listed files and directories are included in the package's `hash`.
+  //  Only listed files will remain on disk when using the zig package manager.
+  .paths = .{
+    // Buildsystem
+    "build.zig",
+    "build.zig.zon",
+    // Source Code
+    "src/minim",
+    "src/minim.zig",
+    "src/M.zig",
+    // Documentation
+    "license.md",
+    // "readme.md",
+  },
+}
+

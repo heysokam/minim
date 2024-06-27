@@ -18,8 +18,12 @@ testsDir=$srcDir/tests
 #_______________________________________
 # Zig Compiler Setup
 Z=$zigDir/zig
-# flags="-fPIE -fcompiler-rt --verbose-cc --verbose-link"
-flags="-fPIE -fcompiler-rt"
+target="-target x86_64-linux-gnu"
+# libs=""
+libs="-lc"
+verb=""
+# verb="--verbose-cc --verbose-link"
+flags="-fPIE -fcompiler-rt $target $verb $libs"
 cache="--cache-dir $cacheDir --global-cache-dir $cacheDir"
 # Compiler Commands
 tests()     { $Z test $srcDir/tests.zig; }
