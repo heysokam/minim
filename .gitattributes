@@ -1,2 +1,6 @@
-*.cm linguist-language=nim
-*.zm linguist-language=nim
+*.cm linguist-language=nim eol=lf
+*.zm linguist-language=nim eol=lf
+*.nim eol=lf
+*.c eol=lf
+*.h eol=lf
+*.zig text=auto eol=lf
