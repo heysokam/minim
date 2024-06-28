@@ -15,12 +15,12 @@ pub const fail = @import("std").debug.panic;
 
 //______________________________________
 /// @descr Outputs the {@arg msg} to CLI with an added \n at the end.
-pub fn echo(msg :[]const u8) !void {
+pub fn echo(msg :[]const u8) void {
   // stdout for the output of the app, not for debugging messages.
   const stdout_file = std.io.getStdOut().writer();
   var bw = std.io.bufferedWriter(stdout_file);
   const stdout = bw.writer();
-  try stdout.print("{s}\n", .{msg});
-  try bw.flush();
+  stdout.print("{s}\n", .{msg}) catch unreachable;
+  bw.flush() catch unreachable;
 }
 
