@@ -3,14 +3,22 @@
 //:____________________________________________________________________
 //! @fileoverview Cable connector to all zstd.Core modules
 //__________________________________________________________|
-const zstd_log = @import("./zstd/log.zig");
+// @section Forward Exports for other modules
+pub const log   = @import("./zstd/log.zig");
+pub const shell = @import("./zstd/shell.zig");
+pub const T     = @import("./zstd/types.zig");
 
 
 //______________________________________
 // @section Logger.Core Exports
 //____________________________
-pub const log  = zstd_log;
-pub const echo = zstd_log.echo;
-pub const prnt = zstd_log.prnt;
-pub const fail = zstd_log.fail;
+pub const echo = log.echo;
+pub const prnt = log.prnt;
+pub const fail = log.fail;
+
+
+//______________________________________
+// @section Shell.Core Exports
+//____________________________
+pub const sh = shell.zsh;
 

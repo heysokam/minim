@@ -137,7 +137,7 @@ pub const BuildTrg = struct {
         .code_model       = zig.CodeModel.default, // @todo How to select the CodeModel 
         .linkage          = null,// @todo Link modes for executables ??   linkage: ?std.builtin.LinkMode = null,
         // max_rss: usize = 0,
-        .link_libc        = true, // @todo Expose this option. (default:   link_libc: ?bool = null, )
+        // .link_libc        = true, // @todo Expose this option. (default:   link_libc: ?bool = null, )
         // single_threaded: ?bool = null,
         // pic: ?bool = null,
         // strip: ?bool = null,

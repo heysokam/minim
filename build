@@ -41,6 +41,6 @@ trg=$binDir/M
 #_______________________________________
 # Order to build
 tests
-build $src $trg
-$trg
+# build $src $trg
+# $trg
 
