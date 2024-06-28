@@ -21,14 +21,18 @@ const Lex       = @import("./lex.zig").Lex;
 const LexemList = @import("./lex.zig").LexemList;
 const Lx        = @import("./lex.zig").Lx;
 
+
 //______________________________________
 /// @descr Describes a Token.
 /// @out From the {@link Tok} Tokenizer process.
 /// @in For the {@link Par} Parser process.
 const Tk = struct {
+  /// @field {@link Tk.id} The Id of the Token
   id   :Tk.Id,
+  /// @field {@link Tk.val} The string value of the Token
   val  :ByteBuffer,
 
+  /// @descr {@link Tk.id} Valid kinds for Tokens
   const Id = enum {
     ident,
     // Specials
@@ -102,15 +106,22 @@ const Tk = struct {
     op_bslash,    // Operators starting with \
     };
 };
+//____________________________
+/// @descr Describes a list of {@link Tk} Token objects
+/// @out From the Tokenizer process
+/// @in To the Parser process
 const TokenList = std.MultiArrayList(Tk);
 
 
+//______________________________________
 /// @note
 ///  A pattern is a description of the form that the lexemes of a token may take.
 ///  In the case of a keyword as a token, a pattern is the sequence of characters that form the keyword.
 ///  For identifiers and other tokens, the pattern is a more complex structure that can be matched by many strings.
 const Pattern = struct {
+  /// @descr List of (key,val) pairs of Tokens, mapping their string representation with their Tk.Id
   const Map = std.StaticStringMap(Tk.Id);
+  /// @descr List of (key,val) pairs of Keyword Tokens, mapping their string representation with their Tk.Id
   const Kw = Map.initComptime(.{
     // Keywords
     .{ "fn",       .kw_func     },
@@ -140,10 +151,13 @@ const Pattern = struct {
     .{ "from",     .op_from     },
     }); // << Kw = ...
 
-  /// @descr Valid Operator starter Characters
-  /// =   +   -   *   /   <   >
-  /// @   $   ~   &   %   |
-  /// !   ?   ^   .   :   \
+  //______________________________________
+  /// @descr List of (key,val) pairs of Keyword Tokens, mapping their string representation with their Tk.Id
+  /// @note
+  ///  Valid Operator starter Characters
+  ///  =   +   -   *   /   <   >
+  ///  @   $   ~   &   %   |
+  ///  !   ?   ^   .   :   \
   const Op = Map.initComptime(.{ 
     // Specials
     .{ ":",  .op_colon  }, // Except :
@@ -169,15 +183,22 @@ const Pattern = struct {
     }); // Valid Operator character starters
 };
 
+/// @descr
+///  Describes a Tokenizer process and its data.
+///  @in A sequence of Lexemes and their containing characters  (Id,cstr)
+///  @out The list of Tokens that those Lexemes represent  (Id,cstr)
 pub const Tok = struct {
   A    :std.mem.Allocator,
   pos  :u64,
   buf  :LexemList,
   res  :TokenList,
 
+  //__________________________
   /// @descr Returns the Lexeme located in the current position of the buffer
   pub fn lx(T:*Tok) Lx { return T.buf.get(T.pos); }
 
+  //__________________________
+  /// @descr Creates a new Tokenizer object from the given {@arg L} Lexer contents.
   pub fn create(L:*Lex) Tok {
     return Tok {
       .A   = L.A,
@@ -187,6 +208,8 @@ pub const Tok = struct {
     };
   }
 
+  //__________________________
+  /// @descr Frees all resources owned by the Tokenizer object.
   pub fn destroy(T:*Tok) void {
     T.buf.deinit();
     T.res.deinit(T.A);
@@ -194,25 +217,80 @@ pub const Tok = struct {
 
 
 
+  //__________________________
+  /// @descr Processes an identifier Lexeme into its Token representation, and adds it to the {@link T.res} result.
+  pub fn ident(T:*Tok) !void { _ = T; }
+  //__________________________
+  /// @descr Processes a number Lexeme into its Token representation, and adds it to the {@link T.res} result.
+  pub fn number(T:*Tok) !void { _ = T; }
+  //__________________________
+  /// @descr Processes a Lexeme starting with `:` into its Token representation, and adds it to the {@link T.res} result.
+  pub fn colon(T:*Tok) !void { _ = T; }
+  //__________________________
+  /// @descr Processes a Lexeme starting with `=` into its Token representation, and adds it to the {@link T.res} result.
+  pub fn eq(T:*Tok) !void { _ = T; }
+  //__________________________
+  /// @descr Processes a Lexeme starting with `*` into its Token representation, and adds it to the {@link T.res} result.
+  pub fn star(T:*Tok) !void { _ = T; }
+  //__________________________
+  /// @descr Processes a Lexeme starting with `(` or `)` into its Token representation, and adds it to the {@link T.res} result.
+  pub fn paren(T:*Tok) !void { _ = T; }
+  //__________________________
+  /// @descr Processes a whitespace Lexeme into its Token representation, and adds it to the {@link T.res} result.
+  pub fn space(T:*Tok) !void { _ = T; }
+  //__________________________
+  /// @descr Processes a newline Lexeme into its Token representation, and adds it to the {@link T.res} result.
+  pub fn newline(T:*Tok) !void { _ = T; }
 
+
+  //__________________________
+  /// @descr Tokenizer Entry Point
   pub fn process(T:*Tok) !void {
     while (true) : (T.pos += 1) {
       if (T.pos == T.buf.len) return; // End of the input data
-      const l = T.lx();
+      const l = T.lx().id;
       switch (l) {
-      'a'...'z', 'A'...'Z', '_', => try T.ident(),
-      '0'...'9'                  => try T.number(),
-      '*'                        => try T.star(),
-      '(', ')'                   => try T.paren(),
-      ':'                        => try T.colon(),
-      '='                        => try T.eq(),
-      ' '                        => try T.space(),
-      '\n'                       => try T.newline(),
-      else => |char| fail("Unknown first character '{c}' (0x{X})", .{char, char})
+      .ident             => try T.ident(),
+      .number            => try T.number(),
+      .colon             => try T.colon(),
+      .eq                => try T.eq(),
+      .star              => try T.star(),
+      .paren_L, .paren_R => try T.paren(),
+      .space             => try T.space(),
+      .newline           => try T.newline(),
+      else => |lexem| fail("Unknown first lexeme '{s}'", .{@tagName(lexem)})
       }
+    // .hash,      // #
+    // .semicolon, // ;
+    // .quote_S,   // '  (single quote)
+    // .quote_D,   // "  (double quote)
+    // .quote_B,   // `  (backtick quote)
+    // .brace_L,   // {
+    // .brace_R,   // }
+    // .bracket_L, // [
+    // .bracket_R, // ]
+    // .dot,       // .
+    // .comma,     // ,
+    // Operators
+    // .plus,      // +
+    // .min,       // -
+    // .slash,     // /
+    // .less,      // <
+    // .more,      // >
+    // .at,        // @
+    // .dollar,    // $
+    // .tilde,     // ~
+    // .amp,       // &
+    // .pcnt,      // %
+    // .pipe,      // |
+    // .excl,      // !
+    // .qmark,     // ?
+    // .hat,       // ^
+    // .bslash,    // \
+    // Whitespace
+    // .tab,       // \t
+    // .ret,       // \r
     }
   }
-
-
 };
 
