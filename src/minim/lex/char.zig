@@ -40,12 +40,31 @@ pub fn isNumeric(C :u8) bool {
 }
 
 //__________________
-/// @descr Returns whether or not the {@arg C} is a character that should trigger a context switch
-pub fn isContextChange(C :u8) bool {
-  if (isWhitespace(C)) { return true; }
+/// @descr Returns whether or not the {@arg C} is an operator symbol
+pub fn isOperator(C :u8) bool {
   return switch (C) { // Search for other valid chars
-    '=', ':', '@', => true,
+    // Standard
+    '*', '+', '-', '/', '%',
+    '<', '>', '&', '|', '!',
+    '~', '^', '=', '$', => true,
+    // Specials
+    ':', '.', '@', '?', '\\', => true,
     else => false,
   };
+}
+
+//__________________
+/// @descr Returns whether or not the {@arg C} is a quote symbol
+pub fn isQuote(C :u8) bool {
+  return switch (C) {
+    '\'', '"', '`' => true,
+    else => false,
+  };
+}
+
+//__________________
+/// @descr Returns whether or not the {@arg C} is a character that should trigger a context switch
+pub fn isContextChange(C :u8) bool {
+  return isWhitespace(C) or isQuote(C) or isOperator(C);
 }
 
