@@ -5,7 +5,7 @@
 const std = @import("std");
 const assert = std.debug.assert;
 // @deps z*std
-const zstd = @import("./zstd.zig");
+const zstd = @import("./lib/zstd.zig");
 // @deps minim
 const M = @import("./minim.zig");
 
@@ -14,6 +14,8 @@ const M = @import("./minim.zig");
 /// @section Entry Point
 //____________________________
 pub fn main() !void {
+  // zstd.sh("echo", "\"1234\"");
+  // zstd.sh("diff", "\"--git ./build\"");
   // try zstd.echo("Some stuff");
   var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
   defer arena.deinit();

@@ -1,1 +1,1 @@
-i32 const main(void) { return 42; }
+int const main(void) { return 42; }
