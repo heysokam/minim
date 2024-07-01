@@ -10,6 +10,7 @@ const prnt = @import("../../lib/zstd.zig").log.prnt;
 const sh   = @import("../../lib/zstd.zig").shell.sh;
 // @deps minim
 const Lex = @import("../../minim.zig").Lex;
+const Tok = @import("../../minim.zig").Tok;
 
 
 const Title = "Basic Checks";
@@ -37,9 +38,16 @@ test "01 | Basic Code Generation" {
   defer L.destroy();
   try L.process();
 
-  for (L.res.items(.id), L.res.items(.val)) | id, val | {
+  // for (L.res.items(.id), L.res.items(.val)) | id, val | {
+  //   std.debug.print("{s} : {s}\n", .{@tagName(id), val.items});
+  // }
+  // try expect(std.mem.eql(u8, L.res.items(.val).items, c));
+
+  var T = Tok.create(&L);
+  defer T.destroy();
+  try T.process();
+  for (T.res.items(.id), T.res.items(.val)) | id, val | {
     std.debug.print("{s} : {s}\n", .{@tagName(id), val.items});
   }
-  // try expect(std.mem.eql(u8, L.res.items(.val).items, c));
 }
 

@@ -15,8 +15,10 @@ const std = @import("std");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
 const fail = zstd.fail;
+const prnt = zstd.prnt;
 const ByteBuffer = zstd.T.ByteBuffer;
 // @deps minim.lex
+const Ch        = @import("./lex.zig").Ch;
 const Lex       = @import("./lex.zig").Lex;
 const LexemList = @import("./lex.zig").LexemList;
 const Lx        = @import("./lex.zig").Lx;
@@ -35,6 +37,7 @@ const Tk = struct {
   /// @descr {@link Tk.id} Valid kinds for Tokens
   const Id = enum {
     ident,
+    number,
     // Specials
     colon,        // :
     paren_L,      // (
@@ -158,7 +161,7 @@ const Pattern = struct {
   ///  =   +   -   *   /   <   >
   ///  @   $   ~   &   %   |
   ///  !   ?   ^   .   :   \
-  const Op = Map.initComptime(.{ 
+  const Op = Map.initComptime(.{
     // Specials
     .{ ":",  .op_colon  }, // Except :
     .{ "=",  .op_eq     }, // Except =
@@ -195,7 +198,20 @@ pub const Tok = struct {
 
   //__________________________
   /// @descr Returns the Lexeme located in the current position of the buffer
-  pub fn lx(T:*Tok) Lx { return T.buf.get(T.pos); }
+  fn lx(T:*Tok) Lx { return T.buf.get(T.pos); }
+  //__________________________
+  /// @descr Returns the Lexeme located {@arg id} positions ahead of the current position of the buffer.
+  fn next_at(T:*Tok, id :usize) Lx { return T.buf.get(T.pos+id); }
+  /// @descr Returns whether or not the next Lexeme in the buffer is an operator.
+  fn next_isOperator(T:*Tok) bool { return Ch.isOperator(Tok.next_at(T,1).val.items[0]); }
+  /// @descr Returns whether or not the next Lexeme in the buffer is an operator.
+  fn next_isWhitespace(T:*Tok) bool { return Ch.isWhitespace(Tok.next_at(T,1).val.items[0]); }
+  //__________________________
+  /// @descr Adds a single character to the last Token of the {@arg T.res} Tokenizer result.
+  fn append_toLast(T:*Tok, C :u8) !void {
+    const id = T.res.len-1;
+    try T.res.items(.val)[id].append(C);
+  }
 
   //__________________________
   /// @descr Creates a new Tokenizer object from the given {@arg L} Lexer contents.
@@ -211,36 +227,101 @@ pub const Tok = struct {
   //__________________________
   /// @descr Frees all resources owned by the Tokenizer object.
   pub fn destroy(T:*Tok) void {
-    T.buf.deinit();
+    T.buf.deinit(T.A);
     T.res.deinit(T.A);
   }
 
 
-
   //__________________________
-  /// @descr Processes an identifier Lexeme into its Token representation, and adds it to the {@link T.res} result.
-  pub fn ident(T:*Tok) !void { _ = T; }
+  /// @descr Processes an identifier Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+  pub fn ident(T:*Tok) !void {
+    const l = T.lx();
+    if (Pattern.Kw.has(l.val.items)) {
+      try T.res.append(T.A, Tk{
+        .id  = Pattern.Kw.get(l.val.items).?,
+        .val = l.val,
+      });
+    } else {
+      try T.res.append(T.A, Tk{
+        .id  = Tk.Id.ident,
+        .val = l.val,
+      });
+    }
+  }
   //__________________________
-  /// @descr Processes a number Lexeme into its Token representation, and adds it to the {@link T.res} result.
-  pub fn number(T:*Tok) !void { _ = T; }
+  /// @descr Processes a number Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+  /// @todo Should this process the numbers into different number kinds?
+  pub fn number(T:*Tok) !void {
+    try T.res.append(T.A, Tk{
+      .id  = Tk.Id.number,
+      .val = T.lx().val,
+    });
+  }
   //__________________________
-  /// @descr Processes a Lexeme starting with `:` into its Token representation, and adds it to the {@link T.res} result.
-  pub fn colon(T:*Tok) !void { _ = T; }
+  /// @descr Processes a Lexeme starting with `:` into its Token representation, and adds it to the {@arg T.res} result.
+  pub fn colon(T:*Tok) !void {
+    if (!Tok.next_isOperator(T)) {
+      try T.res.append(T.A, Tk{
+        .id  = Tk.Id.colon,
+        .val = T.lx().val,
+      });
+    } else { fail("todo: colon operator case", .{}); }
+  }
   //__________________________
-  /// @descr Processes a Lexeme starting with `=` into its Token representation, and adds it to the {@link T.res} result.
-  pub fn eq(T:*Tok) !void { _ = T; }
+  /// @descr Processes a Lexeme starting with `=` into its Token representation, and adds it to the {@arg T.res} result.
+  pub fn eq(T:*Tok) !void {
+    if (!Tok.next_isOperator(T)) {
+      try T.res.append(T.A, Tk{
+        .id  = Tk.Id.eq,
+        .val = T.lx().val,
+      });
+    } else { fail("todo: eq operator case", .{}); }
+  }
   //__________________________
-  /// @descr Processes a Lexeme starting with `*` into its Token representation, and adds it to the {@link T.res} result.
-  pub fn star(T:*Tok) !void { _ = T; }
+  /// @descr Processes a Lexeme starting with `*` into its Token representation, and adds it to the {@arg T.res} result.
+  pub fn star(T:*Tok) !void {
+    if (!Tok.next_isOperator(T)) {
+      try T.res.append(T.A, Tk{
+        .id  = Tk.Id.op_star,
+        .val = T.lx().val,
+      });
+    } else { fail("todo: multi-star operator case", .{}); }
+  }
   //__________________________
-  /// @descr Processes a Lexeme starting with `(` or `)` into its Token representation, and adds it to the {@link T.res} result.
-  pub fn paren(T:*Tok) !void { _ = T; }
+  /// @descr Processes a Lexeme starting with `(` or `)` into its Token representation, and adds it to the {@arg T.res} result.
+  pub fn paren(T:*Tok) !void {
+    const l = T.lx();
+    try T.res.append(T.A, Tk{
+      .id = switch (l.id) {
+        .paren_L => Tk.Id.paren_L,
+        .paren_R => Tk.Id.paren_R,
+        else => unreachable,
+        },
+      .val = l.val,
+    });
+  }
   //__________________________
-  /// @descr Processes a whitespace Lexeme into its Token representation, and adds it to the {@link T.res} result.
-  pub fn space(T:*Tok) !void { _ = T; }
+  /// @descr Processes a whitespace Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+  pub fn space(T:*Tok) !void {
+    try T.res.append(T.A, Tk{
+      .id  = Tk.Id.space,
+      .val = ByteBuffer.init(T.A),
+    });
+    while (true) : (T.pos += 1) { // Collapse all continuous Lexeme spaces into a single space Token.
+      const l = T.lx();
+      if (l.id != .space) { break; }
+      try T.append_toLast(l.val.items[0]); // @warning Assumes spaces are never collaped in the Lexer
+    }
+    T.pos -= 1;
+  }
   //__________________________
-  /// @descr Processes a newline Lexeme into its Token representation, and adds it to the {@link T.res} result.
-  pub fn newline(T:*Tok) !void { _ = T; }
+  /// @descr Processes a newline Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+  pub fn newline(T:*Tok) !void {
+    try T.res.append(T.A, Tk{
+      .id  = Tk.Id.newline,
+      .val = T.lx().val,
+    });
+  }
 
 
   //__________________________

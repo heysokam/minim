@@ -3,8 +3,8 @@
 //:_______________________________________________________________________
 // @deps confy
 const confy   = @import("./src/lib/confy.zig");
-const Package = confy.Package;
 const Name    = confy.Name;
+const Package = confy.Package;
 const Git     = confy.Git;
 
 
