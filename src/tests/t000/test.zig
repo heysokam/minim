@@ -37,17 +37,12 @@ test "01 | Basic Code Generation" {
   var L = try Lex.create_with(A, cm);
   defer L.destroy();
   try L.process();
-
-  // for (L.res.items(.id), L.res.items(.val)) | id, val | {
-  //   std.debug.print("{s} : {s}\n", .{@tagName(id), val.items});
-  // }
-  // try expect(std.mem.eql(u8, L.res.items(.val).items, c));
+  L.report();
 
   var T = Tok.create(&L);
   defer T.destroy();
   try T.process();
-  for (T.res.items(.id), T.res.items(.val)) | id, val | {
-    std.debug.print("{s} : {s}\n", .{@tagName(id), val.items});
-  }
+  T.report();
+  // try expect(std.mem.eql(u8, L.res.items(.val).items, c));
 }
 
