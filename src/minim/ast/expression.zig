@@ -19,7 +19,7 @@ const todo = zstd.todo;
 //   Lit :u8, // todo
 //   Op  :u8, // todo
 // };
-const Expr = union(enum) {
+pub const Expr = union(enum) {
   Lit  :Expr.Literal,
 
   pub fn format(E :*const Expr, comptime f:[]const u8, o:std.fmt.FormatOptions, writer :anytype) !void {
@@ -28,7 +28,7 @@ const Expr = union(enum) {
     }
   }
 
-  const Literal = union(enum) {
+  pub const Literal = union(enum) {
     Flt    :Literal.Float,
     Intgr  :Literal.Int,
     Strng  :Literal.String,
@@ -37,31 +37,31 @@ const Expr = union(enum) {
     const Float = struct {
       val   :cstr,
       size  :todo= null,
-      fn new(args :struct {
+      pub fn new(args :struct {
           val : cstr,
         }) Expr {
         return Expr{ .Lit= Expr.Literal{ .Flt= Expr.Literal.Float{ .val= args.val }}};
       }
     };
 
-    const Int = struct {
+    pub const Int = struct {
       val    :cstr,
       signed :todo= null,
       size   :todo= null,
 
-      fn new(args :struct {
+      pub fn new(args :struct {
           val : cstr,
         }) Expr {
         return Expr{ .Lit= Expr.Literal{ .Intgr= Expr.Literal.Int{ .val= args.val }}};
       }
     };
 
-    const Char = struct {
+    pub const Char = struct {
       val  :cstr,
       const Templ = "'{s}'";
     };
 
-    const String = struct {
+    pub const String = struct {
       val       :cstr,
       multiline :todo= null,
     };

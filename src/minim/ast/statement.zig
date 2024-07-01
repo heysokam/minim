@@ -30,7 +30,7 @@ Retrn   :Stmt.Return,
 pub const Return = struct {
   body  :?Expr= null,
 
-  fn new(E :Expr) Stmt {
+  pub fn new(E :Expr) Stmt {
     return Stmt{ .Retrn= Stmt.Return{ .body= E } };
   }
 };
