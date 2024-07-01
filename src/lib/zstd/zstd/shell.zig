@@ -6,7 +6,7 @@
 // @deps std
 const std = @import("std");
 // @deps C stdlib
-const C = @import("C.zig");
+// const C = @import("C.zig");
 
 
 /// @unsafe @libc
