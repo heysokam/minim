@@ -215,3 +215,11 @@ pub fn process(T:*Tok) !void {
   }
 }
 
+pub fn report(T:*Tok) void {
+  std.debug.print("--- minim.Tokenizer ---\n", .{});
+  for (T.res.items(.id), T.res.items(.val)) | id, val | {
+    std.debug.print("{s} : {s}\n", .{@tagName(id), val.items});
+  }
+  std.debug.print("-----------------------\n", .{});
+}
+
