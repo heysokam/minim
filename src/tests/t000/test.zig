@@ -9,7 +9,7 @@ const echo = @import("../../lib/zstd.zig").log.echo;
 const prnt = @import("../../lib/zstd.zig").log.prnt;
 const sh   = @import("../../lib/zstd.zig").shell.sh;
 // @deps minim
-const Lex = @import("../../minim.zig").Lex;
+const Lex = @import("../../lib/slate.zig").Lex;
 const Tok = @import("../../minim.zig").Tok;
 
 
