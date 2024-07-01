@@ -12,7 +12,10 @@ const Func = @import("./func.zig");
 pub const Node = union(enum) {
   Func :Func,
   pub const List = struct {
-    data :?Seq(Node),
+    data :?Seq(Node)= null,
+
+    /// @descr Returns true if the Node list has no nodes.
+    pub fn empty(L:*const Node.List) bool { return L.data == null; }
   };
 };
 
