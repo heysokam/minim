@@ -13,4 +13,8 @@
 - [ ] [.emit.ID: .]
   - [ ] ID: Case Insensitive
 
+# Operators
+- [ ]  TS.`??`  ->  Zig.`orelse`
+- [ ] Nim.`^1`  ->  Zig.`list.len - 1`
+
 [@include ./context.md]
