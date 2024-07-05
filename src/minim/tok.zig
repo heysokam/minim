@@ -85,7 +85,7 @@ pub fn ident(T:*Tok) !void {
     });
   } else {
     try T.res.append(T.A, Tk{
-      .id  = Tk.Id.ident,
+      .id  = Tk.Id.b_ident,
       .val = l.val,
     });
   }
@@ -95,7 +95,7 @@ pub fn ident(T:*Tok) !void {
 /// @todo Should this process the numbers into different number kinds?
 pub fn number(T:*Tok) !void {
   try T.res.append(T.A, Tk{
-    .id  = Tk.Id.number,
+    .id  = Tk.Id.b_number,
     .val = T.lx().val,
   });
 }
@@ -104,7 +104,7 @@ pub fn number(T:*Tok) !void {
 pub fn colon(T:*Tok) !void {
   if (!Tok.next_isOperator(T)) {
     try T.res.append(T.A, Tk{
-      .id  = Tk.Id.colon,
+      .id  = Tk.Id.sp_colon,
       .val = T.lx().val,
     });
   } else { fail("todo: colon operator case", .{}); }
@@ -114,7 +114,7 @@ pub fn colon(T:*Tok) !void {
 pub fn eq(T:*Tok) !void {
   if (!Tok.next_isOperator(T)) {
     try T.res.append(T.A, Tk{
-      .id  = Tk.Id.eq,
+      .id  = Tk.Id.sp_eq,
       .val = T.lx().val,
     });
   } else { fail("todo: eq operator case", .{}); }
@@ -135,8 +135,8 @@ pub fn paren(T:*Tok) !void {
   const l = T.lx();
   try T.res.append(T.A, Tk{
     .id = switch (l.id) {
-      .paren_L => Tk.Id.paren_L,
-      .paren_R => Tk.Id.paren_R,
+      .paren_L => Tk.Id.sp_paren_L,
+      .paren_R => Tk.Id.sp_paren_R,
       else => unreachable,
       },
     .val = l.val,
@@ -146,7 +146,7 @@ pub fn paren(T:*Tok) !void {
 /// @descr Processes a whitespace Lexeme into its Token representation, and adds it to the {@arg T.res} result.
 pub fn space(T:*Tok) !void {
   try T.res.append(T.A, Tk{
-    .id  = Tk.Id.space,
+    .id  = Tk.Id.wht_space,
     .val = ByteBuffer.init(T.A),
   });
   while (true) : (T.pos += 1) { // Collapse all continuous Lexeme spaces into a single space Token.
@@ -160,7 +160,7 @@ pub fn space(T:*Tok) !void {
 /// @descr Processes a newline Lexeme into its Token representation, and adds it to the {@arg T.res} result.
 pub fn newline(T:*Tok) !void {
   try T.res.append(T.A, Tk{
-    .id  = Tk.Id.newline,
+    .id  = Tk.Id.wht_newline,
     .val = T.lx().val,
   });
 }

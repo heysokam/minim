@@ -29,40 +29,43 @@ pub const Tk = struct {
 
   /// @descr {@link Tk.id} Valid kinds for Tokens
   pub const Id = enum {
-    ident,
-    number,
+    // Base
+    b_ident,
+    b_number,
     // Specials
-    colon,        // :
-    paren_L,      // (
-    paren_R,      // )
-    eq,           // =
-    hash,         // #  ##  #[  ]#  ##[  ]##
-    semicolon,    // ;
-    quote_S,      // '  (single quote)
-    quote_D,      // "  (double quote)
-    quote_B,      // `  (backtick quote)
-    brace_L,      // {
-    brace_R,      // }
-    bracket_L,    // [
-    bracket_R,    // ]
-    comma,        // ,
-    bracketDot_L, // [.
-    bracketDot_R, // .]
-    braceDot_L,   // {.
-    braceDot_R,   // .}
-    parenDot_L,   // (.
-    parenDot_R,   // .)
-    bracketCol_L, // [:
-    bracketCol_R, // :]
+    sp_star,         // *  (not the operator)
+    sp_colon,        // :
+    sp_paren_L,      // (
+    sp_paren_R,      // )
+    sp_eq,           // =
+    sp_hash,         // #  ##  #[  ]#  ##[  ]##
+    sp_semicolon,    // ;
+    sp_quote_S,      // '  (single quote)
+    sp_quote_D,      // "  (double quote)
+    sp_quote_B,      // `  (backtick quote)
+    sp_brace_L,      // {
+    sp_brace_R,      // }
+    sp_bracket_L,    // [
+    sp_bracket_R,    // ]
+    sp_comma,        // ,
+    sp_bracketDot_L, // [.
+    sp_bracketDot_R, // .]
+    sp_braceDot_L,   // {.
+    sp_braceDot_R,   // .}
+    sp_parenDot_L,   // (.
+    sp_parenDot_R,   // .)
+    sp_bracketCol_L, // [:
+    sp_bracketCol_R, // :]
     // Whitespace
-    space,        // ` `
-    newline,      // \n
+    wht_space,        // ` `
+    wht_newline,      // \n
     // Keywords
     kw_proc,      // pr proc
     kw_func,      // fn func
     kw_return,    // return
     kw_cast,      // cast
     kw_operator,  // op operator
+    kw_void,      // void
     // Operators: Specials
     op_star,      // Operators starting with *
     op_dot,       // Operators starting with .
@@ -171,7 +174,7 @@ pub const Pattern = struct {
     .{ "$",  .op_dollar },
     .{ "~",  .op_tilde  },
     .{ "&",  .op_amp    },
-    .{ "%",  .op_perc   },
+    .{ "%",  .op_pcnt   },
     .{ "|",  .op_pipe   },
     .{ "!",  .op_excl   },
     .{ "?",  .op_qmark  },
