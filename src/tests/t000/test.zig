@@ -2,9 +2,10 @@
 //  ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
 //:_______________________________________________________________________
 // @deps std
-const std    = @import("std");
-const eq     = std.mem.eql;
-const check  = std.testing.expect;
+const std = @import("std");
+const eq  = std.mem.eql;
+const chk = std.testing.expect;
+const check = std.testing.expectEqualStrings;
 // @deps zstd
 const zstd = @import("../../lib/zstd.zig");
 const echo = zstd.echo;
@@ -17,7 +18,9 @@ const Lex   = slate.Lex;
 // @deps minim
 const M   = @import("../../minim.zig");
 const Tok = M.Tok;
+const Par = M.Par;
 const Ast = M.Ast;
+const Gen = M.Gen;
 
 
 const Title = "Basic Checks";
@@ -27,10 +30,10 @@ test "00 | dummy check" {
   const zm = @embedFile("./00.zm");
   const c  = @embedFile("./00.c");
   const z  = @embedFile("./00.zig");
-  try check(eq(u8, cm, ""));
-  try check(eq(u8, c,  ""));
-  try check(eq(u8, zm, ""));
-  try check(eq(u8, z,  ""));
+  try check(cm, "");
+  try check(c,  "");
+  try check(zm, "");
+  try check(z,  "");
 }
 
 test "01 | Basic Code Generation" {
@@ -43,8 +46,8 @@ test "01 | Basic Code Generation" {
   const zm = @embedFile("./01.zm");
   const c = @embedFile("./01.c");
   const z = @embedFile("./01.zig");
-  try check(!eq(u8, c,z));
-  try check(!eq(u8, cm,zm));
+  try chk(!eq(u8, c,z));
+  try chk(!eq(u8, cm,zm));
 
   // Lexer
   var L = try Lex.create_with(A, cm);
@@ -57,24 +60,21 @@ test "01 | Basic Code Generation" {
   defer T.destroy();
   try T.process();
   T.report();
-  // try check(eq(u8, L.res.items(.val).items, c));
 
-  // fail.astgen
-  var P = M.Par.create(&T);
+  // Parser
+  var P = Par.create(&T);
   defer P.destroy();
   try P.process();
   P.report();
   const ast = P.res;
-  try check(ast.lang == .C);
-  try check(ast.empty());
+  try chk(ast.lang == .C);
+  try chk(!ast.empty());
 
-  // fail.codegen
-  const code = M.Gen.C(&ast);
+  // Codegen
+  const code = try Gen.C(&ast);
   const out = try std.fmt.allocPrint(A, "{s}", .{code});
-  prnt("..C.Codegen.........\n", .{});
-  prnt("{s}", .{out});
-  prnt("....................\n", .{});
-  try check(eq(u8, out, c));
+  code.report();
+  try check(out, c);
 }
 
 
@@ -96,6 +96,6 @@ test "hello.42" {
   const out = try std.fmt.allocPrint(A.allocator(), "{s}", .{f});
   // prnt("{s}", .{f});
 
-  try check(eq(u8, out, retT++" "++fname++"(void) { return "++result++"; }\n"));
+  try check(out, retT++" const "++fname++"(void) { return "++result++"; }\n");
 }
 
