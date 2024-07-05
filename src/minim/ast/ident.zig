@@ -1,4 +1,6 @@
-pub const Ident = @This();
+//:_______________________________________________________________________
+//  ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
+//:_______________________________________________________________________
 // @deps std
 const std  = @import("std");
 // @deps zstd
@@ -9,19 +11,19 @@ const M     = @import("../rules.zig");
 const Keyw  = M.Keyw;
 const Value = M.Value;
 
-Id  :Ident.Name,
-Kw  :Ident.Keyword,
-Ty  :Ident.Type,
+pub const Ident = union(enum) {
+  Id  :Ident.Name,
+  Kw  :Ident.Keyword,
+  Ty  :Ident.Type,
 
-const Templ = "{s}";
+  pub const Name = struct {
+    name :cstr,
+  };
 
-pub const Name = struct {
-  name :cstr,
-};
+  pub const Type = Value.Type;
 
-pub const Type = Value.Type;
-
-pub const Keyword = struct {
-  id :Keyw,
+  pub const Keyword = struct {
+    id :M.Tk.Id,
+  };
 };
 
