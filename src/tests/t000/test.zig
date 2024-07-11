@@ -4,7 +4,7 @@
 // @deps std
 const std = @import("std");
 const eq  = std.mem.eql;
-const chk = std.testing.expect;
+const ok = std.testing.expect;
 const check = std.testing.expectEqualStrings;
 // @deps zstd
 const zstd = @import("../../lib/zstd.zig");
@@ -44,10 +44,10 @@ test "01 | Basic Code Generation" {
 
   const cm = @embedFile("./01.cm");
   const zm = @embedFile("./01.zm");
-  const c = @embedFile("./01.c");
-  const z = @embedFile("./01.zig");
-  try chk(!eq(u8, c,z));
-  try chk(!eq(u8, cm,zm));
+  const c  = @embedFile("./01.c");
+  const z  = @embedFile("./01.zig");
+  try ok(!eq(u8, c,z));
+  try ok(!eq(u8, cm,zm));
 
   // Lexer
   var L = try Lex.create_with(A, cm);
@@ -67,8 +67,8 @@ test "01 | Basic Code Generation" {
   try P.process();
   P.report();
   const ast = P.res;
-  try chk(ast.lang == .C);
-  try chk(!ast.empty());
+  try ok(ast.lang == .C);
+  try ok(!ast.empty());
 
   // Codegen
   const code = try Gen.C(&ast);
