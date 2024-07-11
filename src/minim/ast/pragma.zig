@@ -3,13 +3,13 @@
 //:_______________________________________________________________________
 // @deps zstd
 const zstd = @import("../../lib//zstd.zig");
-const Seq  = zstd.Seq;
 
 pub const Pragma = enum {
   pure, Inline, Noreturn,
 
   pub const List = struct {
-    data :?Seq(Pragma),
+    const Data = zstd.seq(Pragma);
+    data :?Data,
   };
 };
 

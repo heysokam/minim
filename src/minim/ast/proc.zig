@@ -7,7 +7,6 @@ const std = @import("std");
 // @deps zstd
 const zstd = @import("../../lib/zstd.zig");
 const cstr = zstd.cstr;
-const Seq  = zstd.Seq;
 // @deps minim.ast
 const Ident  = @import("./ident.zig").Ident;
 const Stmt   = @import("./statement.zig").Stmt;
@@ -29,13 +28,14 @@ const Arg = struct {
   name  :Ident.Name,
 
   const List = struct {
-    data :?Seq(Proc.Arg),
+    const Data = zstd.seq(Proc.Arg);
+    data :?Data= null,
   };
 };
 
 pub const Body = struct {
   data  :Stmt.List,
-  pub fn init(A :std.mem.Allocator) @This() { return Body{.data= Stmt.List{.data= Seq(Stmt).init(A)}}; }
+  pub fn init(A :std.mem.Allocator) @This() { return Body{.data= Stmt.List{.data= Stmt.List.Data.init(A)}}; }
   pub fn append(B :*Proc.Body, val :Stmt) !void { try B.data.data.?.append(val); }
 };
 

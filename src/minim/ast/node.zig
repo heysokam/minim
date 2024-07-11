@@ -5,7 +5,6 @@
 const std = @import("std");
 // @deps zstd
 const zstd = @import("../../lib/zstd.zig");
-const Seq  = zstd.Seq;
 // @deps minim.ast
 const Proc = @import("./proc.zig");
 
@@ -14,10 +13,11 @@ const Proc = @import("./proc.zig");
 pub const Node = union(enum) {
   Proc :Proc,
   pub const List = struct {
-    data :?Seq(Node)= null,
+    const Data = zstd.seq(Node);
+    data :?Data= null,
 
     /// @descr Creates a new empty Node.List object.
-    pub fn create(A :std.mem.Allocator) Node.List { return Node.List{.data= Seq(Node).init(A)}; }
+    pub fn create(A :std.mem.Allocator) Node.List { return Node.List{.data= Data.init(A)}; }
     /// @descr Releases all memory used by the Node.List
     pub fn destroy(L:*Node.List) void { L.data.?.deinit(); }
     /// @descr Returns true if the Node list has no nodes.

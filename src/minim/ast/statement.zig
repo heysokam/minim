@@ -5,7 +5,6 @@
 const std = @import("std");
 // @deps zstd
 const zstd = @import("../../lib//zstd.zig");
-const Seq  = zstd.Seq;
 // @deps minim.ast
 const Expr = @import("./expression.zig").Expr;
 
@@ -44,8 +43,9 @@ pub const Stmt = union(enum) {
   // pub const Comment = todo;
   // pub const Block   = todo;
   pub const List = struct {
-    data  :?Seq(Stmt),
-    pub fn init(A :std.mem.Allocator) @This() { return List{.data= Seq(Stmt).init(A)}; }
+    pub const Data = zstd.seq(Stmt);
+    data  :?Data,
+    pub fn init(A :std.mem.Allocator) @This() { return List{.data= Data.init(A)}; }
     pub fn append(L :*Stmt.List, val :Stmt) !void { try L.data.?.append(val); }
   };
 };
