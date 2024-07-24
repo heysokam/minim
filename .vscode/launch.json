@@ -11,6 +11,14 @@
       "target"           : "./bin/tests",
       "cwd"              : "${workspaceRoot}",
       "valuesFormatting" : "parseText"
+    },
+    {
+      "name"             : "Debug : Run",
+      "type"             : "gdb",
+      "request"          : "launch",
+      "target"           : "./bin/run",
+      "cwd"              : "${workspaceRoot}",
+      "valuesFormatting" : "parseText"
     }
   ]
 }
