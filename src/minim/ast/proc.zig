@@ -35,13 +35,13 @@ const Arg = struct {
 
 pub const Body = struct {
   data  :Stmt.List,
-  pub fn init(A :std.mem.Allocator) @This() { return Body{.data= Stmt.List{.data= Stmt.List.Data.init(A)}}; }
-  pub fn append(B :*Proc.Body, val :Stmt) !void { try B.data.data.?.append(val); }
+  pub fn init (A :std.mem.Allocator) @This() { return Body{.data= Stmt.List{.data= Stmt.List.Data.init(A)}}; }
+  pub fn add (B :*Proc.Body, val :Stmt) !void { try B.data.data.?.append(val); }
 };
 
 
 /// @descr Returns an empty {@link Proc} object
-pub fn newEmpty() Proc {
+pub fn newEmpty () Proc {
   return Proc{
     .pure    = false,
     .name    = Ident.Name{.name= "UndefinedProc"},
@@ -53,7 +53,7 @@ pub fn newEmpty() Proc {
   }; // << Proc{ ... }
 }
 
-pub fn new(args :struct {
+pub fn new (args :struct {
   pure    :bool,
   name    :cstr,
   public  :bool= false,

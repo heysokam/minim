@@ -45,8 +45,8 @@ pub const Stmt = union(enum) {
   pub const List = struct {
     pub const Data = zstd.seq(Stmt);
     data  :?Data,
-    pub fn init(A :std.mem.Allocator) @This() { return List{.data= Data.init(A)}; }
-    pub fn append(L :*Stmt.List, val :Stmt) !void { try L.data.?.append(val); }
+    pub fn init (A :std.mem.Allocator) @This() { return List{.data= Data.init(A)}; }
+    pub fn add (L :*Stmt.List, val :Stmt) !void { try L.data.?.append(val); }
   };
 };
 

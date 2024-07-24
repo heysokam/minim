@@ -21,20 +21,20 @@ res   :M.Ast,
 
 //__________________________
 /// @descr Returns the Token located in the current position of the buffer
-fn tk(P:*Par) Tk { return P.buf.get(P.pos); }
+fn tk (P:*Par) Tk { return P.buf.get(P.pos); }
 //__________________________
 /// @descr Moves the current position of the Parser by {@arg n} Tokens
-fn move(P:*Par, n :i64) void { P.pos += @intCast(n); }
+fn move (P:*Par, n :i64) void { P.pos += @intCast(n); }
 //__________________________
 /// @descr Moves the Parser forwards by 1 only if the {@arg id} Token is found at the current position.
-fn skip(P:*Par, id :Tk.Id) void {
+fn skip (P:*Par, id :Tk.Id) void {
   if (P.tk().id == id){ P.move(1); }
 }
 
 
 //__________________________
 /// @descr Creates a new Parser object from the given {@arg T} Tokenizer contents.
-pub fn create(T:*const M.Tok) Par {
+pub fn create (T:*const M.Tok) Par {
   return Par {
     .A      = T.A,
     .pos    = 0,
@@ -48,7 +48,7 @@ pub fn create(T:*const M.Tok) Par {
 }
 //__________________________
 /// @descr Frees all resources owned by the Parser object.
-pub fn destroy(P:*Par) void {
+pub fn destroy (P:*Par) void {
   P.buf.deinit(P.A);
   P.res.destroy();
 }
@@ -61,7 +61,7 @@ pub fn destroy(P:*Par) void {
 const ident = struct {
   //____________________________
   /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
-  pub fn expect(P:*Par, id :Tk.Id, kind :cstr) void {
+  pub fn expect (P:*Par, id :Tk.Id, kind :cstr) void {
     if (P.tk().id != id) {
       fail("Unexpected Token for {s}. Expected '{s}', but found:  {d}:'{s}'", .{kind, @tagName(id), P.pos, @tagName(P.tk().id)});
     }
@@ -70,7 +70,7 @@ const ident = struct {
   /// @descr
   ///  Creates an Ident.Name object from the current Token, and returns it.
   ///  Will fail if the current Token is not an Identifier
-  fn name(P:*Par) M.Ast.Ident.Name {
+  fn name (P:*Par) M.Ast.Ident.Name {
     ident.expect(P, Tk.Id.b_ident, "Ident.name");
     return M.Ast.Ident.Name{.name= P.tk().val.items};
   }
@@ -78,7 +78,7 @@ const ident = struct {
   /// @descr
   ///  Creates an Ident.Type object from the current Token, and returns it.
   ///  Will fail if the current Token is not an Identifier
-  fn typ(P:*Par) M.Ast.Ident.Type {
+  fn typ (P:*Par) M.Ast.Ident.Type {
     ident.expect(P, Tk.Id.b_ident, "Ident.Type");
     return M.Ast.Ident.Type{.any= M.Ast.Ident.Type.Any{.name= P.tk().val.items}}; // TODO: Static Typechecking
   }
@@ -91,13 +91,13 @@ const ident = struct {
 const stmt = struct {
   //____________________________
   /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
-  fn expect(P:*Par, id :Tk.Id) void {
+  fn expect (P:*Par, id :Tk.Id) void {
     if (P.tk().id != id) {
       fail("Unexpected Token for Statement. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)});
     }
   }
 
-  fn Return(P:*Par) M.Ast.Stmt {
+  fn Return (P:*Par) M.Ast.Stmt {
     stmt.expect(P, Tk.Id.kw_return);
     P.move(1);
     P.skip(Tk.Id.wht_space);
@@ -131,7 +131,7 @@ const stmt = struct {
 const proc = struct {
   //____________________________
   /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
-  fn expect(P:*Par, id :Tk.Id) void {
+  fn expect (P:*Par, id :Tk.Id) void {
     if (P.tk().id != id) {
       fail("Unexpected Token for Proc. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)});
     }
@@ -139,7 +139,7 @@ const proc = struct {
 
   //__________________________
   /// @descr Returns whether or not the current Token is a public marker Token.
-  fn public(P:*Par) bool {
+  fn public (P:*Par) bool {
     // TODO: Make these two `star` tokens be one single Token
     return P.tk().id == Tk.Id.sp_star or P.tk().id == Tk.Id.op_star;
   }
@@ -147,14 +147,14 @@ const proc = struct {
   //__________________________
   /// @descr Creates the Body of the current `proc`
   /// :: Proc.Body = eq ind Stmt.List
-  fn body(P:*Par) !M.Ast.Proc.Body {
+  fn body (P:*Par) !M.Ast.Proc.Body {
     proc.expect(P, Tk.Id.sp_eq);
     P.move(1);
     proc.expect(P, Tk.Id.wht_space);
     P.move(1);
     var result = M.Ast.Proc.Body.init(P.A);
     switch (P.tk().id) {
-      Tk.Id.kw_return => try result.append(stmt.Return(P)),
+      Tk.Id.kw_return => try result.add(stmt.Return(P)),
       else => |token| fail("Unknown First Token for Proc.Body Statement '{s}'", .{@tagName(token)})
     }
     return result;
@@ -164,7 +164,7 @@ const proc = struct {
   /// @descr
   ///  Creates a topLevel `proc` or `func` statement and adds the resulting Node into the {@arg P.res} AST result.
   ///  Applies syntax error checking along the process.
-  pub fn parse(P:*Par) !void {
+  pub fn parse (P:*Par) !void {
     var result  = M.Ast.Proc.newEmpty();
     // pure/proc case
     switch (P.tk().id) {
@@ -215,7 +215,7 @@ const proc = struct {
     //   body    :?Proc.Body= null,
     //   pragmas :?Pragma.List= null,
     // }) Proc {
-    try P.res.append(M.Ast.Node{.Proc=result});
+    try P.res.add(M.Ast.Node{.Proc=result});
   }
 };
 
@@ -247,7 +247,7 @@ const proc = struct {
 /// :........
 //__________________________
 /// @descr Parser Entry Point
-pub fn process(P:*Par) !void {
+pub fn process (P:*Par) !void {
   while (P.pos < P.buf.len) : ( P.move(1) ) {
     switch (P.tk().id) {
     .kw_proc, .kw_func => try proc.parse(P),
@@ -256,7 +256,7 @@ pub fn process(P:*Par) !void {
   }
 }
 
-pub fn report(P:*Par) void {
+pub fn report (P:*Par) void {
   std.debug.print("--- minim.Parser ---\n", .{});
   if (P.res.list.data != null) {
     for (P.res.list.data.?.items, 0..) | id, val | {
