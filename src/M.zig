@@ -6,7 +6,8 @@ const std = @import("std");
 // @deps z*std
 const zstd = @import("./lib/zstd.zig");
 // @deps minim
-const M = @import("./minim.zig");
+const M   = @import("./minim.zig");
+const CLI = @import("./minim/cli.zig");
 
 
 //______________________________________
@@ -17,13 +18,16 @@ pub fn main() !void {
   defer A.deinit();
   zstd.echo("Hello M.");
 
+  var cli = try CLI.init(A.allocator());
+  defer cli.destroy();
+
   const zm =
-    \\ proc main *() :i32= return 42
+    \\proc main *() :i32= return 42
+    \\
     ;
   const ast = try M.Ast.get(zm, A.allocator());
 
   const code = try M.Gen.C(&ast);
-  code.report();
-
+  if (cli.cfg.verbose) code.report();
 }
 
