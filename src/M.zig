@@ -18,16 +18,33 @@ pub fn main() !void {
   defer A.deinit();
   zstd.echo("Hello M.");
 
+  //_____________________________
+  // Get CLI options and config
   var cli = try CLI.init(A.allocator());
   defer cli.destroy();
 
-  const zm =
+  //_____________________________
+  // File Configuration
+  //_____________________________
+  // Read the code
+  const zm = // TODO: Read from file
     \\proc main *() :i32= return 42
     \\
     ;
+  //_____________________________
+  // Preprocess
+  //_____________________________
+  // Generate AST
   const ast = try M.Ast.get(zm, A.allocator());
-
+  //_____________________________
+  // Codegen
   const code = try M.Gen.C(&ast);
   if (cli.cfg.verbose) code.report();
+  //_____________________________
+  // Write the code into a temp file
+  //_____________________________
+  // Compile the C code into binaries
+  //_____________________________
+  // Run the final binary when requested
 }
 
