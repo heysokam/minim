@@ -57,7 +57,7 @@ pub fn main () !u8 {
   P.report();
   try tests.build();
   try M.build();
-  try M.run();
+  //try M.run();
   return 0;
 }
 
