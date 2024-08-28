@@ -11,6 +11,7 @@ const zstd = @import("../lib/zstd.zig");
 // @deps minim
 const Cfg = @import("./cfg.zig");
 
+A     :std.mem.Allocator,
 opts  :zstd.CLI,
 cfg   :Cfg,
 
@@ -60,13 +61,14 @@ fn getSystem (cli :*CLI) !zstd.System {
   const host = zstd.System.host();
   const os   = cli.opts.hasLong("os");
   const cpu  = cli.opts.hasLong("cpu");
+  const abi  = cli.opts.hasLong("abi");
   if (!os and !cpu) return host;
   var result :zstd.System= host;
-  if (cli.opts.hasLong("os") ) result.os  = zstd.System.parse.os(try cli.opts.getLong("os"));
-  if (cli.opts.hasLong("cpu")) result.cpu = zstd.System.parse.cpu(try cli.opts.getLong("cpu"));
+  if (os)  result.os  = zstd.System.parse.os(try cli.opts.getLong("os"));
+  if (cpu) result.cpu = zstd.System.parse.cpu(try cli.opts.getLong("cpu"));
   result.abi =
-    if (!cli.opts.hasLong("abi")) zstd.System.parse.abi(try cli.opts.getLong("abi"))
-    else                          zstd.System.default.abi(result.cpu, result.os);
+    if (abi) zstd.System.parse.abi(try cli.opts.getLong("abi"))
+    else     zstd.System.default.abi(result.cpu, result.os);
   return result;
 }
 
@@ -75,11 +77,39 @@ pub fn init (A :std.mem.Allocator) !CLI {
   var result = CLI{
     .opts = try zstd.CLI.init(A),
     .cfg  = Cfg{},
+    .A    = A,
     }; //:: result
   // Arguments
        if (result.opts.hasArgAt("c",  0)) { result.cfg.cmd = .compile; }
   else if (result.opts.hasArgAt("cc", 0)) { result.cfg.cmd = .codegen; }
   try CLI.check.args(&result);
+  // Compile Options
+  if (result.opts.hasLong("release")) result.cfg.mode = .release;
+  result.cfg.system = try result.getSystem();
+  // TODO: path    HashSet[Path]
+  // TODO: passC   HashSet[string]
+  // TODO: passL   HashSet[string]
+  // TODO: cfile   HashSet[Path]
+  // TODO: Input/Output Error Management function
+  // Input
+  result.cfg.input = try result.opts.getArg(1);
+  if (!zstd.paths.file.hasExt(result.cfg.input, ".cm")) zstd.fail("Automatic file extension management is not implemented yet.\n", .{});
+  // Output
+  if (result.opts.hasArg(2)) {
+    switch (result.cfg.cmd) {
+      .codegen => { // TODO: Get arg2 for both cases
+        result.cfg.output = try result.opts.getArg(2);
+      },
+      else => zstd.fail("Arg2 management not implemented for command:  {s}\n", .{@tagName(result.cfg.cmd)}),
+    }
+  }
+  if (std.mem.eql(u8, result.cfg.output, Cfg.Undefined.output)) {
+    result.cfg.output = try zstd.paths.file.ext.change(
+      result.cfg.input, // TODO: Relative to ./bin/*
+      zstd.System.ext.bin(result.cfg.system),
+      result.A
+      ); //:: result.cfg.output
+  }
   // Single Flags
   if (result.opts.hasShort('q') or result.opts.hasLong("quiet")) result.cfg.quiet = true;
   if (result.opts.hasShort('v') or result.opts.hasLong("verbose")) result.cfg.verbose = true;
@@ -90,16 +120,9 @@ pub fn init (A :std.mem.Allocator) !CLI {
   if (result.opts.hasLong("binDir")  ) result.cfg.dir.bin   = try result.opts.getLong("binDir");
   if (result.opts.hasLong("codeDir") ) result.cfg.dir.code  = try result.opts.getLong("codeDir");
   // Binaries
-  if (result.opts.hasLong("zigBin")      ) result.cfg.zigBin   = try result.opts.getLong("zigBin");
-  if (result.opts.hasLong("clangFmtBin") ) result.cfg.fmt.bin  = try result.opts.getLong("clangFmtBin");
-  if (result.opts.hasLong("clangFmtFile")) result.cfg.fmt.file = try result.opts.getLong("clangFmtFile");
-  // Compile Options
-  if (result.opts.hasLong("release")) result.cfg.mode = .release;
-  result.cfg.system = try result.getSystem();
-  // TODO: path    HashSet[Path]
-  // TODO: passC   HashSet[string]
-  // TODO: passL   HashSet[string]
-  // TODO: cfile   HashSet[Path]
+  if (result.opts.hasLong("zigBin")     ) result.cfg.zigBin  = try result.opts.getLong("zigBin");
+  if (result.opts.hasLong("clangFmtBin")) result.cfg.fmt.bin = try result.opts.getLong("clangFmtBin");
+  if (result.opts.hasLong("clangFmtExt")) result.cfg.fmt.ext = try result.opts.getLong("clangFmtExt");
   // Return the resulting configuration
   return result;
 }
