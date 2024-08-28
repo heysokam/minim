@@ -86,8 +86,8 @@ test "hello.42" {
   const fname  = "main";
   const result = "42";
 
-  var body = C.Func.Body.init(A.allocator());
-  try body.append(C.Stmt.Return.new(C.Expr.Literal.Int.new(.{ .val= result })));
+  var body = C.Func.Body.create(A.allocator());
+  try body.add(C.Stmt.Return.new(C.Expr.Literal.Int.new(.{ .val= result })));
   const f = C.Func{
     .retT= C.Ident.Type{ .name= retT, .type= .i32 },
     .name= C.Ident.Name{ .name= fname },
