@@ -80,10 +80,9 @@ pub const create = struct {
   //____________________________
   /// @descr Creates a new AST object by parsing the contents of the {@arg file}
   pub fn fromFile (file :cstr, A :std.mem.Allocator) !Ast {
-    const code = try std.fs.cwd().readFileAlloc(A, file, 50*1024);
+    const code = try zstd.files.read(file, A, .{});
     defer A.free(code);
-    const result = try Ast.create.fromStr(code, A);
-    return result;
+    return try Ast.create.fromStr(code, A);
   }
 };
 
