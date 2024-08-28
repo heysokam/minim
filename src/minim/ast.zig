@@ -44,16 +44,13 @@ pub fn empty (ast :*const Ast) bool { return ast.list.empty(); }
 pub fn add (ast :*Ast, val :Node) !void { try ast.list.add(val); }
 /// @descr Duplicates the data of the {@arg ast} so that it is safe to call {@link Ast.destroy} without deallocating the duplicate.
 pub fn clone (ast :*Ast) !Ast { return Ast{.A= ast.A, .lang= ast.lang, .list= try ast.list.clone()}; }
+/// @descr Frees all resources owned by the Parser object.
+pub fn destroy (ast :*Ast) void { ast.list.destroy(); }
 
 
 //______________________________________
 // @section Ast Creation
 //____________________________
-/// @descr Frees all resources owned by the Parser object.
-pub fn destroy (ast :*Ast) void {
-  ast.list.destroy();
-}
-//__________________________
 /// @descr Creates a new AST object from the given input.
 pub const create = struct {
   //____________________________
