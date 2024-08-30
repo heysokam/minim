@@ -1,0 +1,1 @@
+fn one() void { return; }
