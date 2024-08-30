@@ -4,11 +4,7 @@
 // @deps minim
 const M = @import("../../minim.zig");
 // @deps minim.tests
-const base  = @import("../base.zig");
-const eq    = base.eq;
-const ok    = base.ok;
-const strEq = base.strEq;
-const check = base.check;
+const t = @import("../base.zig");
 
 
 const Title = "Basic Checks";
@@ -19,10 +15,10 @@ test "00 | dummy check" {
   const zm = @embedFile(ID++".zm");
   const c  = @embedFile(ID++".c");
   const z  = @embedFile(ID++".zig");
-  try strEq(cm, "");
-  try strEq(c,  "");
-  try strEq(zm, "");
-  try strEq(z,  "");
+  try t.strEq(cm, "");
+  try t.strEq(c,  "");
+  try t.strEq(zm, "");
+  try t.strEq(z,  "");
 }
 
 test "01 | Basic Code Generation" {
@@ -32,10 +28,10 @@ test "01 | Basic Code Generation" {
   const zm = @embedFile(ID++".zm");
   const c  = @embedFile(ID++".c");
   const z  = @embedFile(ID++".zig");
-  try ok(!eq(u8, c,z));
-  try ok(!eq(u8, cm,zm));
+  try t.ok(!t.eq(u8, c,z));
+  try t.ok(!t.eq(u8, cm,zm));
 
-  try check(cm, c, M.Lang.C);
+  try t.check(cm, c, M.Lang.C);
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }
 

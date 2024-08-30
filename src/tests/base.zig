@@ -38,7 +38,6 @@ pub fn check (src :cstr, trg :cstr, lang :M.Lang) !void {
   const out = try std.fmt.allocPrint(A, "{s}", .{code});
   try ok(ast.lang == lang);
   try ok(!ast.empty());
-  try strEq(out, trg);
+  try strEq(trg, out);
 }
-
 
