@@ -103,6 +103,10 @@ pub const Tk = struct {
     op_qmark,     // Operators starting with ?
     op_hat,       // Operators starting with ^
     op_bslash,    // Operators starting with \
+
+    pub fn format (tk :Tk.Id, comptime _:cstr, _:std.fmt.FormatOptions, writer :anytype) !void {
+      try writer.print("{s}", .{@tagName(tk)});
+    }
     };
 
   //____________________________
