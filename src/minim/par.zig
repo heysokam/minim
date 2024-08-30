@@ -91,25 +91,31 @@ const ident = struct {
 const stmt = struct {
   //____________________________
   /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
-  fn expect (P:*Par, id :Tk.Id) void {
-    if (P.tk().id != id) {
-      fail("Unexpected Token for Statement. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)});
+  fn expectOr (P:*Par, ids :[]const Tk.Id) void {
+    for (ids) | id | {
+      if (P.tk().id == id) { return; }
     }
+    fail("Unexpected Token for Statement. Expected '{s}', but found:  {d}:'{s}'", .{ids, P.pos, @tagName(P.tk().id)});
+  }
+
+  fn expect (P:*Par, id :Tk.Id) void {
+    if (P.tk().id == id) { return; }
+    fail("Unexpected Token for Statement. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)});
   }
 
   fn Return (P:*Par) M.Ast.Stmt {
     stmt.expect(P, Tk.Id.kw_return);
     P.move(1);
     P.skip(Tk.Id.wht_space);
-    // FIX: Return's Body (not just a hardcoded b_number)
-    stmt.expect(P, Tk.Id.b_number);
-    P.move(1);
+    stmt.expectOr(P, &.{Tk.Id.b_number, Tk.Id.wht_newline});
+    const ret = switch (P.tk().id) {
+      .b_number    => M.Ast.Expr.Literal.Int.new(.{.val= P.tk().val.items,}),
+      .wht_newline => M.Ast.Expr.Empty,
+      else => |id| fail("Unexpected Token for Return Statement value. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)}),
+    };
+    if (P.tk().id == .b_number) P.move(1);
     stmt.expect(P, Tk.Id.wht_newline);
-    return M.Ast.Stmt.Return.new(
-      M.Ast.Expr.Literal.Int.new(.{
-        .val= P.tk().val.items,
-        })
-      );
+    return M.Ast.Stmt.Return.new(ret);
   }
 };
 
@@ -141,6 +147,7 @@ const proc = struct {
   /// @descr Returns whether or not the current Token is a public marker Token.
   fn public (P:*Par) bool {
     // TODO: Make these two `star` tokens be one single Token
+    // FIX: Should expect a star, not an op_star/sp_star
     return P.tk().id == Tk.Id.sp_star or P.tk().id == Tk.Id.op_star;
   }
 
@@ -180,7 +187,6 @@ const proc = struct {
     P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
 
     // public/private case
-    proc.expect(P, Tk.Id.op_star); // FIX: Should expect a star, not an op_star
     result.public = proc.public(P);
     // FIX: Make these two `star` tokens be one single Token
     P.skip(Tk.Id.sp_star);
