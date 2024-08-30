@@ -13,7 +13,7 @@ const prnt = zstd.prnt;
 const M = @import("../minim.zig");
 
 const generate = struct {
-  const C   = @import("./gen/c.zig");
+  const C   = @import("./gen/C.zig");
   const Zig = @import("./gen/zig.zig");
 };
 
@@ -25,7 +25,7 @@ pub fn C (ast :*const M.Ast) !slate.C.Ast {
   var result = slate.C.Ast.create(ast.A);
   for (ast.list.data.?.items) | N | {
     switch (N) {
-    .Proc => try result.add(try generate.C.func(N, ast.A)),
+    .Proc => try result.add(try generate.C.proc(N, ast.A)),
     }
   }
   return result;
@@ -39,7 +39,7 @@ pub fn Zig (ast :*const M.Ast) !slate.C.Ast {
   var result = slate.C.Ast.create(ast.A);
   for (ast.list.data.?.items) | N | {
     switch (N) {
-    .Proc => try result.add(try generate.C.func(N, ast.A)),
+    .Proc => try result.add(try generate.C.proc(N, ast.A)),
     }
   }
   return result;

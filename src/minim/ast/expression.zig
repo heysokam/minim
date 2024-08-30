@@ -20,7 +20,8 @@ const todo = zstd.todo;
 //   Op  :u8, // todo
 // };
 pub const Expr = union(enum) {
-  Lit  :Expr.Literal,
+  Empty,
+  Lit   :Expr.Literal,
 
   pub fn format(E :*const Expr, comptime f:[]const u8, o:std.fmt.FormatOptions, writer :anytype) !void {
     switch (E.*) {
