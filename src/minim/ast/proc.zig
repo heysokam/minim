@@ -23,13 +23,16 @@ pragmas  :?Pragma.List,
 body     :Proc.Body= undefined,
 
 
-const Arg = struct {
+pub const Arg = struct {
   type  :Ident.Type,
   name  :Ident.Name,
+  mut   :bool= false,
 
-  const List = struct {
+  pub const List = struct {
     const Data = zstd.seq(Proc.Arg);
     data :?Data= null,
+    pub fn create (A :std.mem.Allocator) @This() { return @This(){.data= Data.init(A)}; }
+    pub fn add (L :*Proc.Arg.List, val :Proc.Arg) !void { try L.data.?.append(val); }
   };
 };
 

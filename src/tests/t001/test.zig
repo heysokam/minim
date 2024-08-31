@@ -21,10 +21,22 @@ test "01 | Basic Proc" {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }
 
+test "02 | Args: Basic" {
+  const ID = "02";
+  const cm = @embedFile(ID++".cm");
+  const zm = @embedFile(ID++".zm");
+  const c  = @embedFile(ID++".c");
+  const z  = @embedFile(ID++".zig");
+  try t.ok(!t.eq(u8, c,z));
+  try t.ok(!t.eq(u8, cm,zm));
+
+  try t.check(cm, c, M.Lang.C);
+  // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
+}
+
 // #_______________________________________
 // # @section Test
 // #_____________________________
-// test name "02 | Args: Basic"      : check "02"
 // test name "03 | Args: Complex"    : check "03"
 // test name "04 | Visibility"       : check "04"
 // test name "05 | Varargs"          : check "05"

@@ -110,6 +110,14 @@ pub fn colon(T:*Tok) !void {
   } else { fail("todo: colon operator case", .{}); }
 }
 //__________________________
+/// @descr Processes a semicolon Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+pub fn semicolon(T:*Tok) !void {
+  try T.res.append(T.A, Tk{
+    .id  = Tk.Id.sp_semicolon,
+    .val = T.lx().val,
+  });
+}
+//__________________________
 /// @descr Processes a Lexeme starting with `=` into its Token representation, and adds it to the {@arg T.res} result.
 pub fn eq(T:*Tok) !void {
   if (!Tok.next_isOperator(T)) {
@@ -165,7 +173,6 @@ pub fn newline(T:*Tok) !void {
   });
 }
 
-
 //__________________________
 /// @descr Tokenizer Entry Point
 pub fn process(T:*Tok) !void {
@@ -175,6 +182,7 @@ pub fn process(T:*Tok) !void {
     .ident             => try T.ident(),
     .number            => try T.number(),
     .colon             => try T.colon(),
+    .semicolon         => try T.semicolon(),
     .eq                => try T.eq(),
     .star              => try T.star(),
     .paren_L, .paren_R => try T.paren(),
@@ -183,7 +191,6 @@ pub fn process(T:*Tok) !void {
     else => |lexem| fail("Unknown first lexeme '{s}'", .{@tagName(lexem)})
     }
   // .hash,      // #
-  // .semicolon, // ;
   // .quote_S,   // '  (single quote)
   // .quote_D,   // "  (double quote)
   // .quote_B,   // `  (backtick quote)

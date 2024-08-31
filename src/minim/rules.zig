@@ -66,6 +66,9 @@ pub const Tk = struct {
     kw_cast,      // cast
     kw_operator,  // op operator
     kw_void,      // void
+    kw_var,       // var
+    kw_let,       // let
+    kw_const,     // const
     // Operators: Specials
     op_star,      // Operators starting with *
     op_dot,       // Operators starting with .
@@ -136,6 +139,9 @@ pub const Pattern = struct {
     .{ "cast",     .kw_cast     },
     .{ "op",       .kw_operator },
     .{ "operator", .kw_operator },
+    .{ "var",      .kw_var      },
+    .{ "let",      .kw_let      },
+    .{ "const",    .kw_const    },
     // Operator Keywords
     .{ "eq",       .op_eq       }, // Same as ==
     .{ "and",      .op_and      }, // Same as &&

@@ -6,7 +6,6 @@ pub const Par = @This();
 const std = @import("std");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
-const fail = zstd.fail;
 const prnt = zstd.prnt;
 const echo = zstd.echo;
 const cstr = zstd.cstr;
@@ -14,17 +13,28 @@ const cstr = zstd.cstr;
 const M = @import("../minim.zig");
 
 const Tk = @import("./rules.zig").Tk;
-A     :std.mem.Allocator,
-pos   :usize,
-buf   :Tk.List,
-res   :M.Ast,
+A      :std.mem.Allocator,
+pos    :usize,
+buf    :Tk.List,
+res    :M.Ast,
+parsed :zstd.str,
+
+//__________________________
+/// @descr Triggers an fatal error and prints the contents parsed so far
+fn fail (P:*const Par, comptime msg :cstr, args :anytype) noreturn {
+  echo(P.parsed.items);
+  zstd.fail(msg, args);
+}
 
 //__________________________
 /// @descr Returns the Token located in the current position of the buffer
 fn tk (P:*Par) Tk { return P.buf.get(P.pos); }
 //__________________________
 /// @descr Moves the current position of the Parser by {@arg n} Tokens
-fn move (P:*Par, n :i64) void { P.pos += @intCast(n); }
+fn move (P:*Par, n :i64) void {
+  P.parsed.appendSlice(P.tk().val.items) catch {};
+  P.pos += @intCast(n);
+}
 //__________________________
 /// @descr Moves the Parser forwards by 1 only if the {@arg id} Token is found at the current position.
 fn skip (P:*Par, id :Tk.Id) void {
@@ -43,7 +53,8 @@ pub fn create (T:*const M.Tok) Par {
       .A    = T.A,
       .lang = .C,
       .list = M.Ast.Node.List.create(T.A),
-    },
+      }, //:: .res
+    .parsed = zstd.str.init(T.A),
   };
 }
 //__________________________
@@ -62,9 +73,8 @@ const ident = struct {
   //____________________________
   /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
   pub fn expect (P:*Par, id :Tk.Id, kind :cstr) void {
-    if (P.tk().id != id) {
-      fail("Unexpected Token for {s}. Expected '{s}', but found:  {d}:'{s}'", .{kind, @tagName(id), P.pos, @tagName(P.tk().id)});
-    }
+    if (P.tk().id != id) P.fail("Unexpected Token for {s}. Expected '{s}', but found:  {d}:'{s}'",
+      .{kind, @tagName(id), P.pos, @tagName(P.tk().id)});
   }
   //__________________________
   /// @descr
@@ -91,27 +101,27 @@ const ident = struct {
 const stmt = struct {
   //____________________________
   /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
-  fn expectOr (P:*Par, ids :[]const Tk.Id) void {
+  fn expectAny (P:*Par, ids :[]const Tk.Id) void {
     for (ids) | id | {
       if (P.tk().id == id) { return; }
     }
-    fail("Unexpected Token for Statement. Expected '{s}', but found:  {d}:'{s}'", .{ids, P.pos, @tagName(P.tk().id)});
+    P.fail("Unexpected Token for Statement. Expected '{any}', but found:  {d}:'{s}'", .{ids, P.pos, @tagName(P.tk().id)});
   }
 
   fn expect (P:*Par, id :Tk.Id) void {
     if (P.tk().id == id) { return; }
-    fail("Unexpected Token for Statement. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)});
+    P.fail("Unexpected Token for Statement. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)});
   }
 
   fn Return (P:*Par) M.Ast.Stmt {
     stmt.expect(P, Tk.Id.kw_return);
     P.move(1);
     P.skip(Tk.Id.wht_space);
-    stmt.expectOr(P, &.{Tk.Id.b_number, Tk.Id.wht_newline});
+    stmt.expectAny(P, &.{Tk.Id.b_number, Tk.Id.wht_newline});
     const ret = switch (P.tk().id) {
       .b_number    => M.Ast.Expr.Literal.Int.new(.{.val= P.tk().val.items,}),
       .wht_newline => M.Ast.Expr.Empty,
-      else => |id| fail("Unexpected Token for Return Statement value. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)}),
+      else => |id| P.fail("Unexpected Token for Return Statement value. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)}),
     };
     if (P.tk().id == .b_number) P.move(1);
     stmt.expect(P, Tk.Id.wht_newline);
@@ -139,7 +149,7 @@ const proc = struct {
   /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
   fn expect (P:*Par, id :Tk.Id) void {
     if (P.tk().id != id) {
-      fail("Unexpected Token for Proc. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)});
+      P.fail("Unexpected Token for Proc. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)});
     }
   }
 
@@ -150,6 +160,57 @@ const proc = struct {
     // FIX: Should expect a star, not an op_star/sp_star
     return P.tk().id == Tk.Id.sp_star or P.tk().id == Tk.Id.op_star;
   }
+
+  const args = struct {
+    //__________________________
+    /// @descr Returns whether the current argument of the current proc is mutable or not
+    /// @note Skips/Moves the parser accordingly
+    fn mutable (P:*Par) bool {
+      P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
+      if (P.tk().id == .kw_var) { P.move(1); return true; }
+      return false;
+    }
+    //__________________________
+    /// @descr Returns the current argument of the current proc
+    fn current (P:*Par) !M.Ast.Proc.Arg {
+      // Arg name
+      P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
+      // FIX: Multi-name with single-type (comma separated)
+      const name = ident.name(P);
+      P.move(1);
+      P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
+      // Arg type
+      proc.expect(P, Tk.Id.sp_colon);
+      P.move(1);
+      P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
+      const mut = proc.args.mutable(P);
+      P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
+      const typ = ident.typ(P);
+      P.move(1);
+      P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
+      return M.Ast.Proc.Arg{.type= typ, .name= name, .mut= mut};
+    }
+
+    //__________________________
+    /// @descr Returns the argument list of the current proc
+    fn list (P:*Par) !?M.Ast.Proc.Arg.List {
+      proc.expect(P, Tk.Id.sp_paren_L);
+      P.move(1);
+      P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
+      if (P.tk().id == Tk.Id.sp_paren_R) { P.move(1); return null; } // null means the proc has no arguments
+      // ... parse args
+      var result = M.Ast.Proc.Arg.List.create(P.A);
+      while (true) {
+        try result.add(try proc.args.current(P));
+        // Arg separator or end
+        if (P.tk().id == Tk.Id.sp_semicolon) { P.move(1); continue; }
+        break;
+      }
+      proc.expect(P, Tk.Id.sp_paren_R);
+      P.move(1);
+      return result;
+    }
+  };
 
   //__________________________
   /// @descr Creates the Body of the current `proc`
@@ -162,7 +223,7 @@ const proc = struct {
     var result = M.Ast.Proc.Body.init(P.A);
     switch (P.tk().id) {
       Tk.Id.kw_return => try result.add(stmt.Return(P)),
-      else => |token| fail("Unknown First Token for Proc.Body Statement '{s}'", .{@tagName(token)})
+      else => |token| P.fail("Unknown First Token for Proc.Body Statement '{s}'", .{@tagName(token)})
     }
     return result;
   }
@@ -177,7 +238,7 @@ const proc = struct {
     switch (P.tk().id) {
       .kw_func => result.pure = true,
       .kw_proc => result.pure = false,
-      else => |token| fail("Unknown First Token for Proc '{s}'", .{@tagName(token)})
+      else => |token| P.fail("Unknown First Token for Proc '{s}'", .{@tagName(token)})
       } P.move(1);
     P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
     // name = Ident
@@ -192,12 +253,8 @@ const proc = struct {
     P.skip(Tk.Id.sp_star);
     P.skip(Tk.Id.op_star);
     P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
-    // FIX: Args
-    proc.expect(P, Tk.Id.sp_paren_L);
-    P.move(1);
-    // ... parse args here
-    proc.expect(P, Tk.Id.sp_paren_R);
-    P.move(1);
+    // Args
+    result.args = try proc.args.list(P);
 
     // Return Type
     P.skip(Tk.Id.wht_space); // TODO: Pass formatting into the AST
@@ -257,7 +314,7 @@ pub fn process (P:*Par) !void {
   while (P.pos < P.buf.len) : ( P.move(1) ) {
     switch (P.tk().id) {
     .kw_proc, .kw_func => try proc.parse(P),
-    else => |token| fail("Unknown Top-Level Token {d}:'{s}'", .{P.pos+1, @tagName(token)})
+    else => |token| P.fail("Unknown Top-Level Token {d}:'{s}'", .{P.pos+1, @tagName(token)})
     }
   }
 }
