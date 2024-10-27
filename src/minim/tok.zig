@@ -9,204 +9,144 @@
 //!  A token consists of an ID and optional attribute values.
 //!  The token ID is an abstract symbol representing a kind of lexical unit,
 //!  (e.g: a particular keyword, a sequence of input characters denoting an identifier, etc)
+//!
+//! @descr
+//!  Describes a Tokenizer process and its data.
+//!  @in A sequence of Lexemes and their containing characters  (Id,cstr)
+//!  @out The list of Tokens that those Lexemes represent  (Id,cstr)
 //___________________________________________________________________________|
 pub const Tok = @This();
 // @deps std
 const std = @import("std");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
-const fail = zstd.fail;
-const prnt = zstd.prnt;
-const ByteBuffer = zstd.T.ByteBuffer;
 // @deps *Slate
 const slate = @import("../lib/slate.zig");
 const Ch    = slate.Ch;
 const Lex   = slate.Lex;
+const Lx    = slate.Lx;
 // @deps minim
-const M  = @import("./rules.zig");
-const Lx = M.Lx;
-const Tk = M.Tk;
+const M       = @import("./rules.zig");
 const Pattern = M.Pattern;
+pub const Tk  = M.Tk;
 
 
-/// @descr
-///  Describes a Tokenizer process and its data.
-///  @in A sequence of Lexemes and their containing characters  (Id,cstr)
-///  @out The list of Tokens that those Lexemes represent  (Id,cstr)
 A    :std.mem.Allocator,
 pos  :u64,
 buf  :Lx.List,
 res  :Tk.List,
 
-//__________________________
-/// @descr Returns the Lexeme located in the current position of the buffer
-fn lx(T:*Tok) Lx { return T.buf.get(T.pos); }
-//__________________________
-/// @descr Returns the Lexeme located {@arg id} positions ahead of the current position of the buffer.
-fn next_at(T:*Tok, id :usize) Lx { return T.buf.get(T.pos+id); }
-/// @descr Returns whether or not the next Lexeme in the buffer is an operator.
-fn next_isOperator(T:*Tok) bool { return Ch.isOperator(Tok.next_at(T,1).val.items[0]); }
-/// @descr Returns whether or not the next Lexeme in the buffer is an operator.
-fn next_isWhitespace(T:*Tok) bool { return Ch.isWhitespace(Tok.next_at(T,1).val.items[0]); }
-//__________________________
-/// @descr Adds a single character to the last Token of the {@arg T.res} Tokenizer result.
-fn append_toLast(T:*Tok, C :u8) !void {
-  const id = T.res.len-1;
-  try T.res.items(.val)[id].append(C);
-}
 
-//__________________________
+//______________________________________
+// @section Create/Destroy
+//____________________________
 /// @descr Creates a new Tokenizer object from the given {@arg L} Lexer contents.
-pub fn create(L:*Lex) Tok {
+pub fn create (L:*Lex) !Tok {
   return Tok {
     .A   = L.A,
     .pos = 0,
-    .buf = L.res,
+    .buf = try L.res.clone(L.A),
     .res = Tk.List{},
   };
-}
-
-//__________________________
+} //:: M.Tok.create
+//__________________
 /// @descr Frees all resources owned by the Tokenizer object.
-pub fn destroy(T:*Tok) void {
+pub fn destroy (T:*Tok) void {
   T.buf.deinit(T.A);
   T.res.deinit(T.A);
-}
+} //:: M.Tok.destroy
 
 
-//__________________________
-/// @descr Processes an identifier Lexeme into its Token representation, and adds it to the {@arg T.res} result.
-pub fn ident(T:*Tok) !void {
-  const l = T.lx();
-  if (Pattern.Kw.has(l.val.items)) {
-    try T.res.append(T.A, Tk{
-      .id  = Pattern.Kw.get(l.val.items).?,
-      .val = l.val,
-    });
-  } else {
-    try T.res.append(T.A, Tk{
-      .id  = Tk.Id.b_ident,
-      .val = l.val,
-    });
-  }
-}
-//__________________________
-/// @descr Processes a number Lexeme into its Token representation, and adds it to the {@arg T.res} result.
-/// @todo Should this process the numbers into different number kinds?
-pub fn number(T:*Tok) !void {
-  try T.res.append(T.A, Tk{
-    .id  = Tk.Id.b_number,
-    .val = T.lx().val,
-  });
-}
-//__________________________
-/// @descr Processes a Lexeme starting with `:` into its Token representation, and adds it to the {@arg T.res} result.
-pub fn colon(T:*Tok) !void {
-  if (!Tok.next_isOperator(T)) {
-    try T.res.append(T.A, Tk{
-      .id  = Tk.Id.sp_colon,
-      .val = T.lx().val,
-    });
-  } else { fail("todo: colon operator case", .{}); }
-}
-//__________________________
-/// @descr Processes a semicolon Lexeme into its Token representation, and adds it to the {@arg T.res} result.
-pub fn semicolon(T:*Tok) !void {
-  try T.res.append(T.A, Tk{
-    .id  = Tk.Id.sp_semicolon,
-    .val = T.lx().val,
-  });
-}
-//__________________________
-/// @descr Processes a Lexeme starting with `=` into its Token representation, and adds it to the {@arg T.res} result.
-pub fn eq(T:*Tok) !void {
-  if (!Tok.next_isOperator(T)) {
-    try T.res.append(T.A, Tk{
-      .id  = Tk.Id.sp_eq,
-      .val = T.lx().val,
-    });
-  } else { fail("todo: eq operator case", .{}); }
-}
-//__________________________
-/// @descr Processes a Lexeme starting with `*` into its Token representation, and adds it to the {@arg T.res} result.
-pub fn star(T:*Tok) !void {
-  if (!Tok.next_isOperator(T)) {
-    try T.res.append(T.A, Tk{
-      .id  = Tk.Id.op_star,
-      .val = T.lx().val,
-    });
-  } else { fail("todo: multi-star operator case", .{}); }
-}
-//__________________________
-/// @descr Processes a Lexeme starting with `(` or `)` into its Token representation, and adds it to the {@arg T.res} result.
-pub fn paren(T:*Tok) !void {
-  const l = T.lx();
-  try T.res.append(T.A, Tk{
-    .id = switch (l.id) {
-      .paren_L => Tk.Id.sp_paren_L,
-      .paren_R => Tk.Id.sp_paren_R,
-      else => unreachable,
-      },
-    .val = l.val,
-  });
-}
-//__________________________
-/// @descr Processes a whitespace Lexeme into its Token representation, and adds it to the {@arg T.res} result.
-pub fn space(T:*Tok) !void {
-  try T.res.append(T.A, Tk{
-    .id  = Tk.Id.wht_space,
-    .val = ByteBuffer.init(T.A),
-  });
-  while (true) : (T.pos += 1) { // Collapse all continuous Lexeme spaces into a single space Token.
-    const l = T.lx();
-    if (l.id != .space) { break; }
-    try T.append_toLast(l.val.items[0]); // @warning Assumes spaces are never collaped in the Lexer
-  }
-  T.pos -= 1;
-}
-//__________________________
-/// @descr Processes a newline Lexeme into its Token representation, and adds it to the {@arg T.res} result.
-pub fn newline(T:*Tok) !void {
-  try T.res.append(T.A, Tk{
-    .id  = Tk.Id.wht_newline,
-    .val = T.lx().val,
-  });
-}
+//______________________________________
+// @section General Tools
+//____________________________
+pub const fail   = zstd.fail;
+pub const prnt   = zstd.prnt;
+pub const report = @import("./tok/cli.zig").report;
 
-//__________________________
+
+//______________________________________
+// @section State/Data Management
+pub const data          = @import("./tok/data.zig");
+pub const lx            = data.lx;
+pub const next_at       = data.next_at;
+pub const append_toLast = data.append_toLast;
+//______________________________________
+// @section State/Data Checks
+pub const check             = @import("./tok/check.zig");
+pub const next_isOperator   = check.next_isOperator;
+pub const next_isWhitespace = check.next_isWhitespace;
+pub const next_isDot        = check.next_isDot;
+pub const next_isPar        = check.next_isPar;
+
+
+//______________________________________
+// @section Process: Words
+pub const words = @import("./tok/words.zig");
+pub const ident = words.ident;
+//______________________________________
+// @section Process: Whitespace
+pub const whitespace = @import("./tok/whitespace.zig");
+pub const space      = whitespace.space;
+pub const newline    = whitespace.newline;
+//______________________________________
+// @section Process: Symbols / Operators
+pub const symbols   = @import("./tok/symbols.zig");
+pub const star      = symbols.star;
+pub const paren     = symbols.paren;
+pub const colon     = symbols.colon;
+pub const semicolon = symbols.semicolon;
+pub const eq        = symbols.eq;
+pub const at        = symbols.at;
+pub const dot       = symbols.dot;
+pub const comma     = symbols.comma;
+pub const hash      = symbols.hash;
+pub const brace     = symbols.brace;
+pub const bracket   = symbols.bracket;
+pub const quote     = symbols.quote;
+//______________________________________
+// @section Process: Literals
+pub const literals = @import("./tok/literals.zig");
+pub const number   = literals.number;
+
+
+//______________________________________
+// @section Process: Entry Point
+//____________________________
 /// @descr Tokenizer Entry Point
-pub fn process(T:*Tok) !void {
+pub fn process (T:*Tok) !void {
   while (T.pos < T.buf.len) : (T.pos += 1) {
     const l = T.lx().id;
     switch (l) {
-    .ident             => try T.ident(),
-    .number            => try T.number(),
-    .colon             => try T.colon(),
-    .semicolon         => try T.semicolon(),
-    .eq                => try T.eq(),
-    .star              => try T.star(),
-    .paren_L, .paren_R => try T.paren(),
-    .space             => try T.space(),
-    .newline           => try T.newline(),
-    else => |lexem| fail("Unknown first lexeme '{s}'", .{@tagName(lexem)})
+    .ident     => try T.ident(),
+    .number    => try T.number(),
+    .space     => try T.space(),
+    .newline   => try T.newline(),
+    .hash      => try T.hash(),       // #
+    .colon     => try T.colon(),      // :
+    .semicolon => try T.semicolon(),  // ;
+    .dot       => try T.dot(),        // .
+    .comma     => try T.comma(),      // ,
+    .eq        => try T.eq(),         // =
+    .star      => try T.star(),       // *
+    .at        => try T.at(),         // @
+    .paren_L,                         // (
+    .paren_R   => try T.paren(),      // )
+    .brace_L,                         // {
+    .brace_R   => try T.brace(),      // }
+    .bracket_L,                       // [
+    .bracket_R => try T.bracket(),    // ]
+    .quote_S,                         // '  (single quote)
+    .quote_D,                         // "  (double quote)
+    .quote_B   => try T.quote(),      // `  (backtick quote)
+    else => |lexem| Tok.fail("Unknown first lexeme '{s}'", .{@tagName(lexem)})
     }
-  // .hash,      // #
-  // .quote_S,   // '  (single quote)
-  // .quote_D,   // "  (double quote)
-  // .quote_B,   // `  (backtick quote)
-  // .brace_L,   // {
-  // .brace_R,   // }
-  // .bracket_L, // [
-  // .bracket_R, // ]
-  // .dot,       // .
-  // .comma,     // ,
   // Operators
   // .plus,      // +
   // .min,       // -
   // .slash,     // /
   // .less,      // <
   // .more,      // >
-  // .at,        // @
   // .dollar,    // $
   // .tilde,     // ~
   // .amp,       // &
@@ -220,13 +160,5 @@ pub fn process(T:*Tok) !void {
   // .tab,       // \t
   // .ret,       // \r
   }
-}
-
-pub fn report(T:*Tok) void {
-  std.debug.print("--- minim.Tokenizer ---\n", .{});
-  for (T.res.items(.id), T.res.items(.val)) | id, val | {
-    std.debug.print("{s} : {s}\n", .{@tagName(id), val.items});
-  }
-  std.debug.print("-----------------------\n", .{});
-}
+} //:: M.Tok.process
 

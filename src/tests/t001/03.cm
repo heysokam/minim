@@ -8,8 +8,8 @@ proc other (
   return 0
 
 proc stuff (
-    one             : ptr unsigned long;
-    two {.readonly.}: ptr i32;
+    one : ptr unsigned long;
+    two : ptr i32 {.readonly.};
   ) :signed char=
   return 0
 
@@ -27,10 +27,21 @@ proc withArrays (
     arg09 : var array[_, ptr i32];
     arg10 : var array[SomeSymbol, i32];
     arg11 : var array[SomeSymbol, ptr i32];
-    arg12 {.readonly.}: var array[12, ptr i32];
-    arg13 {.readonly.}: var array[_, ptr i32];
-    arg14 {.readonly.}: var array[SomeSymbol, ptr i32];
+    arg12 : var array[12, ptr i32 {.readonly.}];
+    arg13 : var array[_, ptr i32 {.readonly.}];
+    arg14 : var array[SomeSymbol, ptr i32 {.readonly.}];
   ) :i32=
   return 0
-  # @note: `var` and `{.readonly.}` for array arguments affects the contained type
+
+proc stuff2 (
+    one : ptr i32 {.readonly.};
+  ) {.importc.} :ptr u32 {.readonly.}=
+  return 0
+
+proc stuff3 (
+    arg1 : ptr i32 {.readonly.};
+    arg2 : ptr u64 {.readonly.};
+  ) {.importc.}
+  :ptr u32 {.readonly.}=
+  return 0
 

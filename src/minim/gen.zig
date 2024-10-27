@@ -4,43 +4,62 @@
 pub const Gen = @This();
 // @deps std
 const std = @import("std");
-// @deps *Slate
-const slate = @import("../lib/slate.zig");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
-const prnt = zstd.prnt;
+const str  = zstd.str;
+// @deps *Slate
+const slate = @import("../lib/slate.zig");
 // @deps minim
-const M = @import("../minim.zig");
+const M     = @import("../minim.zig");
+const rules = @import("./rules.zig");
 
-const generate = struct {
-  const C   = @import("./gen/C.zig");
-  const Zig = @import("./gen/zig.zig");
-};
 
-//______________________________________
+//____________________________
 /// @descr Converts the given minim {@arg ast} into the C programming language.
-pub fn C (ast :*const M.Ast) !slate.C.Ast {
-  if (ast.empty()) return slate.C.Ast.newEmpty();
+pub fn C (ast :*const M.Ast) !str {
+  var result = zstd.str.init(ast.A);
+  try result.appendSlice("TODO: UNIMPLEMENTED | C Codegen");
 
-  var result = slate.C.Ast.create(ast.A);
-  for (ast.list.data.?.items) | N | {
-    switch (N) {
-    .Proc => try result.add(try generate.C.proc(N, ast.A)),
-    }
-  }
+  // if (ast.empty()) return slate.C.Ast.newEmpty();
+  // var result = slate.C.Ast.create(ast.A);
+  // for (ast.list.data.?.items) | N | {
+  //   switch (N) {
+  //   .Proc => try result.add(try generate.C.proc(N, ast.A)),
+  //   }
+  // }
   return result;
-}
+} //:: M.Gen.C
 
-//______________________________________
+
+//____________________________
 /// @descr Converts the given minim {@arg ast} into the Zig programming language.
-pub fn Zig (ast :*const M.Ast) !slate.C.Ast {
-  if (ast.empty()) return slate.C.Ast.newEmpty();
+pub fn Zig (ast :*const M.Ast) !str {
+  std.debug.panic("TODO: UNIMPLEMENTED\n", .{});
 
-  var result = slate.C.Ast.create(ast.A);
-  for (ast.list.data.?.items) | N | {
-    switch (N) {
-    .Proc => try result.add(try generate.C.proc(N, ast.A)),
-    }
-  }
+  var result = zstd.str.init(ast.A);
+  try result.appendSlice("TODO: UNIMPLEMENTED | Zig Codegen");
+
+
+  // if (ast.empty()) return slate.C.Ast.newEmpty();
+  // var result = slate.C.Ast.create(ast.A);
+  // for (ast.list.data.?.items) | N | {
+  //   switch (N) {
+  //   .Proc => try result.add(try generate.C.proc(N, ast.A)),
+  //   }
+  // }
   return result;
+} //:: M.Gen.Zig
+
+
+//____________________________
+/// @descr Converts the given minim {@arg ast} into the {@arg lang} programming language.
+pub fn gen (
+    ast  : *const M.Ast,
+    lang : rules.Lang,
+  ) !str {
+  switch (lang) {
+    .C   => return Gen.C(ast),
+    .Zig => return Gen.Zig(ast),
+  }
 }
+

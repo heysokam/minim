@@ -23,19 +23,23 @@ pub const strEq = std.testing.expectEqualStrings;
 //____________________________
 pub fn check (src :cstr, trg :cstr, lang :M.Lang) !void {
   // Initialize
-  var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+  var gpa = std.heap.GeneralPurposeAllocator(std.heap.GeneralPurposeAllocatorConfig{}){};
+  defer _ = gpa.deinit();
+  var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
   defer arena.deinit();
-  const A = arena.allocator();
+
+  // const A = arena.allocator();
+  const A = gpa.allocator();
+  // const A = std.testing.allocator;
   // Parse
-  var ast = try M.Ast.get(src, A);
+  var ast = try M.Ast.get2(src, .{.verbose=true}, A);
   defer ast.destroy();
   // Codegen
-  var code = switch (lang) {
-    .C   => try M.Gen.C(&ast),
-    .Zig => try M.Gen.Zig(&ast),
-  }; defer code.destroy();
+  var code = try ast.gen(lang);
+  defer code.deinit();
   // Check the result
-  const out = try std.fmt.allocPrint(A, "{s}", .{code});
+  const out = try std.fmt.allocPrint(A, "{s}", .{code.items});
+  zstd.echo(out);
   try ok(ast.lang == lang);
   try ok(!ast.empty());
   try strEq(trg, out);

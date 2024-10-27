@@ -7,14 +7,11 @@
 const std = @import("std");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
-const cstr = zstd.cstr;
-const ByteBuffer = zstd.ByteBuffer;
-// @deps *Slate
-const slate = @import("../lib/slate.zig");
 
+
+//______________________________________
+/// @descr Tags for the languages that Minim can understand/target
 pub const Lang  = enum { Zig, C };
-pub const Value = slate.Value;
-pub const Lx    = slate.Lx;
 
 
 //______________________________________
@@ -25,7 +22,7 @@ pub const Tk = struct {
   /// @field {@link Tk.id} The Id of the Token
   id   :Tk.Id,
   /// @field {@link Tk.val} The string value of the Token
-  val  :ByteBuffer,
+  val  :zstd.ByteBuffer,
 
   /// @descr {@link Tk.id} Valid kinds for Tokens
   pub const Id = enum {
@@ -69,6 +66,8 @@ pub const Tk = struct {
     kw_var,       // var
     kw_let,       // let
     kw_const,     // const
+    kw_array,     // array
+    kw_ptr,       // ptr
     // Operators: Specials
     op_star,      // Operators starting with *
     op_dot,       // Operators starting with .
@@ -107,7 +106,7 @@ pub const Tk = struct {
     op_hat,       // Operators starting with ^
     op_bslash,    // Operators starting with \
 
-    pub fn format (tk :Tk.Id, comptime _:cstr, _:std.fmt.FormatOptions, writer :anytype) !void {
+    pub fn format (tk :Tk.Id, comptime _:zstd.cstr, _:std.fmt.FormatOptions, writer :anytype) !void {
       try writer.print("{s}", .{@tagName(tk)});
     }
     };
@@ -142,6 +141,8 @@ pub const Pattern = struct {
     .{ "var",      .kw_var      },
     .{ "let",      .kw_let      },
     .{ "const",    .kw_const    },
+    .{ "array",    .kw_array    },
+    .{ "ptr",      .kw_ptr      },
     // Operator Keywords
     .{ "eq",       .op_eq       }, // Same as ==
     .{ "and",      .op_and      }, // Same as &&
