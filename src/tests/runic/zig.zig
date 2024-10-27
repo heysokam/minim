@@ -4,9 +4,9 @@
 // @deps std
 const std = @import("std");
 
-// test {
-//   std.testing.refAllDecls(@This());
-//   _ = @import("./zig/t000/test.zig"); // Basic Codegen
-//   // _ = @import("./zig/t001/test.zig"); // Procs
-// }
+test {
+  std.testing.refAllDecls(@This());
+  _ = @import("./zig/t000/test.zig"); // Basic Codegen
+  // _ = @import("./zig/t001/test.zig"); // Procs
+}
 
