@@ -4,10 +4,10 @@
 // @deps std
 const std   = @import("std");
 // @deps zstd
-const zstd = @import("../lib/zstd.zig");
+const zstd = @import("../../lib/zstd.zig");
 const cstr = zstd.cstr;
 // @deps minim
-const M = @import("../minim.zig");
+const M = @import("../../minim.zig");
 
 
 //______________________________________
