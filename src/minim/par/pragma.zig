@@ -24,7 +24,7 @@ pub fn parse (P:*Par) !?Ast.Pragma.List {
   var result = Ast.Pragma.List.create(P.A);
   P.ind();
   pragma.expect(P, Tk.Id.b_ident);
-  try result.add(Ast.Pragma.new(P.tk().val.items));
+  try result.incl(Ast.Pragma.new(P.tk().val.items));
   P.move(1);
   P.ind();
   pragma.expect(P, Tk.Id.sp_braceDot_R);
