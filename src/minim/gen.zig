@@ -22,8 +22,9 @@ pub fn gen (
   ) !str {
   var result = zstd.str.init(ast.A);
   for (ast.list.data.?.items) |N| { switch (lang) {
-    .C   => try slate.Gen.C.render(N, &result),
-    .Zig => try slate.Gen.Zig.render(N, &result),
+    .Minim => try slate.Gen.Minim.render(N, &result),
+    .Zig   => try slate.Gen.Zig.render(N, &result),
+    .C     => try slate.Gen.C.render(N, &result),
   } try result.appendSlice("\n");}
   return result;
 }

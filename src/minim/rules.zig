@@ -12,7 +12,7 @@ const Tk   = @import("./tok/token.zig");
 
 //______________________________________
 /// @descr Tags for the languages that Minim can understand/target
-pub const Lang  = enum { Zig, C };
+pub const Lang  = enum { Minim, Zig, C, };
 
 
 //______________________________________

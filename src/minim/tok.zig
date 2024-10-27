@@ -28,7 +28,7 @@ const Lx    = slate.Lx;
 // @deps minim
 const M       = @import("./rules.zig");
 const Pattern = M.Pattern;
-pub const Tk  = M.Tk;
+pub const Tk  = @import("./tok/token.zig");
 
 
 A    :std.mem.Allocator,
