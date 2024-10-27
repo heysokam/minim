@@ -15,51 +15,16 @@ const rules = @import("./rules.zig");
 
 
 //____________________________
-/// @descr Converts the given minim {@arg ast} into the C programming language.
-pub fn C (ast :*const M.Ast) !str {
-  var result = zstd.str.init(ast.A);
-  try result.appendSlice("TODO: UNIMPLEMENTED | C Codegen");
-
-  // if (ast.empty()) return slate.C.Ast.newEmpty();
-  // var result = slate.C.Ast.create(ast.A);
-  // for (ast.list.data.?.items) | N | {
-  //   switch (N) {
-  //   .Proc => try result.add(try generate.C.proc(N, ast.A)),
-  //   }
-  // }
-  return result;
-} //:: M.Gen.C
-
-
-//____________________________
-/// @descr Converts the given minim {@arg ast} into the Zig programming language.
-pub fn Zig (ast :*const M.Ast) !str {
-  std.debug.panic("TODO: UNIMPLEMENTED\n", .{});
-
-  var result = zstd.str.init(ast.A);
-  try result.appendSlice("TODO: UNIMPLEMENTED | Zig Codegen");
-
-
-  // if (ast.empty()) return slate.C.Ast.newEmpty();
-  // var result = slate.C.Ast.create(ast.A);
-  // for (ast.list.data.?.items) | N | {
-  //   switch (N) {
-  //   .Proc => try result.add(try generate.C.proc(N, ast.A)),
-  //   }
-  // }
-  return result;
-} //:: M.Gen.Zig
-
-
-//____________________________
 /// @descr Converts the given minim {@arg ast} into the {@arg lang} programming language.
 pub fn gen (
     ast  : *const M.Ast,
     lang : rules.Lang,
   ) !str {
-  switch (lang) {
-    .C   => return Gen.C(ast),
-    .Zig => return Gen.Zig(ast),
-  }
+  var result = zstd.str.init(ast.A);
+  for (ast.list.data.?.items) |N| { switch (lang) {
+    .C   => try slate.Gen.C.render(N, &result),
+    .Zig => try slate.Gen.Zig.render(N, &result),
+  } try result.appendSlice("\n");}
+  return result;
 }
 
