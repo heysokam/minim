@@ -22,6 +22,7 @@ pub const strEq = std.testing.expectEqualStrings;
 // @section Custom checks
 //____________________________
 pub fn check (src :cstr, trg :cstr, lang :M.Lang) !void {
+  const verbose = false;
   // Initialize
   var gpa = std.heap.GeneralPurposeAllocator(std.heap.GeneralPurposeAllocatorConfig{}){};
   defer _ = gpa.deinit();
@@ -29,19 +30,18 @@ pub fn check (src :cstr, trg :cstr, lang :M.Lang) !void {
   defer arena.deinit();
 
   // const A = arena.allocator();
-  const A = gpa.allocator();
-  // const A = std.testing.allocator;
+  // const A = gpa.allocator();
+  const A = std.testing.allocator;
   // Parse
-  var ast = try M.Ast.get2(src, .{.verbose=true}, A);
+  var ast = try M.Ast.get2(src, .{.verbose=verbose}, A);
   defer ast.destroy();
   // Codegen
   var code = try ast.gen(lang);
   defer code.deinit();
   // Check the result
-  const out = try std.fmt.allocPrint(A, "{s}", .{code.items});
-  zstd.echo(out);
+  if (verbose) zstd.echo(code.items);
   try ok(ast.lang == lang);
   try ok(!ast.empty());
-  try strEq(trg, out);
+  try strEq(trg, code.items);
 }
 
