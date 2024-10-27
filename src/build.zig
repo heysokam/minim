@@ -43,7 +43,7 @@ pub fn main () !u8 {
   //   .entry   = "src/minim.zig",
   //   .version = P.version,
   // }, builder);
-  var M = try confy.Program(.{
+  const M = try confy.Program(.{
     .trg     = "M",
     .entry   = "src/M.zig",
     .version = P.version,
@@ -56,8 +56,8 @@ pub fn main () !u8 {
 
   P.report();
   try tests.build();
-  try M.build();
-  //try M.run();
+  _=M;// try M.build();
+  // try M.run();
   return 0;
 }
 
