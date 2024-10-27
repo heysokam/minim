@@ -64,7 +64,7 @@ pub const create = struct {
   //____________________________
   /// @descr Creates a new AST object by parsing the {@arg code} source.
   pub fn fromStr2 (
-      code : zstd.cstr,
+      code : cstr,
       in   : Ast.create.Options,
       A    : std.mem.Allocator
     ) !Ast {
@@ -91,7 +91,7 @@ pub const create = struct {
   } //:: M.Ast.create.fromStr2
   //____________________________
   /// @descr Creates a new AST object by parsing the {@arg code} source.
-  pub fn fromStr (code :zstd.cstr, A :std.mem.Allocator) !Ast { return Ast.create.fromStr2(code, .{}, A); }
+  pub fn fromStr (code :cstr, A :std.mem.Allocator) !Ast { return Ast.create.fromStr2(code, .{}, A); }
 
 
   //____________________________
@@ -107,7 +107,7 @@ pub const create = struct {
   } //:: M.Ast.create.fromFile
   //____________________________
   /// @descr Creates a new AST object by parsing the source code contained in the {@arg file}
-  pub fn fromFile (file :zstd.cstr, A :std.mem.Allocator) !Ast { return Ast.create.fromFile2(file, .{}, A); }
+  pub fn fromFile (file :cstr, A :std.mem.Allocator) !Ast { return Ast.create.fromFile2(file, .{}, A); }
 }; //:: M.Ast.create
 
 //______________________________________
