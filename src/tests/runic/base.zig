@@ -20,7 +20,7 @@ pub const strEq = std.testing.expectEqualStrings;
 // @section Custom checks
 //____________________________
 pub fn check (src :cstr, trg :cstr, lang :runic.Lang) !void {
-  const verbose = false;
+  const verbose = true;
   // Initialize
   var gpa = std.heap.GeneralPurposeAllocator(std.heap.GeneralPurposeAllocatorConfig{}){};
   defer _ = gpa.deinit();

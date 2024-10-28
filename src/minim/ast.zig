@@ -62,6 +62,16 @@ pub const create = struct {
   }; //:: M.Ast.create.Options
 
   //____________________________
+  /// @descr Creates a new empty AST object for {@arg lang} language.
+  pub fn empty (lang :rules.Lang, A :std.mem.Allocator) Ast {
+    return Ast{
+      .A    = A,
+      .lang = lang,
+      .list = Node.List.create(A)
+      };
+  }
+
+  //____________________________
   /// @descr Creates a new AST object by parsing the {@arg code} source.
   pub fn fromStr2 (
       code : cstr,
