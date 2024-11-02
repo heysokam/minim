@@ -8,7 +8,7 @@ const std = @import("std");
 const zstd = @import("../lib/zstd.zig");
 const str  = zstd.str;
 // @deps *Slate
-const slate = @import("../lib/slate.zig");
+const slate  = @import("../lib/slate.zig");
 // @deps minim
 const M     = @import("../minim.zig");
 const rules = @import("./rules.zig");
@@ -21,10 +21,10 @@ pub fn gen (
     lang : rules.Lang,
   ) !str {
   var result = zstd.str.init(ast.A);
-  for (ast.list.data.?.items) |N| { switch (lang) {
-    .Minim => try slate.Gen.Minim.render(N, &result),
-    .Zig   => try slate.Gen.Zig.render(N, &result),
-    .C     => try slate.Gen.C.render(N, &result),
+  for (ast.list.items()) |N| { switch (lang) {
+    .Minim => try slate.Gen.Minim.render(N, ast.src, ast.ext.types, &result),
+    .Zig   => try slate.Gen.Zig.render(N, ast.src, ast.ext.types, &result),
+    .C     => try slate.Gen.C.render(N, ast.src, ast.ext.types, &result),
   } try result.appendSlice("\n");}
   return result;
 }
