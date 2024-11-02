@@ -8,6 +8,8 @@ const std = @import("std");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
 const Tk   = @import("./tok/token.zig");
+// @deps *Slate
+const Lx = @import("../lib/slate.zig").Lx;
 
 
 //______________________________________
@@ -88,5 +90,91 @@ pub const Pattern = struct {
     .{ "^",  .op_hat    },
     .{ "\\", .op_bslash }, // Except inside strings
     }); // Valid Operator character starters
+
+  //______________________________________
+  /// @descr List of (key,val) pairs of Whitespace Tokens, mapping their string representation with their Tk.Id
+  pub const Ws = Map.initComptime(.{
+    .{ " ",  .wht_space   },      // ` `
+    .{ "\n", .wht_newline },      // \n
+    }); // Valid Whitespace characters
+
+  //______________________________________
+  /// @descr List of (key,val) pairs of Whitespace Tokens, mapping their string representation with their Tk.Id
+  pub const Par = Map.initComptime(.{
+    // Standard
+    .{ "(",  .sp_paren_L      }, // (
+    .{ ")",  .sp_paren_R      }, // )
+    .{ "{",  .sp_brace_L      }, // {
+    .{ "}",  .sp_brace_R      }, // }
+    .{ "[",  .sp_bracket_L    }, // [
+    .{ "]",  .sp_bracket_R    }, // ]
+    // Dot Paren
+    .{ "[.", .sp_bracketDot_L }, // [.
+    .{ ".]", .sp_bracketDot_R }, // .]
+    .{ "{.", .sp_braceDot_L   }, // {.
+    .{ ".}", .sp_braceDot_R   }, // .}
+    .{ "(.", .sp_parenDot_L   }, // (.
+    .{ ".)", .sp_parenDot_R   }, // .)
+    // Dot Colon
+    .{ "[:", .sp_bracketCol_L }, // [:
+    .{ ":]", .sp_bracketCol_R }, // :]
+    }); // Valid Whitespace characters
 };
+
+
+//____________________________________
+// @section Lexeme Kinds
+//____________________________
+pub const LxKinds = struct {
+  const Map = std.EnumSet(Lx.Id);
+  /// @ref {@link rules.Pattern.Op}
+  pub const Operator = Map.initMany(&.{
+    // Operators
+    .colon,     // :
+    .eq,        // =
+    .star,      // *
+    .dot,       // .
+    .plus,      // +
+    .min,       // -
+    .slash,     // /
+    .less,      // <
+    .more,      // >
+    .at,        // @
+    .dollar,    // $
+    .tilde,     // ~
+    .amp,       // &
+    .pcnt,      // %
+    .pipe,      // |
+    .excl,      // !
+    .qmark,     // ?
+    .hat,       // ^
+    .bslash,    // \
+    }); //:: rules.LxKinds.Operator
+  /// @ref {@link rules.Pattern.Ws}
+  pub const Whitespace = Map.initMany(&.{
+    // Whitespace
+    .space,     // ` `
+    .newline,   // \n
+    .tab,       // \t
+    .ret,       // \r
+    }); //:: rules.LxKinds.Whitespace
+  /// @ref {@link rules.Pattern.Paren}
+  pub const Paren = Map.initMany(&.{
+    .paren_L,   // (
+    .paren_R,   // )
+    .brace_L,   // {
+    .brace_R,   // }
+    .bracket_L, // [
+    .bracket_R, // ]
+    }); //:: rules.LxKinds.Paren
+};
+
+
+pub fn isOperator(L:Lx) bool { return LxKinds.Operator.contains(L.id); }
+/// @descr Returns whether or not {@arg L} is a whitespace lexeme.
+pub fn isWhitespace(L:Lx) bool { return LxKinds.Whitespace.contains(L.id); }
+/// @descr Returns whether or not {@arg L} is a parenthesis, bracket or brace lexeme.
+pub fn isPar(L:Lx) bool { return LxKinds.Paren.contains(L.id); }
+/// @descr Returns whether or not {@arg L} is a dot lexeme.
+pub fn isDot(L:Lx) bool { return L.id == Lx.Id.dot; }
 

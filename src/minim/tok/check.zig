@@ -3,18 +3,23 @@
 //:_______________________________________________________________________
 //! @fileoverview Tokenizer Contents Checks
 //___________________________________________|
+// @deps std
+const std = @import("std");
 // @deps *Slate
 const slate = @import("../../lib/slate.zig");
-const Ch    = slate.Ch;
+const Lx    = slate.Lx;
 // @deps minim
-const Tok = @import("../tok.zig");
+const Tok   = @import("../tok.zig");
+const rules = @import("../rules.zig");
 
-/// @descr Returns whether or not the next Lexeme in the buffer is an operator lexeme.
-pub fn next_isOperator (T :*Tok) bool { return Ch.isOperator(Tok.next_at(T,1).val.items[0]); }
-/// @descr Returns whether or not the next Lexeme in the buffer is a whitespace lexeme.
-pub fn next_isWhitespace (T:*Tok) bool { return Ch.isWhitespace(Tok.next_at(T,1).val.items[0]); }
-/// @descr Returns whether or not the next Lexeme in the buffer is a dot lexeme.
-pub fn next_isDot (T:*Tok) bool { return Ch.isDot(Tok.next_at(T,1).val.items[0]); }
-/// @descr Returns whether or not the next Lexeme in the buffer is a parenthesis, bracket or brace lexeme.
-pub fn next_isPar (T:*Tok) bool { return Ch.isPar(Tok.next_at(T,1).val.items[0]); }
+pub const next = struct {
+  /// @descr Returns whether or not the next Lexeme in the buffer is an operator lexeme.
+  pub fn isOperator (T :*Tok) bool { return rules.isOperator(T.next_at(1)); }
+  /// @descr Returns whether or not the next Lexeme in the buffer is a whitespace lexeme.
+  pub fn isWhitespace (T:*Tok) bool { return rules.isWhitespace(T.next_at(1)); }
+  /// @descr Returns whether or not the next Lexeme in the buffer is a dot lexeme.
+  pub fn isDot (T:*Tok) bool { return rules.isDot(T.next_at(1)); }
+  /// @descr Returns whether or not the next Lexeme in the buffer is a parenthesis, bracket or brace lexeme.
+  pub fn isPar (T:*Tok) bool { return rules.isPar(T.next_at(1)); }
+}; //:: Tok.next
 

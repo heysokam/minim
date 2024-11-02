@@ -7,7 +7,7 @@ const std = @import("std");
 test {
   std.testing.refAllDecls(@This());
   _ = @import("./lib/slate/src/tests.zig");
-  // _ = @import("./tests/minim.zig"); // Minim
-  _ = @import("./tests/runic.zig"); // Runic
+  // _ = @import("./tests/runic.zig"); // Runic
+  _ = @import("./tests/minim.zig"); // Minim
 }
 

@@ -14,16 +14,9 @@ const Tk      = Tok.Tk;
 /// @descr Processes an identifier Lexeme into its Token representation, and adds it to the {@arg T.res} result.
 pub fn ident (T :*Tok) !void {
   const l = T.lx();
-  if (Pattern.Kw.has(l.val.items)) {
-    try T.res.append(T.A, Tk{
-      .id  = Pattern.Kw.get(l.val.items).?,
-      .val = l.val,
-    });
-  } else {
-    try T.res.append(T.A, Tk{
-      .id  = Tk.Id.b_ident,
-      .val = l.val,
-    });
-  }
+  // Add a keyword if it exists in the Pattern list. Add an identifier otherwise
+  try T.add(
+    Pattern.Kw.get(l.from(T.src)) orelse Tk.Id.b_ident,
+    l.loc);
 } //:: M.Tok.ident
 

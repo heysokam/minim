@@ -21,10 +21,12 @@ const std = @import("std");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
 // @deps *Slate
-const slate = @import("../lib/slate.zig");
-const Ch    = slate.Ch;
-const Lex   = slate.Lex;
-const Lx    = slate.Lx;
+const slate   = @import("../lib/slate.zig");
+const Ch      = slate.Ch;
+const Lex     = slate.Lex;
+const Lx      = slate.Lx;
+const source  = slate.source;
+pub const Loc = slate.Loc;
 // @deps minim
 const M       = @import("./rules.zig");
 const Pattern = M.Pattern;
@@ -32,7 +34,8 @@ pub const Tk  = @import("./tok/token.zig");
 
 
 A    :std.mem.Allocator,
-pos  :u64,
+pos  :source.Pos,
+src  :source.Code,
 buf  :Lx.List,
 res  :Tk.List,
 
@@ -45,6 +48,7 @@ pub fn create (L:*Lex) !Tok {
   return Tok {
     .A   = L.A,
     .pos = 0,
+    .src = L.src,
     .buf = try L.res.clone(L.A),
     .res = Tk.List{},
   };
@@ -67,17 +71,18 @@ pub const report = @import("./tok/cli.zig").report;
 
 //______________________________________
 // @section State/Data Management
-pub const data          = @import("./tok/data.zig");
-pub const lx            = data.lx;
-pub const next_at       = data.next_at;
-pub const append_toLast = data.append_toLast;
+pub const data       = @import("./tok/data.zig");
+pub const lx         = data.lx;
+pub const next_at    = data.next_at;
+pub const add_toLast = data.add.toLast;
+pub const add        = data.add.one;
 //______________________________________
 // @section State/Data Checks
 pub const check             = @import("./tok/check.zig");
-pub const next_isOperator   = check.next_isOperator;
-pub const next_isWhitespace = check.next_isWhitespace;
-pub const next_isDot        = check.next_isDot;
-pub const next_isPar        = check.next_isPar;
+pub const next_isOperator   = check.next.isOperator;
+pub const next_isWhitespace = check.next.isWhitespace;
+pub const next_isDot        = check.next.isDot;
+pub const next_isPar        = check.next.isPar;
 
 
 //______________________________________

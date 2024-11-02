@@ -16,24 +16,19 @@ const Tk  = Tok.Tk;
 //____________________________
 /// @descr Processes a whitespace Lexeme into its Token representation, and adds it to the {@arg T.res} result.
 pub fn space (T:*Tok) !void {
-  try T.res.append(T.A, Tk{
-    .id  = Tk.Id.wht_space,
-    .val = zstd.ByteBuffer.init(T.A),
-  });
+  const start = T.pos;
+  var   end   = T.pos;
   while (true) : (T.pos += 1) { // Collapse all continuous Lexeme spaces into a single space Token.
-    const l = T.lx();
-    if (l.id != .space) { break; }
-    try T.append_toLast(l.val.items[0]); // @warning Assumes spaces are never collapsed in the Lexer
+    if (T.lx().id != .space) { break; }
+    end += 1; // @warning Assumes spaces are never collapsed in the Lexer
   }
+  try T.add(Tk.Id.wht_space, .{.start= start, .end= end});
   T.pos -= 1;
 }
 
 //____________________________
 /// @descr Processes a newline Lexeme into its Token representation, and adds it to the {@arg T.res} result.
 pub fn newline (T:*Tok) !void {
-  try T.res.append(T.A, Tk{
-    .id  = Tk.Id.wht_newline,
-    .val = T.lx().val,
-  });
+  try T.add(Tk.Id.wht_newline, T.lx().loc);
 }
 

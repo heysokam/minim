@@ -10,42 +10,30 @@ pub const Tk = @This();
 const std = @import("std");
 // @deps zstd
 const zstd = @import("../../lib/zstd.zig");
+// @deps *Slate
+const source = @import("../../lib/slate.zig").source;
 
 
-/// @field {@link Tk.id} The Id of the Token
+/// @field The location of the string value of the Token in the source code.
+loc  :source.Loc,
+/// @field The unique identifier of the Token
 id   :Tk.Id,
-/// @field {@link Tk.val} The string value of the Token
-val  :zstd.ByteBuffer,
 
 
-pub fn create (
-    I : Tk.Id,
-    A : std.mem.Allocator
-  ) !Tk {
-  return Tk{
-    .id  = I,
-    .val = zstd.ByteBuffer.init(A)};
-} //:: Tk.create
+pub fn create_at (I : Tk.Id, start :source.Pos, end :source.Pos) Tk { return Tk.create(I, source.Loc{.start= start, .end= end}); }
+pub fn create (I : Tk.Id, L :source.Loc) Tk { return Tk{.id= I, .loc= L}; }
 
-pub fn create_with (
-    I : Tk.Id,
-    V : zstd.ByteBuffer,
-  ) !Tk {
-  return Tk{.id= I, .val= try V.clone()};
-} //:: Tk.create
-
-pub fn destroy (T:*Tk) !void {
-  T.val.deinit();
-} //:: Tk.destroy
-
-pub fn clone (T:*Tk) !Tk {
-  return Tk{
-    .id  = T.id,
-    .val = try T.val.clone()
-    };
-} //:: Tk.destroy
+pub const slice = struct {
+  //______________________________________
+  /// @descr Returns the string value of the Token located at the {@arg L.loc} of {@arg src}.
+  /// @note Returns an empty string when {@arg T.loc} does not represent a valid location.
+  /// @note Does not perform bounds check on {@arg src}. It will fail when the location is out of bounds.
+  pub fn from (T :*const Tk, src :source.Code) source.Code { return T.loc.from(src); }
+}; //:: Tk.slice
+pub const from = slice.from;
 
 
+//______________________________________
 /// @descr {@link Tk.id} Valid kinds for Tokens
 pub const Id = enum {
   // Base
