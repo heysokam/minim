@@ -7,39 +7,41 @@ const std = @import("std");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
 const cstr = zstd.cstr;
+// @deps slate
+const source = @import("../lib/slate.zig").source;
 // @deps minim
 const M  = @import("../minim.zig");
 const Tk = M.Tok.Tk;
 
-A      :std.mem.Allocator,
-pos    :usize,
-buf    :Tk.List,
-res    :M.Ast,
-parsed :zstd.str,
+A       :std.mem.Allocator,
+pos     :Par.Pos,
+src     :source.Code,
+buf     :Tk.List,
+res     :M.Ast,
+parsed  :zstd.str,
 
+pub const Pos = usize;
 
 //______________________________________
 // @section Create/Destroy
 //____________________________
 /// @descr Creates a new Parser object from the given {@arg T} Tokenizer contents.
 pub fn create (T:*const M.Tok) !Par {
-  return Par {
+  return Par{
     .A      = T.A,
     .pos    = 0,
+    .src    = T.src,
     .buf    = try T.res.clone(T.A),
-    .res    = M.Ast{
-      .A    = T.A,
-      .lang = .C,
-      .list = M.Ast.Node.List.create(T.A),
-      }, //:: .res
+    .res    = M.Ast.create.empty(.C, T.src, T.A),  // FIX: Do not hardcode the language to C
     .parsed = zstd.str.init(T.A),
-  };
+    };
 } //:: M.Par.create
 //__________________
 /// @descr Frees all resources owned by the Parser object.
 pub fn destroy (P:*Par) void {
   P.buf.deinit(P.A);
   P.res.destroy();
+  P.parsed.deinit();
 } //:: M.Par.destroy
 
 

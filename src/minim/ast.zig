@@ -9,7 +9,8 @@ const zstd = @import("../lib/zstd.zig");
 const cstr = zstd.cstr;
 const str  = zstd.str;
 // @deps *Slate
-const slate = @import("../lib/slate.zig");
+const slate  = @import("../lib/slate.zig");
+const source = slate.source;
 // @deps minim
 const rules = @import("./rules.zig");
 const Tok   = @import("./tok.zig");
@@ -29,7 +30,6 @@ pub const Node   = slate.Node;
 pub const Proc   = slate.Proc;
 
 
-
 //______________________________________
 // @section Object Fields
 //____________________________
@@ -37,8 +37,41 @@ pub const Proc   = slate.Proc;
 A     :std.mem.Allocator,
 /// @descr Describes which output language the AST is targeting
 lang  :rules.Lang,
+/// @descr Contains the string that the AST's source code is references from every Node
+/// @note Nodes are created such that the language (or correctness) of the source code contained in this string does not matter.
+src   :source.Code,
 /// @descr Contains the list of Top-Level nodes of the AST
 list  :Node.List,
+/// @descr Extra data that doesn't fit in the main node list of the AST
+/// @eg Array Types will be an index into the ext.types list
+ext  :Ast.Extras,
+
+pub const Extras = struct {
+  types  :Ast.Extras.List.Types,
+
+  pub fn create (A :std.mem.Allocator) Ast.Extras { return Ast.Extras{
+    .types = List.Types.create(A),
+    };
+  } //:: Ast.Extras.create
+
+  pub fn clone (E :*Ast.Extras) !Ast.Extras { return Ast.Extras{
+    .types = try E.types.clone()
+    };
+  } //:: Ast.Extras.clone
+
+  pub const List = struct {
+    pub const Pos = zstd.DataList(u1).Pos;  // (@note ignore u1. it is only used to access the Pos type)
+    const Types   = Type.List;
+    const add = struct {
+      pub fn @"type" (ast :*Ast, T :Ast.Type) !Ast.Extras.List.Pos { try ast.ext.types.add(T); return ast.ext.types.last(); }
+    };
+  };
+}; //:: Ast.Extras
+//____________________________
+/// @descr Adds a Type to the respective Ast.Extras list
+pub const add_type = Ast.Extras.List.add.type;
+
+
 
 //______________________________________
 // @section Ast Management
@@ -48,9 +81,19 @@ pub fn empty (ast :*const Ast) bool { return ast.list.empty(); }
 /// @descr Adds the {@arg val} Node to the Node.List of the {@arg ast}.
 pub fn add (ast :*Ast, val :Node) !void { try ast.list.add(val); }
 /// @descr Duplicates the data of the {@arg ast} so that it is safe to call {@link Ast.destroy} without deallocating the duplicate.
-pub fn clone (ast :*Ast) !Ast { return Ast{.A= ast.A, .lang= ast.lang, .list= try ast.list.clone()}; }
-/// @descr Frees all resources owned by the Parser object.
-pub fn destroy (ast :*Ast) void { ast.list.destroy(); }
+pub fn clone (ast :*Ast) !Ast { return Ast{
+  .A       = ast.A,
+  .lang    = ast.lang,
+  .src     = ast.src,
+  .list    = try ast.list.clone(),
+  .ext     = try ast.ext.clone(),
+  };
+} //:: Ast.clone
+/// @descr Frees all resources owned by the AST object.
+pub fn destroy (ast :*Ast) void {
+  for (0..ast.list.items().len) |id| ast.list.items()[id].destroy(ast.ext.types);
+  ast.list.destroy();
+} //:: Ast.destroy
 
 
 //______________________________________
@@ -63,13 +106,15 @@ pub const create = struct {
 
   //____________________________
   /// @descr Creates a new empty AST object for {@arg lang} language.
-  pub fn empty (lang :rules.Lang, A :std.mem.Allocator) Ast {
+  pub fn empty (lang :rules.Lang, src :source.Code, A :std.mem.Allocator) Ast {
     return Ast{
       .A    = A,
       .lang = lang,
-      .list = Node.List.create(A)
+      .src  = src,
+      .list = Node.List.create(A),
+      .ext  = Ast.Extras.create(A),
       };
-  }
+  } //:: M.Ast.empty
 
   //____________________________
   /// @descr Creates a new AST object by parsing the {@arg code} source.
@@ -79,7 +124,7 @@ pub const create = struct {
       A    : std.mem.Allocator
     ) !Ast {
     // Lexer
-    var L = try slate.Lex.create_with(A, code);
+    var L = try slate.Lex.create(A, code);
     defer L.destroy();
     try L.process();
     if (in.verbose) L.report();

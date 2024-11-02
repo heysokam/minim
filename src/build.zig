@@ -52,7 +52,7 @@ pub fn main () !u8 {
     .trg     = "tests",
     .entry   = "src/tests.zig",
     .version = P.version,
-    .flags   = .{.ld= &.{"-lclang"}},
+    // .flags   = .{.ld= &.{"-lclang"}},
   }, &builder);
 
   P.report();

@@ -13,12 +13,18 @@ const ident  = @import("./ident.zig");
 const stmt   = @import("./statement.zig");
 const pragma = @import("./pragma.zig");
 
+
+//______________________________________
+// @section Checks
 //____________________________
 /// @descr Triggers an error if any of the {@arg ids} are not the current Token in the {@arg P} Parser.
 fn expectAny (P:*Par, ids :[]const Tk.Id) void { P.expectAny(ids, "Proc"); }
 /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
 fn expect (P:*Par, id :Tk.Id) void { P.expect(id, "Proc"); }
 
+
+//______________________________________
+// @section Properties
 //__________________________
 /// @descr Returns whether or not the current Token is a public marker Token.
 fn public (P:*Par) bool {
@@ -27,6 +33,10 @@ fn public (P:*Par) bool {
   return P.tk().id == Tk.Id.sp_star or P.tk().id == Tk.Id.op_star;
 }
 
+
+//______________________________________
+// @section Arguments
+//__________________________
 const args = struct {
   //__________________________
   /// @descr Returns whether the current argument of the current proc is mutable or not
@@ -56,6 +66,7 @@ const args = struct {
     return Ast.Proc.Arg{.id= name, .type= typ, .write= mut};
   }
 
+
   //__________________________
   /// @descr Returns the argument list of the current proc
   fn list (P:*Par) !?Ast.Proc.Arg.List {
@@ -76,9 +87,12 @@ const args = struct {
     proc.expect(P, Tk.Id.sp_paren_R);
     P.move(1);
     return result;
-  }
-};
+  } //:: Par.proc.args.list
+}; //:: Par.proc.args
 
+
+//______________________________________
+// @section Parser.Proc: Body Statements
 //__________________________
 /// @descr Creates the Body of the current `proc`
 /// :: Proc.Body = eq ind Stmt.List
@@ -86,20 +100,23 @@ fn body (P :*Par) !Ast.Proc.Body {
   proc.expect(P, Tk.Id.sp_eq);
   P.move(1);
   P.ind();
-  var result = Ast.Proc.Body.init(P.A);
+  var result = Ast.Proc.Body.create(P.A);
   switch (P.tk().id) {
-    Tk.Id.kw_return => try result.add(stmt.Return(P)),
+    Tk.Id.kw_return => try result.add(try stmt.Return(P)),
     else => |token| P.fail("Unknown First Token for Proc.Body Statement '{s}'", .{@tagName(token)})
   }
   return result;
 }
 
+
+//______________________________________
+// @section Parser.Proc: Entry Point
 //__________________________
 /// @descr
 ///  Creates a topLevel `proc` or `func` statement and adds the resulting Node into the {@arg P.res} AST result.
 ///  Applies syntax error checking along the process.
 pub fn parse (P :*Par) !void {
-  var result  = Ast.Proc.newEmpty();
+  var result = Ast.Proc.create_empty();
   // pure/proc case
   switch (P.tk().id) {
     .kw_func => result.pure = true,
@@ -141,5 +158,5 @@ pub fn parse (P :*Par) !void {
 
   // Add the resulting Proc node to the AST
   try P.res.add(Ast.Node{.Proc= result});
-}
+} //:: Par.proc.parse
 

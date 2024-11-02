@@ -23,12 +23,13 @@ pub fn parse (P:*Par) !?Ast.Pragma.List {
   P.ind();
   var result = Ast.Pragma.List.create(P.A);
   P.ind();
+  // FIX: Multi-pragma Support
   pragma.expect(P, Tk.Id.b_ident);
-  try result.incl(Ast.Pragma.new(P.tk().val.items));
+  try result.incl(Ast.Pragma.from(P.tk().from(P.src)));
   P.move(1);
   P.ind();
   pragma.expect(P, Tk.Id.sp_braceDot_R);
   P.move(1);
   return result;
-}
+} //:: Par.pragma.parse
 

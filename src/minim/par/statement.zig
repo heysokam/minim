@@ -18,17 +18,17 @@ pub fn expectAny (P:*Par, ids :[]const Tk.Id) void { P.expectAny(ids, "Statement
 /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
 pub fn expect (P:*Par, id :Tk.Id) void { P.expect(id, "Statement"); }
 
-pub fn Return (P:*Par) Ast.Stmt {
+pub fn Return (P:*Par) !Ast.Stmt {
   stmt.expect(P, Tk.Id.kw_return);
   P.move(1);
   P.ind();
   stmt.expectAny(P, &.{Tk.Id.b_number, Tk.Id.wht_newline});
   const ret = switch (P.tk().id) {
-    .b_number    => Ast.Expr.Literal.Int.new(.{.val= P.tk().val.items,}),
+    .b_number    => Ast.Expr.Literal.Int.create(P.tk().loc),
     .wht_newline => Ast.Expr.Empty,
     else => |id| P.fail("Unexpected Token for Return Statement value. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)}),
   };
   if (P.tk().id == Tk.Id.b_number) P.move(1);
-  return Ast.Stmt.Return.new(ret);
+  return Ast.Stmt.Return.create(ret);
 }
 
