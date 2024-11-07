@@ -44,7 +44,7 @@ src   :source.Code,
 list  :Node.List,
 /// @descr Extra data that doesn't fit in the main node list of the AST
 /// @eg Array Types will be an index into the ext.types list
-ext  :Ast.Extras,
+ext   :Ast.Extras,
 
 pub const Extras = struct {
   types  :Ast.Extras.List.Types,
@@ -85,7 +85,7 @@ pub fn clone (ast :*Ast) !Ast { return Ast{
   .A       = ast.A,
   .lang    = ast.lang,
   .src     = ast.src,
-  .list    = try ast.list.clone(),
+  .list    = try Node.list.clone(&ast.list),
   .ext     = try ast.ext.clone(),
   };
 } //:: Ast.clone

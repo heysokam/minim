@@ -23,8 +23,8 @@ pub fn gen (
   var result = zstd.str.init(ast.A);
   for (ast.list.items()) |N| { switch (lang) {
     .Minim => try slate.Gen.Minim.render(N, ast.src, ast.ext.types, &result),
-    .Zig   => try slate.Gen.Zig.render(N, ast.src, ast.ext.types, &result),
-    .C     => try slate.Gen.C.render(N, ast.src, ast.ext.types, &result),
+    .Zig   => try slate.Gen  .Zig.render(N, ast.src, ast.ext.types, &result),
+    .C     => try slate.Gen    .C.render(N, ast.src, ast.ext.types, &result),
   } try result.appendSlice("\n");}
   return result;
 }
