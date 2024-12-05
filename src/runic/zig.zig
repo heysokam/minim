@@ -8,8 +8,10 @@ const Z   = std.zig;
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
 const cstr = zstd.cstr;
+const echo = zstd.echo;
 // @deps *Slate
 const slate = @import("../lib/slate.zig");
+const source = slate.source;
 // @deps minim
 const Lang = @import("../minim/rules.zig").Lang;
 const Ast  = @import("../minim/ast.zig").Ast;
@@ -20,48 +22,79 @@ const cfg = struct {
 };
 
 const zast = struct {
-  const proc = struct {
-    pub fn getName (ast :Z.Ast, id :u32) cstr {
-      // const protoID = ast.nodes.items(.data)[id].lhs;
-      // const nameID  = ast.nodes.items(.main_token)[protoID]+1; // The name is always at:  fn+1
-      // const name    = ast.tokenSlice(nameID);
-      return ast.tokenSlice(ast.nodes.items(.main_token)[ast.nodes.items(.data)[id].lhs]+1);
-    }
-  };
-};
+  pub const proc = struct {
+    pub const id = struct {
+      pub inline fn name  (ast :Z.Ast, id_proc :Z.Ast.TokenIndex) Z.Ast.TokenIndex { return ast.nodes.items(.main_token)[id_proc]+1; }
+      pub inline fn proto (ast :Z.Ast, id_proc :Z.Ast.TokenIndex) Z.Ast.TokenIndex { return ast.nodes.items(.data)[id_proc].lhs; }
+      pub inline fn body  (ast :Z.Ast, id_proc :Z.Ast.TokenIndex) Z.Ast.TokenIndex { return ast.nodes.items(.data)[id_proc].rhs; }
+    }; //:: zast.proc.id
+    pub const name = struct {
+      pub inline fn loc (ast :Z.Ast, id_proc :Z.Ast.TokenIndex) Z.Ast.Span { return ast.tokenToSpan(zast.proc.id.name(ast, id_proc)); }
+      pub inline fn get (ast :Z.Ast, id_proc :Z.Ast.TokenIndex) source.Loc {
+        const tk = zast.proc.name.loc(ast, id_proc);
+        return source.Loc{.start=@intCast(tk.start), .end=@intCast(tk.end)};
+      } //:: zast.proc.getName
+    }; //:: zast.proc.name
+    pub const retrn = struct {
+    }; //:: zast.proc.retrn
+  }; //:: zast.proc
+}; //:: zast
+
 const proc = struct {
   pub fn getNode (
-      ast : Z.Ast,
-      id  : u32,
+      ast     : Z.Ast,
+      id_proc : u32,
     ) !Ast.Node {
-    var result = slate.Proc.newEmpty();
+    const datas    :[]Z.Ast.Node.Data= ast.nodes.items(.data);
+    const tags     :[]Z.Ast.Node.Tag=  ast.nodes.items(.tag);
+    const ID_proto = datas[id_proc].lhs;
+    const ID_body  = datas[id_proc].rhs;
+
+    // const data = ast.fullFnProto(buffer: *[1]Ast.Node.Index, node: Node.Index)
+    var fn_proto_buf: [1]Z.Ast.Node.Index = undefined;
+    const data = ast.fullFnProto(&fn_proto_buf, id_proc).?;
+    // const data_retT = datas[data.ast.return_type];
+    const tag_retT  = tags[data.ast.return_type];
+
+
+
+    // const proto_extras = ast.extraData(datas[ID_proto].lhs, Z.Ast.Node.FnProto);
+    // const proto_extras = ast.extraData(datas[id_proc], Z.Ast.Node.FnProto);
+    // const proto_extras = ast.extraData(0, Z.Ast.Node.FnProto);
+    // const ID_retT = proto_extras.params_start;
+    // const ID_retT = 0;
+
+
+
+
+    var result = slate.Proc.create_empty();
     result.pure = false;  // Pure functions do not exist in Zig
 
-    const protoID = ast.nodes.items(.data)[id].lhs;
-    const bodyID  = ast.nodes.items(.data)[id].rhs;
     // Get the Proc.Name
-    result.name   = slate.Proc.Name{.name = zast.proc.getName(ast, id)};// :Proc.Name,
+    result.name = slate.Proc.Name{.name = zast.proc.name.get(ast, id_proc)};
 
+    echo("............................");
+    echo(result.name.from(ast.source));
+    echo("............................");
 
-    zstd.echo("............................");
-    zstd.echo(zast.proc.getName(ast, id));
-    zstd.echo("............................");
+    echo("..HERE......................");
+    echo(@tagName(tag_retT));
     // Get the Proc.ReturnT
-    const retTID = ast.nodes.items(.data)[protoID].rhs;
-    const retT   = ast.tokenSlice(retTID);
-    zstd.echo(retT);
+    const retT = ast.tokenSlice(data.ast.return_type);
+    echo(retT);
+    echo("..HERE......................");
 
 
 
 
-    // const decl    = ast.extraData(0, Z.Ast.Node.FnProto);
-    const proto   = ast.nodes.items(.tag)[protoID];
-    const body    = ast.nodes.items(.tag)[bodyID];
-    zstd.echo("............................");
-    zstd.echo(@tagName(proto));
-    zstd.echo(@tagName(body));
+    // const decl = ast.extraData(0, Z.Ast.Node.FnProto);
+    const proto = tags[ID_proto];
+    const body  = tags[ID_body];
+    echo("............................");
+    echo(@tagName(proto));
+    echo(@tagName(body));
     // zstd.prnt("{}\n", .{decl.params_end});
-    zstd.echo("............................");
+    echo("............................");
     // result.public  = // :bool= false,
     // result.args    = // :?Proc.Arg.List= null,
     // result.retT    = // :?Proc.ReturnT= null,
@@ -222,11 +255,11 @@ const proc = struct {
 };
 
 pub fn get2 (
-    src  : cstr,
+    src  : source.Code,
     in   : Ast.create.Options,
     A    : std.mem.Allocator,
   ) !Ast {
-  var result = Ast.create.empty(Lang.Zig, A);
+  var result = Ast.create.empty(Lang.Zig, src, A);
   // Get the Zig AST
   const code = try A.dupeZ(u8, src);
   defer A.free(code);
