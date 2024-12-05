@@ -36,5 +36,5 @@ pub fn move (P:*Par, N :i64) void {
 pub fn skip (P:*Par, id :Tk.Id) void {
   if (P.last()) return;
   if (P.tk().id == id){ P.move(1); }
-}
+} //:: Par.data.skip
 
