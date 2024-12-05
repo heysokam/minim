@@ -1,9 +1,6 @@
 //:_______________________________________________________________________
 //  ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
 //:_______________________________________________________________________
-// @deps zstd
-const zstd = @import("./lib/zstd.zig");
-const echo = zstd.echo;
 // @deps confy
 const confy   = @import("./lib/confy.zig");
 const Name    = confy.Name;
@@ -28,6 +25,12 @@ const P = confy.Package.Info{
   .git     = Git.Info{ .owner= author.short, .repo= name },
 };
 
+const deps = struct {
+  const zstd  = confy.Dependency{.name= "zstd",   .url= "https://github.com/heysokam/zstd"   };
+  const slate = confy.Dependency{.name= "slate",  .url= "https://github.com/heysokam/slate"  };
+};
+const dependencies = &.{deps.zstd, deps.slate};
+
 
 
 
@@ -47,11 +50,13 @@ pub fn main () !u8 {
     .trg     = "M",
     .entry   = "src/M.zig",
     .version = P.version,
+    .deps    = dependencies,
   }, &builder);
   var tests = try confy.UnitTest(.{
     .trg     = "tests",
     .entry   = "src/tests.zig",
     .version = P.version,
+    .deps    = &.{deps.slate},
     // .flags   = .{.ld= &.{"-lclang"}},
   }, &builder);
 
