@@ -2,7 +2,7 @@
 //  ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
 //:_______________________________________________________________________
 // @deps confy
-const confy   = @import("./lib/confy.zig");
+const confy   = @import("./src/lib/confy.zig");
 const Name    = confy.Name;
 const Package = confy.Package;
 const Git     = confy.Git;
