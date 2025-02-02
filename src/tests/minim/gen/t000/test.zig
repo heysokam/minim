@@ -2,9 +2,9 @@
 //  ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
 //:_______________________________________________________________________
 // @deps minim
-const M = @import("../../../minim.zig");
+const M = @import("../../../../minim.zig");
 // @deps minim.tests
-const t = @import("../base.zig");
+const t = @import("../../base.zig");
 
 
 const Title = "Basic Checks";

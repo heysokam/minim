@@ -6,8 +6,7 @@ const std = @import("std");
 
 test {
   std.testing.refAllDecls(@This());
-  _ = @import("./minim/tok/test.zig"); // Tokenizer
-  _ = @import("./minim/par/test.zig"); // Parser
-  _ = @import("./minim/gen/test.zig"); // Codegen
+  _ = @import("./t000/test.zig"); // Basic Codegen
+  _ = @import("./t001/test.zig"); // Procs
 }
 
