@@ -28,7 +28,7 @@ pub const slice = struct {
   /// @descr Returns the string value of the Token located at the {@arg L.loc} of {@arg src}.
   /// @note Returns an empty string when {@arg T.loc} does not represent a valid location.
   /// @note Does not perform bounds check on {@arg src}. It will fail when the location is out of bounds.
-  pub fn from (T :*const Tk, src :source.Code) source.Code { return T.loc.from(src); }
+  pub fn from (T :*const Tk, src :source.Code) source.Str { return T.loc.from(src); }
 }; //:: Tk.slice
 pub const from = slice.from;
 

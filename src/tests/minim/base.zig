@@ -5,7 +5,7 @@
 const std   = @import("std");
 // @deps zstd
 const zstd = @import("../../lib/zstd.zig");
-const cstr = zstd.cstr;
+const zstr = zstd.zstr;
 // @deps minim
 const M = @import("../../minim.zig");
 
@@ -21,7 +21,7 @@ pub const strEq = std.testing.expectEqualStrings;
 //______________________________________
 // @section Custom checks
 //____________________________
-pub fn check (src :cstr, trg :cstr, lang :M.Lang) !void {
+pub fn check (src :zstr, trg :zstr, lang :M.Lang) !void {
   const verbose = false;
   // Initialize
   var gpa = std.heap.GeneralPurposeAllocator(std.heap.GeneralPurposeAllocatorConfig{}){};
