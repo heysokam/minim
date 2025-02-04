@@ -1,0 +1,15 @@
+<procedure>       ::= "proc" <space> <indentation>* <identifier> <star_parameters> <colon_type> "=" <expression>
+<space>           ::= " "
+<indentation>     ::= "\n" <space>*
+<star_parameters> ::= "*" <parameters>
+<colon_type>      ::= ":" <type>
+<parameters>      ::= "(" <parameter_list> ")"
+<parameter_list>  ::= <identifier> ("," <space> <identifier>)*
+<type>            ::= "int" | "float" | "string"
+<expression>      ::= "return" <space> <value>
+<value>           ::= <integer>
+<integer>         ::= <digit>+
+<identifier>      ::= <letter> (<letter> | <digit>)*
+<digit>           ::= [0-9]
+<letter>          ::= [a-z] [A-Z]
+
