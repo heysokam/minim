@@ -6,6 +6,7 @@ const std = @import("std");
 
 test {
   std.testing.refAllDecls(@This());
+  _ = @import("./bugs/test.zig"); // Bug Fixes
   _ = @import("./t000/test.zig"); // Basic Codegen
   _ = @import("./t001/test.zig"); // Procs
 }
