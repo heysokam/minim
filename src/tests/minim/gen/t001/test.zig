@@ -4,48 +4,52 @@
 // @deps minim
 const M = @import("../../../../minim.zig");
 // @deps minim.tests
-const t = @import("../../base.zig");
+const t  = @import("../../base.zig");
+const it = t.it;
 
-const Title = "Procedures";
+const Procedures = t.title("Procedures");
+test Procedures { Procedures.begin(); defer Procedures.end();
 
-test "01 | Basic Proc" {
+try it("01 | Basic Proc", struct { fn f()!void {
   const ID = "01";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
   const c  = @embedFile(ID++".c");
   const z  = @embedFile(ID++".zig");
-  try t.ok(!t.eq(u8, c,z));
-  try t.strEq(cm,zm);
+  try t.not.eq_str(c,z);
+  try t.eq_str(cm,zm);
 
   try t.check(cm, c, M.Lang.C);
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
-}
+}}.f);
 
-test "02 | Args: Basic" {
+try it("02 | Args: Basic", struct { fn f()!void {
   const ID = "02";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
   const c  = @embedFile(ID++".c");
   const z  = @embedFile(ID++".zig");
-  try t.ok(!t.eq(u8, c,z));
-  try t.ok(!t.eq(u8, cm,zm));
+  try t.not.eq_str(c,z);
+  try t.not.eq_str(cm,zm);
 
   try t.check(cm, c, M.Lang.C);
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
-}
+}}.f);
 
-test "03 | Args: Complex" {
+try it("03 | Args: Complex", struct { fn f()!void {
   const ID = "03";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
   const c  = @embedFile(ID++".c");
   const z  = @embedFile(ID++".zig");
-  try t.ok(!t.eq(u8, c,z));
-  try t.ok(!t.eq(u8, cm,zm));
+  try t.not.eq_str(c,z);
+  try t.not.eq_str(cm,zm);
 
   try t.check(cm, c, M.Lang.C);
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
-}
+}}.f);
+
+} //:: Procedures
 
 // #_______________________________________
 // # @section Test
