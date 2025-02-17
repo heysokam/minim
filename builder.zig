@@ -25,11 +25,17 @@ const P = confy.Package.Info{
   .git     = Git.Info{ .owner= author.short, .repo= name },
 };
 
+const cfg = struct {
+  const verbose = false;
+};
 const deps = struct {
   const zstd  = confy.Dependency{.name= "zstd",   .url= "https://github.com/heysokam/zstd"   };
   const slate = confy.Dependency{.name= "slate",  .url= "https://github.com/heysokam/slate"  };
+  const ztest = confy.Dependency{.name= "ztest",  .url= "https://github.com/heysokam/ztest"  };
+
+  const minim = [_]confy.Dependency{deps.zstd, deps.slate};
+  const tests = deps.minim ++ [_]confy.Dependency{deps.ztest};
 };
-const dependencies = &.{deps.zstd, deps.slate};
 
 
 
@@ -50,13 +56,15 @@ pub fn main () !u8 {
     .trg     = "M",
     .entry   = "src/M.zig",
     .version = P.version,
-    .deps    = dependencies,
+    .deps    = &deps.minim,
+    .cfg     = .{.verbose= cfg.verbose },
   }, &builder);
   var tests = try confy.UnitTest(.{
     .trg     = "tests",
     .entry   = "src/tests.zig",
     .version = P.version,
-    .deps    = &.{deps.slate},
+    .deps    = &deps.tests,
+    .cfg     = .{.verbose= cfg.verbose },
     // .flags   = .{.ld= &.{"-lclang"}},
   }, &builder);
 
