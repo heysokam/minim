@@ -61,7 +61,7 @@ pub const Pattern = struct {
     }); // << Kw = ...
 
   //______________________________________
-  /// @descr List of (key,val) pairs of Keyword Tokens, mapping their string representation with their Tk.Id
+  /// @descr List of (key,val) pairs of Operator Tokens, mapping their string representation with their Tk.Id
   /// @note
   ///  Valid Operator starter Characters
   ///  =   +   -   *   /   <   >
@@ -99,7 +99,7 @@ pub const Pattern = struct {
     }); // Valid Whitespace characters
 
   //______________________________________
-  /// @descr List of (key,val) pairs of Whitespace Tokens, mapping their string representation with their Tk.Id
+  /// @descr List of (key,val) pairs of Parenthesis Tokens, mapping their string representation with their Tk.Id
   pub const Par = Map.initComptime(.{
     // Standard
     .{ "(",  .sp_paren_L      }, // (
@@ -170,11 +170,12 @@ pub const LxKinds = struct {
 };
 
 
-pub fn isOperator(L:Lx) bool { return LxKinds.Operator.contains(L.id); }
+/// @descr Returns whether or not {@arg L} is an operator lexeme.
+pub fn isOperator (L:Lx) bool { return LxKinds.Operator.contains(L.id); }
 /// @descr Returns whether or not {@arg L} is a whitespace lexeme.
-pub fn isWhitespace(L:Lx) bool { return LxKinds.Whitespace.contains(L.id); }
+pub fn isWhitespace (L:Lx) bool { return LxKinds.Whitespace.contains(L.id); }
 /// @descr Returns whether or not {@arg L} is a parenthesis, bracket or brace lexeme.
-pub fn isPar(L:Lx) bool { return LxKinds.Paren.contains(L.id); }
+pub fn isPar (L:Lx) bool { return LxKinds.Paren.contains(L.id); }
 /// @descr Returns whether or not {@arg L} is a dot lexeme.
-pub fn isDot(L:Lx) bool { return L.id == Lx.Id.dot; }
+pub fn isDot (L:Lx) bool { return L.id == Lx.Id.dot; }
 
