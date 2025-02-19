@@ -16,11 +16,11 @@ const Tk  = Tok.Tk;
 //____________________________
 /// @descr Processes a whitespace Lexeme into its Token representation, and adds it to the {@arg T.res} result.
 pub fn space (T:*Tok) !void {
-  const start = T.pos;
-  var   end   = T.pos;
+  const start = T.lx().loc.start;
+  var   end   = T.lx().loc.end;
   while (true) : (T.pos += 1) { // Collapse all continuous Lexeme spaces into a single space Token.
     if (T.lx().id != .space) { break; }
-    end += 1; // @warning Assumes spaces are never collapsed in the Lexer
+    end = T.lx().loc.end;
   }
   try T.add(Tk.Id.wht_space, .{.start= start, .end= end});
   T.pos -= 1;

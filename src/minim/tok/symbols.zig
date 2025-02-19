@@ -13,8 +13,9 @@ const Tk  = Tok.Tk;
 //____________________________
 /// @descr Processes a Lexeme starting with `*` into its Token representation, and adds it to the {@arg T.res} result.
 pub fn star (T:*Tok) !void {
-  if (!T.next_isOperator()) {
-    try T.add(Tk.Id.op_star, T.lx().loc);
+  const special = true;  // FIX: Special star symbol check
+  if (special and !T.next_isOperator()) {
+    try T.add(Tk.Id.sp_star, T.lx().loc);
   } else { Tok.fail("todo: multi-star operator case", .{}); }
 }
 
