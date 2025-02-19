@@ -135,8 +135,8 @@ pub const LxKinds = struct {
     .star,      // *
     .dot,       // .
     .plus,      // +
-    .min,       // -
-    .slash,     // /
+    .dash,      // -
+    .slash_F,   // /
     .less,      // <
     .more,      // >
     .at,        // @
@@ -148,7 +148,7 @@ pub const LxKinds = struct {
     .excl,      // !
     .qmark,     // ?
     .hat,       // ^
-    .bslash,    // \
+    .slash_B,   // \
     }); //:: rules.LxKinds.Operator
   /// @ref {@link rules.Pattern.Ws}
   pub const Whitespace = Map.initMany(&.{
