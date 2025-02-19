@@ -61,7 +61,7 @@ const args = struct {
     P.ind();
     const mut = proc.args.mutable(P);
     P.ind();
-    const typ = try ident.typ.parse(P);
+    const typ = try ident.type.parse(P);
     P.ind();
     return Ast.Proc.Arg{.id= name, .type= typ, .write= mut};
   }
@@ -69,13 +69,13 @@ const args = struct {
 
   //__________________________
   /// @descr Returns the argument list of the current proc
-  fn list (P:*Par) !?Ast.Proc.Arg.List {
+  fn list (P:*Par) !Ast.Proc.ArgStore.Pos {
     proc.expect(P, Tk.Id.sp_paren_L);
     P.move(1);
     P.ind();
-    if (P.tk().id == Tk.Id.sp_paren_R) { P.move(1); return null; } // null means the proc has no arguments
+    if (P.tk().id == Tk.Id.sp_paren_R) { P.move(1); return .None; } // .None means the proc has no arguments
     // ... parse args
-    var result = Ast.Proc.Arg.List.create(P.A);
+    var result = try Ast.Proc.Args.create(P.A);
     while (true) {
       P.ind();
       if (P.tk().id == Tk.Id.sp_paren_R) { break; }
@@ -86,7 +86,7 @@ const args = struct {
     }
     proc.expect(P, Tk.Id.sp_paren_R);
     P.move(1);
-    return result;
+    return P.res.add_args(result);
   } //:: Par.proc.args.list
 }; //:: Par.proc.args
 
@@ -96,16 +96,16 @@ const args = struct {
 //__________________________
 /// @descr Creates the Body of the current `proc`
 /// :: Proc.Body = eq ind Stmt.List
-fn body (P :*Par) !Ast.Proc.Body {
+fn body (P :*Par) !Ast.Proc.BodyStore.Pos {
   proc.expect(P, Tk.Id.sp_eq);
   P.move(1);
   P.ind();
-  var result = Ast.Proc.Body.create(P.A);
+  var result = try Ast.Proc.Body.create(P.A);
   switch (P.tk().id) {
     Tk.Id.kw_return => try result.add(try stmt.Return(P)),
     else => |token| P.fail("Unknown First Token for Proc.Body Statement '{s}'", .{@tagName(token)})
   }
-  return result;
+  return P.res.add_stmts(result);
 }
 
 
@@ -132,9 +132,7 @@ pub fn parse (P :*Par) !void {
 
   // public/private case
   result.public = proc.public(P);
-  // FIX: Make these two `star` tokens a single Token
   P.skip(Tk.Id.sp_star);
-  P.skip(Tk.Id.op_star);
   P.ind();
 
   // Args
@@ -149,7 +147,7 @@ pub fn parse (P :*Par) !void {
   proc.expect(P, Tk.Id.sp_colon);
   P.move(1);
   P.ind();
-  result.retT = try ident.typ.parse(P);
+  result.retT = try ident.type.parse(P);
   P.ind();
 
   // Return Body
@@ -157,6 +155,6 @@ pub fn parse (P :*Par) !void {
   result.body = try proc.body(P);
 
   // Add the resulting Proc node to the AST
-  try P.res.add(Ast.Node{.Proc= result});
+  _= try P.res.add_node(Ast.Node{.Proc= result}); // TODO: Modules will need this Node.Store.Pos
 } //:: Par.proc.parse
 

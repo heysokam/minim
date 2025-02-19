@@ -32,7 +32,7 @@ pub fn create (T:*const M.Tok) !Par {
     .pos    = 0,
     .src    = T.src,
     .buf    = try T.res.clone(T.A),
-    .res    = M.Ast.create.empty(.C, T.src, T.A),  // FIX: Do not hardcode the language to C
+    .res    = try M.Ast.create.empty(.C, T.src, T.A),  // FIX: Do not hardcode the language to C
     .parsed = zstd.str.init(T.A),
     };
 } //:: M.Par.create
@@ -50,7 +50,7 @@ pub fn destroy (P:*Par) void {
 //____________________________
 pub const report = @import("./par/cli.zig").report;
 pub const prnt   = zstd.prnt;
-/// @descr Triggers an fatal error and prints the contents parsed so far
+/// @descr Triggers a fatal error and prints the contents parsed so far
 pub fn fail (P:*const Par, comptime msg :cstr, args :anytype) noreturn {
   zstd.echo(P.parsed.items);
   zstd.fail(msg, args);
@@ -82,32 +82,32 @@ pub const ind         = indentation.parse;
 pub const expectInd   = indentation.expect;
 
 
-//__________________________
-/// Rules: Statement
-/// :: kw_return   = 'return'
-/// :: Stmt.Return = kw_return Expr
-/// :........
-pub const stmt = @import("./par/statement.zig");
+// //__________________________
+// /// Rules: Statement
+// /// :: kw_return   = 'return'
+// /// :: Stmt.Return = kw_return Expr
+// /// :........
+// pub const stmt = @import("./par/statement.zig");
 
 
-//__________________________
-/// Rules: Identifier
-/// :: kw_ptr     = 'ptrconst '
-/// :: kw_array   = 'array'
-/// :: Ident      = TODO
-/// :: Data.Type  = ( kw_ptr )? Ident
-/// :........
-pub const ident = @import("./par/ident.zig");
+// //__________________________
+// /// Rules: Identifier
+// /// :: kw_ptr     = 'ptrconst '
+// /// :: kw_array   = 'array'
+// /// :: Ident      = TODO
+// /// :: Data.Type  = ( kw_ptr )? Ident
+// /// :........
+// pub const ident = @import("./par/ident.zig");
 
 
-//__________________________
-/// Rules: Pragma
-/// :: prag_start   = '{.'
-/// :: prag_end     = '.}'
-/// :: Pragma.Value = colon ind? (Ident)
-/// :: Pragma       = prag_start ind? Ident (ind? Pragma.Value)? ind? prag_end
-/// :........
-pub const pragma = @import("./par/pragma.zig");
+// //__________________________
+// /// Rules: Pragma
+// /// :: prag_start   = '{.'
+// /// :: prag_end     = '.}'
+// /// :: Pragma.Value = colon ind? (Ident)
+// /// :: Pragma       = prag_start ind? Ident (ind? Pragma.Value)? ind? prag_end
+// /// :........
+// pub const pragma = @import("./par/pragma.zig");
 
 
 //__________________________

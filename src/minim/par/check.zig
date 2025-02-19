@@ -15,8 +15,8 @@ const Tk  = Tok.Tk;
 //____________________________
 /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
 pub fn expect (P:*Par, id :Tk.Id, kind :cstr) void {
-  if (P.tk().id != id) P.fail("Unexpected Token for {s}. Expected '{s}', but found:  {d}:'{s}'",
-    .{kind, @tagName(id), P.pos, @tagName(P.tk().id)});
+  if (P.tk().id != id) P.fail("Unexpected Token for {s}. Expected '{s}', but found:  {d}:'{s}':{s}",
+    .{kind, @tagName(id), P.pos, @tagName(P.tk().id), P.tk().from(P.src)});
 } //:: Par.check.expect
 
 //____________________________

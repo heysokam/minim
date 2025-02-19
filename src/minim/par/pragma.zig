@@ -5,10 +5,10 @@ const pragma = @This();
 // @deps zstd
 const zstd = @import("../../lib/zstd.zig");
 // @deps minim
-const Tok    = @import("../tok.zig").Tok;
-const Tk     = Tok.Tk;
-const Par    = @import("../par.zig").Par;
-const Ast    = @import("../ast.zig").Ast;
+const Tok = @import("../tok.zig").Tok;
+const Tk  = Tok.Tk;
+const Par = @import("../par.zig").Par;
+const Ast = @import("../ast.zig").Ast;
 
 
 //____________________________
@@ -16,13 +16,12 @@ const Ast    = @import("../ast.zig").Ast;
 pub fn expect (P:*Par, id :Tk.Id) void { P.expect(id, "Pragma"); }
 
 //____________________________
-pub fn parse (P:*Par) !?Ast.Pragma.List {
-  if (P.tk().id != Tk.Id.sp_braceDot_L) return null;
+pub fn parse (P:*Par) !Ast.Pragma.Store.Pos {
+  if (P.tk().id != Tk.Id.sp_braceDot_L) return .None;
   pragma.expect(P, Tk.Id.sp_braceDot_L);
   P.move(1);
   P.ind();
   var result = Ast.Pragma.List.create(P.A);
-  P.ind();
   // FIX: Multi-pragma Support
   pragma.expect(P, Tk.Id.b_ident);
   try result.incl(Ast.Pragma.from(P.tk().from(P.src)));
@@ -30,6 +29,6 @@ pub fn parse (P:*Par) !?Ast.Pragma.List {
   P.ind();
   pragma.expect(P, Tk.Id.sp_braceDot_R);
   P.move(1);
-  return result;
+  return P.res.add_pragmas(result);
 } //:: Par.pragma.parse
 

@@ -21,7 +21,10 @@ pub fn tk (P :*Par) Tk { return next_at(P,0); }
 ///  Moving by positive numbers will append to {@arg P.parsed} the string of every token found on each step.
 pub fn move (P:*Par, N :i64) void {
   if (N == 0) return;
-  if (std.math.sign(N) < 0) P.pos += @intCast(N);
+  if (std.math.sign(N) < 0) {
+    P.pos += @intCast(N);
+    return;
+  }
   for (0..@intCast(N)) |step| {
     P.parsed.appendSlice(P.tk().from(P.src)) catch
       |err| std.debug.panic("Parser {s}: Something went wrong at step `{d}` when advancing the position by `{d}`.\n", .{@errorName(err), step, N});

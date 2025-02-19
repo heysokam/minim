@@ -11,7 +11,7 @@ const Par = @import("../par.zig");
 /// @descr Reports the contents of the {@arg P} Parser object to CLI
 pub fn report (P :*Par) void {
   Par.prnt("--- minim.Parser ---\n", .{});
-  for (P.res.list.items(), 0..) | id, val | {
+  for (P.res.data.nodes.items(), 0..) | id, val | {
     Par.prnt("{s} : {any}\n", .{@tagName(id), val});
   }
   Par.prnt("--------------------\n", .{});
