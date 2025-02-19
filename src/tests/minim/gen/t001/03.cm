@@ -10,6 +10,7 @@ proc other (
 proc stuff (
     one : ptr unsigned long;
     two : ptr i32 {.readonly.};
+    thr : var ptr i32 {.readonly.};
   ) :signed char=
   return 0
 

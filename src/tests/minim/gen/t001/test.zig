@@ -7,10 +7,10 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-const Procedures = t.title("Procedures");
+var  Procedures = t.title("Procedures");
 test Procedures { Procedures.begin(); defer Procedures.end();
 
-try it("01 | Basic Proc", struct { fn f()!void {
+try it("Basic Proc", struct { fn f()!void {
   const ID = "01";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
@@ -23,7 +23,7 @@ try it("01 | Basic Proc", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-try it("02 | Args: Basic", struct { fn f()!void {
+try it("Args: Basic", struct { fn f()!void {
   const ID = "02";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
@@ -36,7 +36,7 @@ try it("02 | Args: Basic", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-try it("03 | Args: Complex", struct { fn f()!void {
+try it("Args: Complex", struct { fn f()!void {
   const ID = "03";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
