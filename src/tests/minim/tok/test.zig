@@ -10,7 +10,7 @@ const slate = @import("slate");
 const t  = @import("../base.zig");
 const it = t.it;
 
-const Tokenizer = t.title("minim.Tok | General Cases");
+var  Tokenizer = t.title("minim.Tok | General Cases");
 test Tokenizer { Tokenizer.begin(); defer Tokenizer.end();
 
 try it("should create the expected list of tokens for the Hello42 case", struct { fn f() !void {

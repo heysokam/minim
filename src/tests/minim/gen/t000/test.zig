@@ -8,10 +8,10 @@ const t = @import("../../base.zig");
 const it = t.it;
 
 
-const BasicChecks = t.title("Basic Checks");
+var  BasicChecks = t.title("Basic Checks");
 test BasicChecks { BasicChecks.begin(); defer BasicChecks.end();
 
-try it("00 | dummy check", struct { fn f()!void {
+try it("dummy check", struct { fn f()!void {
   const ID = "00";
   // Should pass a dummy check
   const cm = @embedFile(ID++".cm");
@@ -24,7 +24,7 @@ try it("00 | dummy check", struct { fn f()!void {
   try t.eq_str(z,  "");
 }}.f);
 
-try it("01 | Basic Code Generation", struct { fn f()!void {
+try it("Basic Code Generation", struct { fn f()!void {
   const ID = "01";
   // Should do basic code generation
   const cm = @embedFile(ID++".cm");
