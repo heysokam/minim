@@ -44,86 +44,17 @@ src   :source.Code,
 /// @eg Array Types will be an index into the ext.types list
 data  :Ast.Data,
 
-pub const Data = struct {
-  A       : std.mem.Allocator,
-  types   : Ast.Data.List.Types,
-  args    : Ast.Data.List.Args,
-  pragmas : Ast.Data.List.Pragmas,
-  stmts   : Ast.Data.List.Stmts,
-  /// @descr Contains the list of Top-Level nodes of the AST
-  nodes   : Ast.Data.List.Nodes,
 
-  pub fn create (A :std.mem.Allocator) !Ast.Data { return Ast.Data{
-    .A       = A,
-    .types   = try Ast.Data.List.Types.create(A),
-    .args    = try Ast.Data.List.Args.create(A),
-    .pragmas = try Ast.Data.List.Pragmas.create(A),
-    .stmts   = try Ast.Data.List.Stmts.create(A),
-    .nodes   = try Ast.Data.List.Nodes.create(A),
-    };
-  } //:: Ast.Extras.create
-
-  pub fn clone (D :*Ast.Data) !Ast.Data { return Ast.Data{
-    .A       = D.A,
-    .types   = try D.types.clone(),
-    .args    = try D.args.clone(),
-    .pragmas = try D.pragmas.clone(),
-    .stmts   = try D.stmts.clone(),
-    .nodes   = try D.nodes.clone(),
-    };
-  } //:: Ast.Extras.clone
-
-  pub fn destroy (D :*Ast.Data) void {
-    D.types.destroy();
-    D.args.destroy();
-    D.pragmas.destroy();
-    D.stmts.destroy();
-    D.nodes.destroy();
-  } //:: Ast.Data.destroy
-
-  pub const List = struct {
-    pub const Pos = slate.DataList(u1).Pos;  // (@note ignore u1. it is only used to access the Pos type)
-    const Types   = Type.Store;
-    const Args    = Proc.ArgStore;
-    const Pragmas = Ast.Pragma.Store;
-    const Stmts   = Ast.Stmt.Store;
-    const Nodes   = Ast.Node.List; // NOTE: Modules are Node.Stores
-    const add = struct {
-      pub fn @"type" (ast :*Ast, T :Ast.Type)        !Ast.Data.List.Pos { try ast.data.types.add(T)   ; return ast.data.types.last(); }
-      pub fn args    (ast :*Ast, T :Ast.Proc.Args)   !Ast.Data.List.Pos { try ast.data.args.add(T)    ; return ast.data.args.last(); }
-      pub fn pragmas (ast :*Ast, T :Ast.Pragma.List) !Ast.Data.List.Pos { try ast.data.pragmas.add(T) ; return ast.data.pragmas.last(); }
-      pub fn stmts   (ast :*Ast, T :Ast.Stmt.List)   !Ast.Data.List.Pos { try ast.data.stmts.add(T)   ; return ast.data.stmts.last(); }
-      pub fn node    (ast :*Ast, T :Ast.Node)        !Ast.Data.List.Pos { try ast.data.nodes.add(T)   ; return ast.data.nodes.last(); }
-    }; //:: Ast.Data.List.add
-  }; //:: Ast.Data.List
-
-  pub const get = struct {
-    pub const proc = struct {
-      /// @descr Shorthand that returns the data for the proc argument at position ({@arg procID}, {@arg argID})
-      pub fn arg (data :*const Ast.Data, procID :usize, argID :usize) Proc.Arg {
-        return data.args.at(
-          data.nodes.items()[procID].Proc.args
-        ).?.at(@enumFromInt(argID)).?;
-      } //:: Ast.Data.get.proc.arg
-    }; //:: Ast.Data.get.proc
-
-    /// @descr Shorthand that returns the data for the type at position {@arg id}
-    pub fn @"type" (data :*const Ast.Data, id :Ast.Data.List.Types.Pos) Type {
-      return data.types.at(id).?;
-    } //:: Ast.Data.get.type
-  }; //:: Ast.Data.get
-
-  pub const get_proc_arg = Ast.Data.get.proc.arg;
-  pub const get_type     = Ast.Data.get.type;
-}; //:: Ast.Data
+//______________________________________
+// @section Data Management
 //____________________________
+pub const Data = @import("./ast/data.zig");
 /// @descr Adds a Type to the respective Ast.Data list
-pub const add_type    = Ast.Data.List.add.type;
-pub const add_args    = Ast.Data.List.add.args;
-pub const add_pragmas = Ast.Data.List.add.pragmas;
-pub const add_stmts   = Ast.Data.List.add.stmts;
-pub const add_node    = Ast.Data.List.add.node;
-
+pub inline fn add_type    (ast :*Ast, T :slate.Type)        !Data.List.Pos { return Ast.Data.List.add.type(    &ast.data, T); }
+pub inline fn add_args    (ast :*Ast, T :slate.Proc.Args)   !Data.List.Pos { return Ast.Data.List.add.args(    &ast.data, T); }
+pub inline fn add_pragmas (ast :*Ast, T :slate.Pragma.List) !Data.List.Pos { return Ast.Data.List.add.pragmas( &ast.data, T); }
+pub inline fn add_stmts   (ast :*Ast, T :slate.Stmt.List)   !Data.List.Pos { return Ast.Data.List.add.stmts(   &ast.data, T); }
+pub inline fn add_node    (ast :*Ast, T :slate.Node)        !Data.List.Pos { return Ast.Data.List.add.node(    &ast.data, T); }
 
 
 //______________________________________
