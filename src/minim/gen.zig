@@ -21,10 +21,10 @@ pub fn gen (
     lang : rules.Lang,
   ) !str {
   var result = zstd.str.init(ast.A);
-  for (ast.list.items()) |N| { switch (lang) {
-    .Minim => try slate.Gen.Minim.render(N, ast.src, ast.ext.types, &result),
-    .Zig   => try slate.Gen  .Zig.render(N, ast.src, ast.ext.types, &result),
-    .C     => try slate.Gen    .C.render(N, ast.src, ast.ext.types, &result),
+  for (ast.data.nodes.items()) |N| { switch (lang) {
+    .Minim => try slate.Gen.Minim.render(N, ast.src, ast.data.types, &result),
+    .Zig   => try slate.Gen  .Zig.render(N, ast.src, ast.data.types, &result),
+    .C     => try slate.Gen    .C.render(N, ast.src, ast.data.types, ast.data.pragmas, ast.data.args, ast.data.stmts, &result),
   } try result.appendSlice("\n");}
   return result;
 }
