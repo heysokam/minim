@@ -9,5 +9,6 @@ test {
   _ = @import("./bugs/test.zig"); // Bug Fixes
   _ = @import("./t000/test.zig"); // Basic Codegen
   _ = @import("./t001/test.zig"); // Procs
+  _ = @import("./t002/test.zig"); // Variables
 }
 
