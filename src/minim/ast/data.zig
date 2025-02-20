@@ -30,10 +30,13 @@ pub fn create (A :std.mem.Allocator) !Data { return Data{
 pub fn clone (D :*Data) !Data {
   // Clone the list stores
   var args = try Data.Store.Args.create(D.A);
+  errdefer args.destroy();
   for (D.args.items()) |arg| try args.add(try arg.clone());
   var pragmas = try Data.Store.Pragmas.create(D.A);
+  errdefer pragmas.destroy();
   for (D.pragmas.items()) |pragma| try pragmas.add(try pragma.clone());
   var stmts = try Data.Store.Stmts.create(D.A);
+  errdefer stmts.destroy();
   for (D.stmts.items()) |stmt| try stmts.add(try stmt.clone());
   // Clone the lists
   return Data{
