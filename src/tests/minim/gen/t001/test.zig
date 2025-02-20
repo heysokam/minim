@@ -49,17 +49,86 @@ try it("Args: Complex", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-} //:: Procedures
 
-// #_______________________________________
-// # @section Test
-// #_____________________________
-// test name "04 | Visibility"       : check "04"
-// test name "05 | Varargs"          : check "05"
-// # Pragmas
-// test name "10 | Pragma: inline"   : check "10"
-// test name "11 | Pragma: noreturn" : check "11"
-// # Func
-// test name "50 | Func: Basic"      : check "50"
-// test name "51 | Func: pure"       : check "51"
+
+
+try t.todo.it("Visibility", struct { fn f()!void {
+  const ID = "04";
+  const cm = @embedFile(ID++".cm");
+  const zm = @embedFile(ID++".zm");
+  const c  = @embedFile(ID++".c");
+  const z  = @embedFile(ID++".zig");
+  try t.not.eq_str(c,z);
+  try t.eq_str(cm,zm);
+
+  try t.check(cm, c, M.Lang.C);
+  // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
+}}.f);
+
+try t.todo.it("Varargs", struct { fn f()!void {
+  const ID = "05";
+  const cm = @embedFile(ID++".cm");
+  const zm = @embedFile(ID++".zm");
+  const c  = @embedFile(ID++".c");
+  const z  = @embedFile(ID++".zig");
+  try t.not.eq_str(c,z);
+  try t.eq_str(cm,zm);
+
+  try t.check(cm, c, M.Lang.C);
+  // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
+}}.f);
+
+try t.todo.it("Pragma: inline", struct { fn f()!void {
+  const ID = "10";
+  const cm = @embedFile(ID++".cm");
+  const zm = @embedFile(ID++".zm");
+  const c  = @embedFile(ID++".c");
+  const z  = @embedFile(ID++".zig");
+  try t.not.eq_str(c,z);
+  try t.eq_str(cm,zm);
+
+  try t.check(cm, c, M.Lang.C);
+  // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
+}}.f);
+
+try t.todo.it("Pragma: noreturn", struct { fn f()!void {
+  const ID = "11";
+  const cm = @embedFile(ID++".cm");
+  const zm = @embedFile(ID++".zm");
+  const c  = @embedFile(ID++".c");
+  const z  = @embedFile(ID++".zig");
+  try t.not.eq_str(c,z);
+  try t.eq_str(cm,zm);
+
+  try t.check(cm, c, M.Lang.C);
+  // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
+}}.f);
+
+try t.todo.it("Func: Basic", struct { fn f()!void {
+  const ID = "50";
+  const cm = @embedFile(ID++".cm");
+  const zm = @embedFile(ID++".zm");
+  const c  = @embedFile(ID++".c");
+  const z  = @embedFile(ID++".zig");
+  try t.not.eq_str(c,z);
+  try t.eq_str(cm,zm);
+
+  try t.check(cm, c, M.Lang.C);
+  // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
+}}.f);
+
+try t.todo.it("Func: pure", struct { fn f()!void {
+  const ID = "51";
+  const cm = @embedFile(ID++".cm");
+  const zm = @embedFile(ID++".zm");
+  const c  = @embedFile(ID++".c");
+  const z  = @embedFile(ID++".zig");
+  try t.not.eq_str(c,z);
+  try t.eq_str(cm,zm);
+
+  try t.check(cm, c, M.Lang.C);
+  // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
+}}.f);
+
+} //:: Procedures
 
