@@ -50,11 +50,11 @@ data  :Ast.Data,
 //____________________________
 pub const Data = @import("./ast/data.zig");
 /// @descr Adds a Type to the respective Ast.Data list
-pub inline fn add_type    (ast :*Ast, T :slate.Type)        !Data.List.Pos { return Ast.Data.List.add.type(    &ast.data, T); }
-pub inline fn add_args    (ast :*Ast, T :slate.Proc.Args)   !Data.List.Pos { return Ast.Data.List.add.args(    &ast.data, T); }
-pub inline fn add_pragmas (ast :*Ast, T :slate.Pragma.List) !Data.List.Pos { return Ast.Data.List.add.pragmas( &ast.data, T); }
-pub inline fn add_stmts   (ast :*Ast, T :slate.Stmt.List)   !Data.List.Pos { return Ast.Data.List.add.stmts(   &ast.data, T); }
-pub inline fn add_node    (ast :*Ast, T :slate.Node)        !Data.List.Pos { return Ast.Data.List.add.node(    &ast.data, T); }
+pub inline fn add_type    (ast :*Ast, T :slate.Type)        !Data.Store.Pos { return Ast.Data.Store.add.type(    &ast.data, T); }
+pub inline fn add_args    (ast :*Ast, T :slate.Proc.Args)   !Data.Store.Pos { return Ast.Data.Store.add.args(    &ast.data, T); }
+pub inline fn add_pragmas (ast :*Ast, T :slate.Pragma.List) !Data.Store.Pos { return Ast.Data.Store.add.pragmas( &ast.data, T); }
+pub inline fn add_stmts   (ast :*Ast, T :slate.Stmt.List)   !Data.Store.Pos { return Ast.Data.Store.add.stmts(   &ast.data, T); }
+pub inline fn add_node    (ast :*Ast, T :slate.Node)        !Data.Store.Pos { return Ast.Data.Store.add.node(    &ast.data, T); }
 
 
 //______________________________________

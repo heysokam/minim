@@ -14,7 +14,7 @@ const Lx = @import("../lib/slate.zig").Lx;
 
 //______________________________________
 /// @descr Tags for the languages that Minim can understand/target
-pub const Lang  = enum { Minim, Zig, C, };
+pub const Lang = enum { Minim, Zig, C, };
 
 
 //______________________________________

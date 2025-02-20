@@ -55,7 +55,7 @@ pub const @"type" = struct {
   /// @descr
   ///  Starts parsing an Ident.Type.Array object from the current Token, and returns the position of the result.
   ///  Will fail if the next few tokens do not not match the Ident.Type.Array pattern
-  fn array (P:*Par, isPtr :bool) anyerror!Ast.Data.List.Pos {
+  fn array (P:*Par, isPtr :bool) anyerror!Ast.Data.Store.Pos {
     P.move(1);
     P.ind();
     // Start:  [
@@ -89,7 +89,7 @@ pub const @"type" = struct {
   /// @descr
   ///  Starts parsing an Ident.Type object from the current Token, and returns the position of the result.
   ///  Will fail if the next few tokens do not not match the Ident.Type pattern
-  pub fn parse (P:*Par) !Ast.Data.List.Pos {
+  pub fn parse (P:*Par) !Ast.Data.Store.Pos {
     P.expectAny(&.{Tk.Id.kw_array, Tk.Id.kw_ptr, Tk.Id.b_ident}, "Ident.Type");
     // ptr T
     const ptr = P.tk().id == .kw_ptr;

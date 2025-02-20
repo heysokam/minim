@@ -22,6 +22,7 @@ pub const eq_str = ztest.eq_str;
 pub const not    = ztest.not;
 pub const it     = ztest.it;
 pub const title  = ztest.title;
+pub const skip   = ztest.skip;
 
 
 //______________________________________
@@ -42,7 +43,7 @@ pub fn check (src :zstr, trg :zstr, lang :M.Lang) !void {
   var ast = try M.Ast.get2(src, .{.verbose=verbose}, allocator);
   defer ast.destroy();
   // Codegen
-  var code = try ast.gen(lang);
+  const code = try ast.gen(lang);
   defer code.deinit();
   // Check the result
   if (verbose) zstd.echo(code.items);
