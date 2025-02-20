@@ -1,3 +1,0 @@
-var thing :Thing= _
-thing.one       = 1
-thing.two.other = thing.one

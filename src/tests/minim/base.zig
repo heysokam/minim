@@ -23,6 +23,7 @@ pub const not    = ztest.not;
 pub const it     = ztest.it;
 pub const title  = ztest.title;
 pub const skip   = ztest.skip;
+pub const todo   = ztest.todo;
 
 
 //______________________________________
@@ -32,7 +33,6 @@ pub fn check (src :zstr, trg :zstr, lang :M.Lang) !void {
   const verbose = false;
   // Initialize
   var gpa = std.heap.GeneralPurposeAllocator(std.heap.GeneralPurposeAllocatorConfig{}){};
-  defer _ = gpa.deinit();
   var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
   defer arena.deinit();
 
@@ -50,6 +50,7 @@ pub fn check (src :zstr, trg :zstr, lang :M.Lang) !void {
   try t.eq(ast.lang, lang);
   try t.eq(ast.empty(), false);
   try t.eq_str(code.items, trg);
+  try t.eq(gpa.deinit(), .ok);
 }
 
 

@@ -1,3 +1,0 @@
-proc main *() :int=
-  let forty2 :int= 42
-  return forty2

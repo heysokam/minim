@@ -1,5 +1,0 @@
-var arr0 :array[2,int]= [39,40]
-var arr1 :array[1,int]= [41]
-var arr2 :array[_,int]= [42]
-var arr3 :array[_,int]= [42*2+arr0]
-var arr4 :array[_,int]= [arr1[24*1+arr2]]

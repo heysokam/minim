@@ -1,8 +1,0 @@
-const forty2 :int= 42
-
-const
-  one   :int= 1
-  two   :int= 2
-  three :int= 3
-  four  :int= 4
-  five  :int= 5

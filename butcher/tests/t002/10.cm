@@ -1,3 +1,0 @@
-var two   :signed char= 2
-var three :unsigned short int= 3
-var four  :unsigned long long int= 4
