@@ -17,5 +17,6 @@ test {
   _ = @import("./t007/test.zig"); // Control Flow
   _ = @import("./t008/test.zig"); // Calls
   _ = @import("./t009/test.zig"); // Types
+  _ = @import("./t010/test.zig"); // Affixes
 }
 
