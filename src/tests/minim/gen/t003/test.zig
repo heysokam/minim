@@ -102,7 +102,7 @@ try t.hide.it("Include: Global: .cm", struct { fn f()!void {
 }}.f);
 
 // # TODO: Imports   (at #50)
-}
+} //:: Modules
 
 
 var  Namespaces = t.title("Namespaces");
@@ -134,5 +134,5 @@ try t.hide.it("Blocks: Named", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-}
+} //:: Namespaces
 

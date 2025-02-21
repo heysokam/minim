@@ -101,5 +101,5 @@ try t.hide.it("C Pragma: once", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-}
+} //:: StandalonePragmas
 

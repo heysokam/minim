@@ -49,5 +49,5 @@ try t.hide.it("Inline Comments", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-}
+} //:: Comments
 

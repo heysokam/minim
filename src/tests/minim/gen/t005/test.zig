@@ -36,5 +36,5 @@ try t.hide.it("Multi identifier", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-}
+} //:: Discard
 
