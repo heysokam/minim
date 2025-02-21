@@ -24,6 +24,7 @@ pub const it     = ztest.it;
 pub const title  = ztest.title;
 pub const skip   = ztest.skip;
 pub const todo   = ztest.todo;
+pub const hide   = ztest.hide;
 
 
 //______________________________________

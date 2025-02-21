@@ -52,7 +52,7 @@ try it("Args: Complex", struct { fn f()!void {
 
 
 
-try t.todo.it("Visibility", struct { fn f()!void {
+try t.hide.it("Visibility", struct { fn f()!void {
   const ID = "04";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
@@ -65,7 +65,7 @@ try t.todo.it("Visibility", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-try t.todo.it("Varargs", struct { fn f()!void {
+try t.hide.it("Varargs", struct { fn f()!void {
   const ID = "05";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
@@ -78,7 +78,7 @@ try t.todo.it("Varargs", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-try t.todo.it("Pragma: inline", struct { fn f()!void {
+try t.hide.it("Pragma: inline", struct { fn f()!void {
   const ID = "10";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
@@ -91,7 +91,7 @@ try t.todo.it("Pragma: inline", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-try t.todo.it("Pragma: noreturn", struct { fn f()!void {
+try t.hide.it("Pragma: noreturn", struct { fn f()!void {
   const ID = "11";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
@@ -104,7 +104,7 @@ try t.todo.it("Pragma: noreturn", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-try t.todo.it("Func: Basic", struct { fn f()!void {
+try t.hide.it("Func: Basic", struct { fn f()!void {
   const ID = "50";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
@@ -117,7 +117,7 @@ try t.todo.it("Func: Basic", struct { fn f()!void {
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
 
-try t.todo.it("Func: pure", struct { fn f()!void {
+try t.hide.it("Func: pure", struct { fn f()!void {
   const ID = "51";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
