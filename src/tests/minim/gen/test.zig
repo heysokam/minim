@@ -10,5 +10,7 @@ test {
   _ = @import("./t000/test.zig"); // Basic Codegen
   _ = @import("./t001/test.zig"); // Procs
   _ = @import("./t002/test.zig"); // Variables
+  _ = @import("./t003/test.zig"); // Modules and Namespaces
+  _ = @import("./t004/test.zig"); // Standalone Pragmas
 }
 
