@@ -16,5 +16,6 @@ test {
   _ = @import("./t006/test.zig"); // Comments and Newlines
   _ = @import("./t007/test.zig"); // Control Flow
   _ = @import("./t008/test.zig"); // Calls
+  _ = @import("./t009/test.zig"); // Types
 }
 
