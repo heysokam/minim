@@ -18,5 +18,6 @@ test {
   _ = @import("./t008/test.zig"); // Calls
   _ = @import("./t009/test.zig"); // Types
   _ = @import("./t010/test.zig"); // Affixes
+  _ = @import("./t011/test.zig"); // Cast
 }
 
