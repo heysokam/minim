@@ -87,7 +87,7 @@ pub const expectInd   = indentation.expect;
 // /// :: kw_return   = 'return'
 // /// :: Stmt.Return = kw_return Expr
 // /// :........
-// pub const stmt = @import("./par/statement.zig");
+pub const stmt = @import("./par/statement.zig");
 
 
 // //__________________________
@@ -125,7 +125,6 @@ pub const expectInd   = indentation.expect;
 /// :. Pragma for Proc.Args
 /// :. Pragma for Proc.Ret
 /// :........
-pub const proc = @import("./par/proc.zig");
 
 
 //____________________________
@@ -154,13 +153,26 @@ pub const proc = @import("./par/proc.zig");
 /// :.   | 'iterator' routine
 /// :.   | 'template' routine
 /// :........
+///
+const toplevel = struct {
+  /// @descr Creates a topLevel `proc`/`func` statement and adds the resulting Node into the {@arg P.res} AST result.
+  fn proc (P:*Par) !void {
+    _= try P.res.add_node(M.Ast.Node{.Proc= try @import("./par/proc.zig").parse(P)}); // TODO: Modules will need this Node.Store.Pos
+  }
+
+  fn variable (P:*Par) !void {
+    P.fail("Top-Level Variables are not implemented yet", .{});
+    _= try P.res.add_node(M.Ast.Node{.Var= try @import("./par/statement.zig").variable(P)}); // TODO: Modules will need this Node.Store.Pos
+  }
+};
 //____________________________
 /// @descr Parser Entry Point
 pub fn process (P:*Par) !void {
   while (P.pos < P.buf.len) : ( P.move(1) ) {
     switch (P.tk().id) {
     .kw_func,
-    .kw_proc     => try proc.parse(P),
+    .kw_proc     => try toplevel.proc(P),
+    .kw_const    => try toplevel.variable(P),
     .wht_space,
     .wht_newline => {}, // TODO: Pass formatting into the AST
     else => |token| P.fail("Unknown Top-Level Token {d}:'{s}'", .{P.pos+1, @tagName(token)})

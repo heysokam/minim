@@ -10,7 +10,7 @@ const it = t.it;
 var  Variables = t.title("Variables");
 test Variables { Variables.begin(); defer Variables.end();
 
-try t.todo.it("Const: Normal definition", struct { fn f()!void {
+try t.hide.it("Const: Normal definition", struct { fn f()!void {
   const ID = "01";
   const cm = @embedFile(ID++".cm");
   const zm = @embedFile(ID++".zm");
@@ -22,10 +22,6 @@ try t.todo.it("Const: Normal definition", struct { fn f()!void {
   try t.check(cm, c, M.Lang.C);
   // try check(zm, z, M.Lang.Zig); // TODO: Zig compilation support
 }}.f);
-
-
-
-
 
 try t.hide.it("Const: Private definition", struct { fn f()!void {
   const ID = "02";

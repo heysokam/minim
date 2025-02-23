@@ -113,9 +113,9 @@ fn body (P :*Par) !Ast.Proc.BodyStore.Pos {
 // @section Parser.Proc: Entry Point
 //__________________________
 /// @descr
-///  Creates a topLevel `proc` or `func` statement and adds the resulting Node into the {@arg P.res} AST result.
+///  Creates a topLevel `proc` or `func` statement and returns resulting Node.
 ///  Applies syntax error checking along the process.
-pub fn parse (P :*Par) !void {
+pub fn parse (P :*Par) !Ast.Proc {
   var result = Ast.Proc.create_empty();
   // pure/proc case
   switch (P.tk().id) {
@@ -154,7 +154,6 @@ pub fn parse (P :*Par) !void {
   proc.expect(P, Tk.Id.sp_eq);
   result.body = try proc.body(P);
 
-  // Add the resulting Proc node to the AST
-  _= try P.res.add_node(Ast.Node{.Proc= result}); // TODO: Modules will need this Node.Store.Pos
+  return result;
 } //:: Par.proc.parse
 
