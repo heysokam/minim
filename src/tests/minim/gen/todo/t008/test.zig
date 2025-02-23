@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  Calls = t.title("Calls and Procedures");
+var  Calls = t.title("minim.Gen | Calls and Procedures");
 test Calls { Calls.begin(); defer Calls.end();
 
 try t.hide.it("Basic Call", struct { fn f()!void {

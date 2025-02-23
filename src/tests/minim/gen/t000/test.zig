@@ -8,7 +8,7 @@ const t = @import("../../base.zig");
 const it = t.it;
 
 
-var  BasicChecks = t.title("Basic Checks");
+var  BasicChecks = t.title("minim.Gen | Basic Checks");
 test BasicChecks { BasicChecks.begin(); defer BasicChecks.end();
 
 try it("dummy check", struct { fn f()!void {

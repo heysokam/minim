@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  Cast = t.title("Cast");
+var  Cast = t.title("minim.Gen | Cast");
 test Cast { Cast.begin(); defer Cast.end();
 
 try t.hide.it("Basic cast[T](..)", struct { fn f()!void {

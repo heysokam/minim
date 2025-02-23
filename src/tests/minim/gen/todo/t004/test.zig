@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  StandalonePragmas = t.title("Standalone Pragmas");
+var  StandalonePragmas = t.title("minim.Gen | Standalone Pragmas");
 test StandalonePragmas { StandalonePragmas.begin(); defer StandalonePragmas.end();
 
 try t.hide.it("Error", struct { fn f()!void {

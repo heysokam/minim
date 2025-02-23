@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  Discard = t.title("Discard");
+var  Discard = t.title("minim.Gen | Discard");
 test Discard { Discard.begin(); defer Discard.end();
 
 try t.hide.it("Single identifier", struct { fn f()!void {

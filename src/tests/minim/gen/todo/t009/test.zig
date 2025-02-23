@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  Types = t.title("Type Definitions");
+var  Types = t.title("minim.Gen | Type Definitions");
 test Types { Types.begin(); defer Types.end();
 
 

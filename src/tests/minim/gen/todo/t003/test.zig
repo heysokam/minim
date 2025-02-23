@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  Modules = t.title("Modules");
+var  Modules = t.title("minim.Gen | Modules");
 test Modules { Modules.begin(); defer Modules.end();
 
 try t.hide.it("Include: Simple case", struct { fn f()!void {

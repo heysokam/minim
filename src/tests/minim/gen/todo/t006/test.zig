@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  Comments = t.title("Comments and Newlines");
+var  Comments = t.title("minim.Gen | Comments and Newlines");
 test Comments { Comments.begin(); defer Comments.end();
 
 try t.hide.it("Basic Doc Comment", struct { fn f()!void {

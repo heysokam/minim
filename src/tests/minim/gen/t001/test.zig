@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  Procedures = t.title("Procedures");
+var  Procedures = t.title("minim.Gen | Procedures");
 test Procedures { Procedures.begin(); defer Procedures.end();
 
 try it("Basic Proc", struct { fn f()!void {

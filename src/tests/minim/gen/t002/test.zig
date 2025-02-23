@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  Variables = t.title("Variables");
+var  Variables = t.title("minim.Gen | Variables");
 test Variables { Variables.begin(); defer Variables.end();
 
 try t.hide.it("Const: Normal definition", struct { fn f()!void {

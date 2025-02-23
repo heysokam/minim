@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  ControlFlow = t.title("Control Flow");
+var  ControlFlow = t.title("minim.Gen | Control Flow");
 test ControlFlow { ControlFlow.begin(); defer ControlFlow.end();
 
 

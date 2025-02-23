@@ -7,7 +7,7 @@ const M = @import("../../../../minim.zig");
 const t  = @import("../../base.zig");
 const it = t.it;
 
-var  Affixes = t.title("Affixes");
+var  Affixes = t.title("minim.Gen | Affixes");
 test Affixes { Affixes.begin(); defer Affixes.end();
 
 //_______________________________________
