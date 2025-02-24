@@ -57,7 +57,7 @@ pub const default = struct {
   pub const dir = struct {
     const src         = "src";
     const bin         = "bin";
-    pub const cache   = default.dir.bin++"/.cache/M";
+    pub const cache   = default.dir.bin++"/.cache/minim";
     const code :?cstr = null;
   };
   const zigBin = Cfg.default.dir.bin++"/.zig/zig";
@@ -67,4 +67,6 @@ pub const default = struct {
   };
   const system = System.host();
 };
+
+pub const Prefix = "ᛟ minim";
 
