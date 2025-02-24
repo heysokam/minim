@@ -32,3 +32,10 @@ pub fn newline (T:*Tok) !void {
   try T.add(Tk.Id.wht_newline, T.lx().loc);
 }
 
+
+//____________________________
+/// @descr Processes an EOF Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+pub fn eof (T:*Tok) !void {
+  try T.add(Tk.Id.b_EOF, T.lx().loc);
+}
+

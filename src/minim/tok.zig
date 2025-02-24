@@ -94,6 +94,7 @@ pub const ident = words.ident;
 pub const whitespace = @import("./tok/whitespace.zig");
 pub const space      = whitespace.space;
 pub const newline    = whitespace.newline;
+pub const eof        = whitespace.eof;
 //______________________________________
 // @section Process: Symbols / Operators
 pub const symbols   = @import("./tok/symbols.zig");
@@ -144,6 +145,7 @@ pub fn process (T:*Tok) !void {
     .quote_S,                         // '  (single quote)
     .quote_D,                         // "  (double quote)
     .quote_B   => try T.quote(),      // `  (backtick quote)
+    .EOF       => try T.eof(),        // 0x0  (the null character 0 is treated as an EOF marker)
     else => |lexem| Tok.fail("Unknown first lexeme '{s}'", .{@tagName(lexem)})
     }
   // Operators

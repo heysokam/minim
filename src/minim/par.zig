@@ -175,8 +175,10 @@ pub fn process (P:*Par) !void {
     .kw_const    => try toplevel.variable(P),
     .wht_space,
     .wht_newline => {}, // TODO: Pass formatting into the AST
+    .b_EOF       => break,  // 0x0  (the null character 0 is treated as an EOF marker)
     else => |token| P.fail("Unknown Top-Level Token {d}:'{s}'", .{P.pos+1, @tagName(token)})
     }
+    if (P.pos >= P.buf.len) break;
   }
 } //:: M.Par.process
 

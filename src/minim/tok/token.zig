@@ -39,6 +39,7 @@ pub const Id = enum {
   // Base
   b_ident,
   b_number,
+  b_EOF,           // End of File marker
   // Specials
   sp_star,         // *  (not the operator)
   sp_colon,        // :
