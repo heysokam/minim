@@ -8,10 +8,9 @@ pub const Pre = @This();
 const std = @import("std");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
-const cstr = zstd.cstr;
 
 /// TODO: Implement the preprocessor logic
-pub fn process (code :cstr, A :std.mem.Allocator) !cstr {
-  return try A.dupe(u8, code);
+pub fn process (code :*zstd.str) !zstd.str {
+  return try code.clone();
 }
 

@@ -126,7 +126,7 @@ pub const create = struct {
   } //:: M.Ast.create.fromStr2
   //____________________________
   /// @descr Creates a new AST object by parsing the {@arg code} source.
-  pub fn fromStr (code :cstr, A :std.mem.Allocator) !Ast { return Ast.create.fromStr2(code, .{}, A); }
+  pub fn fromStr (code :slate.source.Code, A :std.mem.Allocator) !Ast { return Ast.create.fromStr2(code, .{}, A); }
 
 
 //   //____________________________

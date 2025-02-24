@@ -69,8 +69,8 @@ pub fn main () !u8 {
   }, &builder);
 
   P.report();
+  try M.build();
   try tests.build();
-  _=M;// try M.build();
   // try M.run();
   return 0;
 }
