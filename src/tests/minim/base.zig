@@ -44,7 +44,7 @@ pub fn check (src :zstr, trg :zstr, lang :M.Lang) !void {
   var ast = try M.Ast.get2(src, .{.verbose=verbose}, allocator);
   defer ast.destroy();
   // Codegen
-  const code = try ast.gen(lang);
+  const code = try ast.gen();
   defer code.deinit();
   // Check the result
   if (verbose) zstd.echo(code.items);
@@ -53,7 +53,33 @@ pub fn check (src :zstr, trg :zstr, lang :M.Lang) !void {
   try t.eq_str(code.items, trg);
   try t.eq(gpa.deinit(), .ok);
 }
-
+//____________________________
+pub fn compile (src :zstr, lang :M.Lang) !zstd.cstr {_=lang;
+  // Create the C code
+  const dir = "./bin/.cache/minim/test";
+  const base = dir++"/tmp";
+  const srcFile = dir++"/tmp.cm";
+  try zstd.files.write(src, srcFile, .{});
+  const trg = base;
+  // Create the Compilation Command
+  var cmd = zstd.shell.Cmd.create(t.A);
+  defer cmd.destroy();
+  try cmd.addList(&.{"./bin/M", "c", srcFile }); // TODO:  , "--trg:"++trg, });
+  zstd.prnt("Running Command:\n  ", .{});
+  for (cmd.parts.items) |part| zstd.prnt("{s} ", .{part});
+  zstd.prnt("\n", .{});
+  try cmd.run();
+  return trg;
+}
+//____________________________
+pub fn run (src :zstr, lang :M.Lang) !zstd.shell.Cmd.Result {
+  const trg = try t.compile(src, lang);
+  var cmd = zstd.shell.Cmd.create(t.A);
+  defer cmd.destroy();
+  try cmd.add(trg);
+  try cmd.exec();
+  return try cmd.result.?.clone();
+}
 
 //______________________________________
 // @section Preset Cases

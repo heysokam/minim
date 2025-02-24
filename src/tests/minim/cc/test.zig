@@ -6,9 +6,7 @@ const std = @import("std");
 
 test {
   std.testing.refAllDecls(@This());
-  _ = @import("./minim/tok/test.zig"); // Tokenizer
-  _ = @import("./minim/par/test.zig"); // Parser
-  _ = @import("./minim/gen/test.zig"); // Codegen
-  _ = @import("./minim/cc/test.zig") ; // Binary Compilation
+  _ = @import("./C.zig");   // Target: C
+  _ = @import("./zig.zig"); // Target: Zig
 }
 
