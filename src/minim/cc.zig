@@ -15,7 +15,7 @@ const Cfg = @import("./cfg.zig");
 
 pub const compile = struct {
   pub fn C (file :cstr, cli :CLI) !void {
-    zstd.prnt("{s} {s} {s} {s} {s}\n", .{cli.cfg.zigBin, "cc", file, "-o", cli.cfg.output});
+    if (cli.cfg.verbose) zstd.prnt("  {s} {s} {s} {s} {s}\n", .{cli.cfg.zigBin, "cc", file, "-o", cli.cfg.output});
     try zstd.shell.run(&.{cli.cfg.zigBin, "cc", file, "-o", cli.cfg.output}, cli.A);
   }
 };
