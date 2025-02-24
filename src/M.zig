@@ -6,10 +6,20 @@ const std = @import("std");
 // @deps zstd
 const zstd = @import("./lib/zstd.zig");
 // @deps minim
-const M     = @import("./minim.zig");
-const CLI   = @import("./minim/cli.zig");
-const Cfg   = @import("./minim/cfg.zig");
 const slate = @import("./lib/slate.zig");
+const CLI   = @import("./minim/cli.zig");
+const M     = struct {
+  usingnamespace @import("./minim.zig");
+  const Cfg = @import("./minim/cfg.zig");
+
+  // TODO: Move M.log to its own file
+  const log = struct {
+    const Prefix = M.Cfg.Prefix++": ";
+    const prnt = zstd.prnt;
+    fn echo (msg :zstd.cstr) void { zstd.prnt("{s}\n", .{msg}); }
+    fn info (msg :zstd.cstr) void { zstd.prnt("{s}{s}\n", .{M.log.Prefix, msg}); }
+  };
+};
 
 
 // // FIX: Take out of butcher
@@ -20,25 +30,28 @@ const slate = @import("./lib/slate.zig");
 // }
 //
 
+
 const process = struct {
   fn parse (cli :*const CLI) !M.Ast {
     //_____________________________
     // Read the code
+    // FIX: Change to Ast.read()
     const input = try zstd.files.read(cli.cfg.input, cli.A, .{.maxFileSize= cli.cfg.maxFileSize});
     defer cli.A.free(input);
-    var src = try zstd.str.initCapacity(cli.A, input.len+1);
+    var src = zstd.str.init(cli.A);
     defer src.deinit();
-    src.appendSliceAssumeCapacity(input);
-    src.appendAssumeCapacity(0);
+    try src.appendSlice(input);
+    try src.append(0);
     //_____________________________
     // Preprocess
-    const zm = try M.Pre.process(&src);
+    if (cli.cfg.verbose) M.log.prnt("{s}Preprocessing code from file:\n  {s}\n", .{M.log.Prefix, cli.cfg.input});
+    var zm = try M.Pre.process(&src);
     defer zm.deinit();
     //_____________________________
     // Generate AST
-    var ast = try M.Ast.get(zm.items[0..:0], cli.A);
+    if (cli.cfg.verbose) M.log.info("Parsing AST for the resulting preprocessed code.");
+    var ast = try M.Ast.get(try zm.toOwnedSliceSentinel(0), cli.A);
     errdefer ast.destroy();
-    //if (cli.cfg.verbose) code.report();
     //_____________________________
     // Generate the target language AST
     return ast;
@@ -48,14 +61,18 @@ const process = struct {
     //_____________________________
     // Write the code into a cache file
     // FIX: Remove hardcoded C
-    const tmpFile = Cfg.default.dir.cache++"/tmp"++Cfg.default.fmt.ext++".c";
+    const tmpFile = try std.fmt.allocPrint(cli.A, "{s}/tmp{s}.c", .{cli.cfg.dir.cache, cli.cfg.fmt.ext});
+    defer cli.A.free(tmpFile);
+    if (cli.cfg.verbose) M.log.prnt("{s}Generating the target's language source code to file:\n  {s}\n", .{M.log.Prefix, tmpFile});
     const code = try ast.gen();
+    defer code.deinit();
     try zstd.files.write(code.items, tmpFile, .{});
     //_____________________________
     // Format the code
     // TODO: clangFmtBin clangFmtFile
     //_____________________________
     // Compile the generated code into binaries
+    if (cli.cfg.verbose) M.log.info("Compiling the target language's source code with command:");
     try M.CC.C(tmpFile, cli);
     //_____________________________
     // Run the final binary when requested
@@ -86,7 +103,6 @@ const process = struct {
 pub fn main() !void {
   var A = std.heap.ArenaAllocator.init(std.heap.page_allocator);
   defer A.deinit();
-  zstd.echo("Hello M.");
 
   //_____________________________
   // Get CLI options and config
