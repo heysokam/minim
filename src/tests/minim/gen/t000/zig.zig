@@ -26,7 +26,6 @@ try it("Basic Code Generation", struct { fn f()!void {
   const zm = @embedFile(ID++".zm");
   const z  = @embedFile(ID++".zig");
   try t.not.eq_str(zm,z);
-
   try t.check(zm, z, M.Lang.Zig);
 }}.f);
 
