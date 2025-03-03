@@ -20,8 +20,9 @@ pub fn gen (ast :*const M.Ast) !str {
   var result = zstd.str.init(ast.A);
   for (ast.data.nodes.items()) |N| { switch (ast.lang) {
     .Minim => try slate.Gen.Minim.render(N, ast.src, ast.data.types, &result),
-    .Zig   => try slate.Gen  .Zig.render(N, ast.src, ast.data.types, &result),
+    .Zig   => try slate.Gen  .Zig.render(N, ast.src, ast.data.types, ast.data.pragmas, ast.data.args, ast.data.stmts, &result),
     .C     => try slate.Gen    .C.render(N, ast.src, ast.data.types, ast.data.pragmas, ast.data.args, ast.data.stmts, &result),
+    .none  => return error.minim_gen_FoundUnknownTargetLang,
   } try result.appendSlice("\n");}
   return result;
 }

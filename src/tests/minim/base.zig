@@ -41,7 +41,7 @@ pub fn check (src :zstr, trg :zstr, lang :M.Lang) !void {
   // const allocator = gpa.allocator();
   const allocator = t.A;
   // Parse
-  var ast = try M.Ast.get2(src, .{.verbose=verbose}, allocator);
+  var ast = try M.Ast.get2(src, .{.lang=lang, .verbose=verbose}, allocator);
   defer ast.destroy();
   // Codegen
   const code = try ast.gen();

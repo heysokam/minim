@@ -26,13 +26,13 @@ pub const Pos = usize;
 // @section Create/Destroy
 //____________________________
 /// @descr Creates a new Parser object from the given {@arg T} Tokenizer contents.
-pub fn create (T:*const M.Tok) !Par {
+pub fn create (T:*const M.Tok, lang :M.Lang) !Par {
   return Par{
     .A      = T.A,
     .pos    = 0,
     .src    = T.src,
     .buf    = try T.res.clone(T.A),
-    .res    = try M.Ast.create.empty(.C, T.src, T.A),  // FIX: Do not hardcode the language to C
+    .res    = try M.Ast.create.empty(lang, T.src, T.A),
     .parsed = zstd.str.init(T.A),
     };
 } //:: M.Par.create
@@ -180,5 +180,6 @@ pub fn process (P:*Par) !void {
     }
     if (P.pos >= P.buf.len) break;
   }
+  // FIX: Interpret Lang based on the result
 } //:: M.Par.process
 

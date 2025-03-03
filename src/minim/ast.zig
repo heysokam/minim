@@ -82,7 +82,8 @@ pub fn destroy (ast :*Ast) void {
 //____________________________
 pub const create = struct {
   pub const Options = struct {
-    verbose  :bool=  false,
+    verbose : bool       = false,
+    lang    : rules.Lang = .none,
   }; //:: M.Ast.create.Options
 
   //____________________________
@@ -116,7 +117,7 @@ pub const create = struct {
     if (in.verbose) T.report();
 
     // Parser
-    var P = try Par.create(&T);
+    var P = try Par.create(&T, in.lang);
     defer P.destroy();
     try P.process();
     if (in.verbose) P.report();
@@ -126,7 +127,11 @@ pub const create = struct {
   } //:: M.Ast.create.fromStr2
   //____________________________
   /// @descr Creates a new AST object by parsing the {@arg code} source.
-  pub fn fromStr (code :slate.source.Code, A :std.mem.Allocator) !Ast { return Ast.create.fromStr2(code, .{}, A); }
+  pub fn fromStr (
+      code : slate.source.Code,
+      lang : rules.Lang,
+      A    : std.mem.Allocator
+    ) !Ast { return Ast.create.fromStr2(code, .{.lang= lang}, A); }
 
 
 //   //____________________________

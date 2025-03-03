@@ -50,7 +50,7 @@ const process = struct {
     //_____________________________
     // Generate AST
     if (cli.cfg.verbose) M.log.info("Parsing AST for the resulting preprocessed code.");
-    var ast = try M.Ast.get(try zm.toOwnedSliceSentinel(0), cli.A);
+    var ast = try M.Ast.get(try zm.toOwnedSliceSentinel(0), .C, cli.A); // FIX: Remove hardcoded C
     errdefer ast.destroy();
     //_____________________________
     // Generate the target language AST
