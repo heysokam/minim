@@ -47,6 +47,7 @@ pub const Id = enum {
   sp_paren_R,      // )
   sp_eq,           // =
   sp_hash,         // #  ##  #[  ]#  ##[  ]##
+  sp_excl,         // !
   sp_semicolon,    // ;
   sp_quote_S,      // '  (single quote)
   sp_quote_D,      // "  (double quote)

@@ -107,6 +107,7 @@ pub const at        = symbols.at;
 pub const dot       = symbols.dot;
 pub const comma     = symbols.comma;
 pub const hash      = symbols.hash;
+pub const excl      = symbols.excl;
 pub const brace     = symbols.brace;
 pub const bracket   = symbols.bracket;
 pub const quote     = symbols.quote;
@@ -129,6 +130,7 @@ pub fn process (T:*Tok) !void {
     .space     => try T.space(),
     .newline   => try T.newline(),
     .hash      => try T.hash(),       // #
+    .excl      => try T.excl(),       // !
     .colon     => try T.colon(),      // :
     .semicolon => try T.semicolon(),  // ;
     .dot       => try T.dot(),        // .

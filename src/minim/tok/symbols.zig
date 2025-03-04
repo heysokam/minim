@@ -69,6 +69,14 @@ pub fn hash (T:*Tok) !void {
 }
 
 //____________________________
+/// @descr Processes a hash Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+pub fn excl (T:*Tok) !void {
+  // FIX: ! operator case
+  try T.add(Tk.Id.sp_excl, T.lx().loc);
+}
+
+
+//____________________________
 /// @descr Processes a Lexeme starting with `.` into its Token representation, and adds it to the {@arg T.res} result.
 pub fn dot (T:*Tok) !void {
   // Special .} .] .) cases
