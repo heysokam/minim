@@ -74,6 +74,7 @@ pub const Id = enum {
   kw_cast,      // cast
   kw_operator,  // op operator
   kw_void,      // void
+  kw_mut,       // mut
   kw_var,       // var
   kw_let,       // let
   kw_const,     // const

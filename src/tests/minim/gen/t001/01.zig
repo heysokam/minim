@@ -1,1 +1,1 @@
-fn one() void { return; }
+fn one () void { return; }

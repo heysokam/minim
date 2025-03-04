@@ -18,7 +18,7 @@ try it("Basic Proc", struct { fn f()!void {
   try t.check(zm, z, M.Lang.Zig);
 }}.f);
 
-try t.todo.it("Args: Basic", struct { fn f()!void {
+try it("Args: Basic", struct { fn f()!void {
   const ID = "02";
   const zm = @embedFile(ID++".zm");
   const z  = @embedFile(ID++".zig");

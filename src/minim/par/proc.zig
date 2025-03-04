@@ -43,7 +43,7 @@ const args = struct {
   /// @note Skips/Moves the parser accordingly
   fn mutable (P :*Par) bool {
     P.ind();
-    if (P.tk().id == .kw_var) { P.move(1); return true; }
+    if (P.tk().id == .kw_var or P.tk().id == .kw_mut) { P.move(1); return true; }
     return false;
   }
   //__________________________

@@ -1,2 +1,2 @@
 proc thing (one :i32) :u32= return 0
-proc other (one :i32; two :var i32) :u32= return 0
+proc other (one :i32; two :mut i32) :u32= return 0

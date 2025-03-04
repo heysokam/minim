@@ -1,16 +1,16 @@
-proc thing (one :ptr int) :u32= return 0
+proc thing (one :ptr i32) :u32= return 0
 
 proc other (
-    one : int;
-    two : var i32;
-    thr : var ptr i32;
+    one : i32;
+    two : mut i32;
+    thr : mut ptr i32;
   ) :u32=
   return 0
 
 proc stuff (
-    one : ptr unsigned long;
+    one : ptr u64;
     two : ptr i32 {.readonly.};
-  ) :signed char=
+  ) :u8=
   return 0
 
 
@@ -19,18 +19,18 @@ proc withArrays (
     arg01 : array[1, ptr i32];
     arg02 : array[_, i32];
     arg03 : array[_, ptr i32];
-    arg04 : var array[4, ptr i32 {.readonly.}];
-    arg05 : var array[_, ptr i32 {.readonly.}];
+    arg04 : mut array[4, ptr i32 {.readonly.}];
+    arg05 : mut array[_, ptr i32 {.readonly.}];
   ) :i32=
   return 0
 
 proc stuff3 (
     arg0 : ptr i32;
     arg1 : ptr i32 {.readonly.};
-    arg2 : var ptr u64 {.readonly.};
+    arg2 : mut ptr u64 {.readonly.};
   ) {.export: "stuff".}
   :SomeError! ptr u32 {.readonly.}=
-  return try getNumberPtr(0)
+  return 0
 
 proc other1 (arg0 :i32) {.import.} :SomeError!i32
 

@@ -2,15 +2,15 @@ proc thing (one :ptr int) :u32= return 0
 
 proc other (
     one : int;
-    two : var i32;
-    thr : var ptr i32;
+    two : mut i32;
+    thr : mut ptr i32;
   ) :u32=
   return 0
 
 proc stuff (
     one : ptr unsigned long;
     two : ptr i32 {.readonly.};
-    thr : var ptr i32 {.readonly.};
+    thr : mut ptr i32 {.readonly.};
   ) :signed char=
   return 0
 
@@ -22,15 +22,15 @@ proc withArrays (
     arg03 : array[_, ptr i32];
     arg04 : array[SomeSymbol, i32];
     arg05 : array[SomeSymbol, ptr i32];
-    arg06 : var array[6, i32];
-    arg07 : var array[7, ptr i32];
-    arg08 : var array[_, i32];
-    arg09 : var array[_, ptr i32];
-    arg10 : var array[SomeSymbol, i32];
-    arg11 : var array[SomeSymbol, ptr i32];
-    arg12 : var array[12, ptr i32 {.readonly.}];
-    arg13 : var array[_, ptr i32 {.readonly.}];
-    arg14 : var array[SomeSymbol, ptr i32 {.readonly.}];
+    arg06 : mut array[6, i32];
+    arg07 : mut array[7, ptr i32];
+    arg08 : mut array[_, i32];
+    arg09 : mut array[_, ptr i32];
+    arg10 : mut array[SomeSymbol, i32];
+    arg11 : mut array[SomeSymbol, ptr i32];
+    arg12 : mut array[12, ptr i32 {.readonly.}];
+    arg13 : mut array[_, ptr i32 {.readonly.}];
+    arg14 : mut array[SomeSymbol, ptr i32 {.readonly.}];
   ) :i32=
   return 0
 

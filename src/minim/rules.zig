@@ -36,6 +36,7 @@ pub const Pattern = struct {
     .{ "cast",     .kw_cast     },
     .{ "op",       .kw_operator },
     .{ "operator", .kw_operator },
+    .{ "mut",      .kw_mut      },
     .{ "var",      .kw_var      },
     .{ "let",      .kw_let      },
     .{ "const",    .kw_const    },
