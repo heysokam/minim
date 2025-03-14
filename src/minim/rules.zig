@@ -41,6 +41,7 @@ pub const Pattern = struct {
     .{ "let",      .kw_let      },
     .{ "const",    .kw_const    },
     .{ "array",    .kw_array    },
+    .{ "slice",    .kw_slice    },
     .{ "ptr",      .kw_ptr      },
     // Operator Keywords
     .{ "eq",       .op_eq       }, // Same as ==
@@ -70,26 +71,28 @@ pub const Pattern = struct {
   ///  !   ?   ^   .   :   \
   pub const Op = Map.initComptime(.{
     // Specials
-    .{ ":",  .op_colon  }, // Except :
-    .{ "=",  .op_eq     }, // Except =
-    .{ "*",  .op_star   }, // Except *:
-    .{ ".",  .op_dot    }, // Except .
+    .{ ":",  .op_colon    }, // Except :
+    .{ "=",  .op_eq       }, // Except =
+    .{ "*",  .op_star     }, // Except *:
+    .{ ".",  .op_dot      }, // Except .
+    .{ "!",  .sp_excl     },
+    .{ "?",  .sp_question },
     // Standard
-    .{ "+",  .op_plus   },
-    .{ "-",  .op_min    },
-    .{ "/",  .op_slash  },
-    .{ "<",  .op_less   },
-    .{ ">",  .op_more   },
-    .{ "@",  .op_at     }, // Except @. Same as casting.  A@B  ->   cast[B](A)
-    .{ "$",  .op_dollar },
-    .{ "~",  .op_tilde  },
-    .{ "&",  .op_amp    },
-    .{ "%",  .op_pcnt   },
-    .{ "|",  .op_pipe   },
-    .{ "!",  .op_excl   },
-    .{ "?",  .op_qmark  },
-    .{ "^",  .op_hat    },
-    .{ "\\", .op_bslash }, // Except inside strings
+    .{ "+",  .op_plus     },
+    .{ "-",  .op_min      },
+    .{ "/",  .op_slash    },
+    .{ "<",  .op_less     },
+    .{ ">",  .op_more     },
+    .{ "@",  .op_at       }, // Except @. Same as casting.  A@B  ->   cast[B](A)
+    .{ "$",  .op_dollar   },
+    .{ "~",  .op_tilde    },
+    .{ "&",  .op_amp      },
+    .{ "%",  .op_pcnt     },
+    .{ "|",  .op_pipe     },
+    .{ "^",  .op_hat      },
+    .{ "\\", .op_bslash   }, // Except inside strings
+    // .{ "!",  .op_excl     },
+    // .{ "?",  .op_question },
     }); // Valid Operator character starters
 
   //______________________________________
@@ -147,7 +150,7 @@ pub const LxKinds = struct {
     .pcnt,      // %
     .pipe,      // |
     .excl,      // !
-    .qmark,     // ?
+    .question,  // ?
     .hat,       // ^
     .slash_B,   // \
     }); //:: rules.LxKinds.Operator
@@ -179,4 +182,9 @@ pub fn isWhitespace (L:Lx) bool { return LxKinds.Whitespace.contains(L.id); }
 pub fn isPar (L:Lx) bool { return LxKinds.Paren.contains(L.id); }
 /// @descr Returns whether or not {@arg L} is a dot lexeme.
 pub fn isDot (L:Lx) bool { return L.id == Lx.Id.dot; }
+/// @descr Returns whether or not {@arg L} is a special lexeme.
+pub fn isSpecial (L:Lx) bool { return switch (L.id) {
+  .question, .excl
+  => true, else => false
+}; }
 

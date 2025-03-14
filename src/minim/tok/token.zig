@@ -48,6 +48,7 @@ pub const Id = enum {
   sp_eq,           // =
   sp_hash,         // #  ##  #[  ]#  ##[  ]##
   sp_excl,         // !
+  sp_question,     // ?
   sp_semicolon,    // ;
   sp_quote_S,      // '  (single quote)
   sp_quote_D,      // "  (double quote)
@@ -80,6 +81,7 @@ pub const Id = enum {
   kw_let,       // let
   kw_const,     // const
   kw_array,     // array
+  kw_slice,     // slice
   kw_ptr,       // ptr
   // Operators: Specials
   op_star,      // Operators starting with *
@@ -115,7 +117,7 @@ pub const Id = enum {
   op_pcnt,      // Operators starting with %
   op_pipe,      // Operators starting with |
   op_excl,      // Operators starting with !
-  op_qmark,     // Operators starting with ?
+  op_question,  // Operators starting with ?
   op_hat,       // Operators starting with ^
   op_bslash,    // Operators starting with \
 
