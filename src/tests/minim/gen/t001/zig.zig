@@ -26,7 +26,7 @@ try it("Args: Basic", struct { fn f()!void {
   try t.check(zm, z, M.Lang.Zig);
 }}.f);
 
-try t.todo.it("Args: Complex", struct { fn f()!void {
+try it("Args: Complex", struct { fn f()!void {
   const ID = "03";
   const zm = @embedFile(ID++".zm");
   const z  = @embedFile(ID++".zig");

@@ -1,36 +1,132 @@
-proc thing (one :ptr i32) :u32= return 0
+proc args01 (one :i32; two :i32) :u32= return 0
+proc args02 (one :ptr i32; two :ptr i32) :u32= return 0
+proc args03 (one :ptr i32 {.readonly.}; two :ptr i32 {.readonly.}) :u32= return 0
+proc args04 (one :array[1,u32]; two :array[1,u32]) :u32= return 0
+proc args05 (one :array[2,ptr u32]; two :array[2,ptr u32]) :u32= return 0
+proc args06 (one :array[3, ptr u32 {.readonly.}]; two :array[3, ptr u32 {.readonly.}]) :u32= return 0
+proc args07 (one :slice[u32]; two :slice[u32]) :u32= return 0
+proc args08 (one :slice[ptr u32]; two :slice[ptr u32]) :u32= return 0
+proc args09 (one :slice[ptr u32 {.readonly.}]; two :slice[ptr u32 {.readonly.}]) :u32= return 0
+proc args10 (one :array[4,?u32]; two :array[4,?u32]) :u32= return 0
+proc args11 (one :slice[?u32]; two :slice[?u32]) :u32= return 0
 
-proc other (
+proc args01_opt (one :?i32; two :?i32) :u32= return 0
+proc args02_opt (one :?ptr i32; two :?ptr i32) :u32= return 0
+proc args03_opt (one :?ptr i32 {.readonly.}; two :?ptr i32 {.readonly.}) :u32= return 0
+proc args04_opt (one :?array[1,u32]; two :?array[1,u32]) :u32= return 0
+proc args05_opt (one :?array[2,ptr u32]; two :?array[2,ptr u32]) :u32= return 0
+proc args06_opt (one :?array[3, ptr u32 {.readonly.}]; two :?array[3, ptr u32 {.readonly.}]) :u32= return 0
+proc args07_opt (one :?slice[u32]; two :?slice[u32]) :u32= return 0
+proc args08_opt (one :?slice[ptr u32]; two :?slice[ptr u32]) :u32= return 0
+proc args09_opt (one :?slice[ptr u32 {.readonly.}]; two :?slice[ptr u32 {.readonly.}]) :u32= return 0
+proc args10_opt (one :?array[4,?u32]; two :?array[4,?u32]) :u32= return 0
+proc args11_opt (one :?slice[?u32]; two :?slice[?u32]) :u32= return 0
+
+proc args01_mut (one :mut i32; two :mut i32) :u32= return 0
+proc args02_mut (one :mut ptr i32; two :mut ptr i32) :u32= return 0
+proc args03_mut (one :mut ptr i32 {.readonly.}; two :mut ptr i32 {.readonly.}) :u32= return 0
+proc args04_mut (one :mut array[1,u32]; two :mut array[1,u32]) :u32= return 0
+proc args05_mut (one :mut array[2,ptr u32]; two :mut array[2,ptr u32]) :u32= return 0
+proc args06_mut (one :mut array[3, ptr u32 {.readonly.}]; two :mut array[3, ptr u32 {.readonly.}]) :u32= return 0
+proc args07_mut (one :mut slice[u32]; two :mut slice[u32]) :u32= return 0
+proc args08_mut (one :mut slice[ptr u32]; two :mut slice[ptr u32]) :u32= return 0
+proc args09_mut (one :mut slice[ptr u32 {.readonly.}]; two :mut slice[ptr u32 {.readonly.}]) :u32= return 0
+proc args10_mut (one :mut array[4,?u32]; two :mut array[4,?u32]) :u32= return 0
+proc args11_mut (one :mut slice[?u32]; two :mut slice[?u32]) :u32= return 0
+
+proc args01_mopt (one :mut ?i32; two :mut ?i32) :u32= return 0
+proc args02_mopt (one :mut ?ptr i32; two :mut ?ptr i32) :u32= return 0
+proc args03_mopt (one :mut ?ptr i32 {.readonly.}; two :mut ?ptr i32 {.readonly.}) :u32= return 0
+proc args04_mopt (one :mut ?array[1,u32]; two :mut ?array[1,u32]) :u32= return 0
+proc args05_mopt (one :mut ?array[2,ptr u32]; two :mut ?array[2,ptr u32]) :u32= return 0
+proc args06_mopt (one :mut ?array[3, ptr u32 {.readonly.}]; two :mut ?array[3, ptr u32 {.readonly.}]) :u32= return 0
+proc args07_mopt (one :mut ?slice[u32]; two :mut ?slice[u32]) :u32= return 0
+proc args08_mopt (one :mut ?slice[ptr u32]; two :mut ?slice[ptr u32]) :u32= return 0
+proc args09_mopt (one :mut ?slice[ptr u32 {.readonly.}]; two :mut ?slice[ptr u32 {.readonly.}]) :u32= return 0
+proc args10_mopt (one :mut ?array[4,?u32]; two :mut ?array[4,?u32]) :u32= return 0
+proc args11_mopt (one :mut ?slice[?u32]; two :mut ?slice[?u32]) :u32= return 0
+
+proc rett01 () :u32= return 0
+proc rett02 () :ptr u32= return 0
+proc rett03 () :ptr u32 {.readonly.}= return 0
+proc rett04 () :array[1,u32]= return 0
+proc rett05 () :array[2,ptr u32]= return 0
+proc rett06 () :array[3, ptr u32 {.readonly.}]= return 0
+proc rett07 () :slice[u32]= return 0
+proc rett08 () :slice[ptr u32]= return 0
+proc rett09 () :slice[ptr u32 {.readonly.}]= return 0
+proc rett10 () :array[4,?u32]= return 0
+proc rett11 () :slice[?u32]= return 0
+
+
+proc rett01_opt () :?u32= return 0
+proc rett02_opt () :?ptr u32= return 0
+proc rett03_opt () :?ptr u32 {.readonly.}= return 0
+proc rett04_opt () :?array[1,u32]= return 0
+proc rett05_opt () :?array[2,ptr u32]= return 0
+proc rett06_opt () :?array[3, ptr u32 {.readonly.}]= return 0
+proc rett07_opt () :?slice[u32]= return 0
+proc rett08_opt () :?slice[ptr u32]= return 0
+proc rett09_opt () :?slice[ptr u32 {.readonly.}]= return 0
+proc rett10_opt () :?array[4,?u32]= return 0
+proc rett11_opt () :?slice[?u32]= return 0
+
+proc rett01_mut () :mut u32= return 0
+proc rett02_mut () :mut ptr u32= return 0
+proc rett03_mut () :mut ptr u32 {.readonly.}= return 0
+proc rett04_mut () :mut array[1,u32]= return 0
+proc rett05_mut () :mut array[2,ptr u32]= return 0
+proc rett06_mut () :mut array[3, ptr u32 {.readonly.}]= return 0
+proc rett07_mut () :mut slice[u32]= return 0
+proc rett08_mut () :mut slice[ptr u32]= return 0
+proc rett09_mut () :mut slice[ptr u32 {.readonly.}]= return 0
+proc rett10_mut () :mut array[4,?u32]= return 0
+proc rett11_mut () :mut slice[?u32]= return 0
+
+proc rett01_mopt () :mut ?u32= return 0
+proc rett02_mopt () :mut ?ptr u32= return 0
+proc rett03_mopt () :mut ?ptr u32 {.readonly.}= return 0
+proc rett04_mopt () :mut ?array[1,u32]= return 0
+proc rett05_mopt () :mut ?array[2,ptr u32]= return 0
+proc rett06_mopt () :mut ?array[3, ptr u32 {.readonly.}]= return 0
+proc rett07_mopt () :mut ?slice[u32]= return 0
+proc rett08_mopt () :mut ?slice[ptr u32]= return 0
+proc rett09_mopt () :mut ?slice[ptr u32 {.readonly.}]= return 0
+proc rett10_mopt () :mut ?array[4,?u32]= return 0
+proc rett11_mopt () :mut ?slice[?u32]= return 0
+
+proc args_multiline1 (
     one : i32;
     two : mut i32;
     thr : mut ptr i32;
   ) :u32=
   return 0
 
-proc stuff (
+proc args_multiline2 (
     one : ptr u64;
     two : ptr i32 {.readonly.};
-  ) :u8=
+  ) :u32=
   return 0
 
-
-proc withArrays (
+proc args_multiline3 (
     arg00 : array[1, i32];
-    arg01 : array[1, ptr i32];
-    arg02 : array[_, i32];
-    arg03 : array[_, ptr i32];
-    arg04 : mut array[4, ptr i32 {.readonly.}];
-    arg05 : mut array[_, ptr i32 {.readonly.}];
-  ) :i32=
+    arg01 : array[1, ptr i32 {.readonly.}];
+    arg02 : slice[i32];
+    arg03 : slice[ptr i32];
+    arg04 : slice[ptr i32 {.readonly.}];
+    arg05 : mut array[4, ptr i32 {.readonly.}];
+    arg06 : mut slice[ptr i32 {.readonly.}];
+  ) :u32=
   return 0
 
-proc stuff3 (
-    arg0 : ptr i32;
-    arg1 : ptr i32 {.readonly.};
-    arg2 : mut ptr u64 {.readonly.};
-  ) {.export: "stuff".}
-  :SomeError! ptr u32 {.readonly.}=
-  return 0
+proc protoFn *(arg0 :i32) {.import.} :SomeError!i32;
 
-proc other1 (arg0 :i32) {.import.} :SomeError!i32
+proc inlineFn () {.inline.} :SomeError! ptr u32 {.readonly.}= return 0
+
+proc cursed (
+    one :mut ?array[_, ?ptr u32 {.readonly.}];
+    two :mut ?slice[?ptr u32 {.readonly.}]
+  ) {.import.}
+  :SomeError !mut ?array[_, ?ptr u32 {.readonly.}];
+
 

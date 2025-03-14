@@ -1,48 +1,65 @@
-proc thing (one :ptr int) :u32= return 0
+proc args01 (one :i32; two :i32) :u32= return 0
+proc args02 (one :ptr i32; two :ptr i32) :u32= return 0
+proc args03 (one :ptr i32 {.readonly.}; two :ptr i32 {.readonly.}) :u32= return 0
+proc args04 (one :array[1,u32]; two :array[1,u32]) :u32= return 0
+proc args05 (one :array[2,ptr u32]; two :array[2,ptr u32]) :u32= return 0
+proc args06 (one :array[3, ptr u32 {.readonly.}]; two :array[3, ptr u32 {.readonly.}]) :u32= return 0
+proc args07 (one :slice[u32]; two :slice[u32]) :u32= return 0
+proc args08 (one :slice[ptr u32]; two :slice[ptr u32]) :u32= return 0
+proc args09 (one :slice[ptr u32 {.readonly.}]; two :slice[ptr u32 {.readonly.}]) :u32= return 0
 
-proc other (
-    one : int;
+proc args01_mut (one :mut i32; two :mut i32) :u32= return 0
+proc args02_mut (one :mut ptr i32; two :mut ptr i32) :u32= return 0
+proc args03_mut (one :mut ptr i32 {.readonly.}; two :mut ptr i32 {.readonly.}) :u32= return 0
+proc args04_mut (one :mut array[1,u32]; two :mut array[1,u32]) :u32= return 0
+proc args05_mut (one :mut array[2,ptr u32]; two :mut array[2,ptr u32]) :u32= return 0
+proc args06_mut (one :mut array[3, ptr u32 {.readonly.}]; two :mut array[3, ptr u32 {.readonly.}]) :u32= return 0
+proc args07_mut (one :mut slice[u32]; two :mut slice[u32]) :u32= return 0
+proc args08_mut (one :mut slice[ptr u32]; two :mut slice[ptr u32]) :u32= return 0
+proc args09_mut (one :mut slice[ptr u32 {.readonly.}]; two :mut slice[ptr u32 {.readonly.}]) :u32= return 0
+
+proc rett01 () :u32= return 0
+proc rett02 () :ptr u32= return 0
+proc rett03 () :ptr u32 {.readonly.}= return 0
+
+proc rett01_mut () :mut u32= return 0
+proc rett02_mut () :mut ptr u32= return 0
+proc rett03_mut () :mut ptr u32 {.readonly.}= return 0
+
+proc args_multiline1 (
+    one : i32;
     two : mut i32;
     thr : mut ptr i32;
   ) :u32=
   return 0
 
-proc stuff (
-    one : ptr unsigned long;
+proc args_multiline2 (
+    one : ptr u64;
     two : ptr i32 {.readonly.};
-    thr : mut ptr i32 {.readonly.};
-  ) :signed char=
+  ) :u32=
   return 0
 
-
-proc withArrays (
+proc args_multiline3 (
     arg00 : array[1, i32];
-    arg01 : array[1, ptr i32];
-    arg02 : array[_, i32];
-    arg03 : array[_, ptr i32];
-    arg04 : array[SomeSymbol, i32];
-    arg05 : array[SomeSymbol, ptr i32];
-    arg06 : mut array[6, i32];
-    arg07 : mut array[7, ptr i32];
-    arg08 : mut array[_, i32];
-    arg09 : mut array[_, ptr i32];
-    arg10 : mut array[SomeSymbol, i32];
-    arg11 : mut array[SomeSymbol, ptr i32];
-    arg12 : mut array[12, ptr i32 {.readonly.}];
-    arg13 : mut array[_, ptr i32 {.readonly.}];
-    arg14 : mut array[SomeSymbol, ptr i32 {.readonly.}];
-  ) :i32=
+    arg01 : array[1, ptr i32 {.readonly.}];
+    arg02 : slice[i32];
+    arg03 : slice[ptr i32];
+    arg04 : slice[ptr i32 {.readonly.}];
+    arg05 : mut array[4, ptr i32 {.readonly.}];
+    arg06 : mut array[SomeSymbol, ptr i32 {.readonly.}];
+    arg07 : mut slice[ptr i32 {.readonly.}];
+  ) :u32=
   return 0
 
-proc stuff2 (
-    one : ptr i32 {.readonly.};
-  ) {.importc.} :ptr u32 {.readonly.}=
-  return 0
+proc protoFn *(arg0 :i32) {.import.} :i32;
 
-proc stuff3 (
-    arg1 : ptr i32 {.readonly.};
-    arg2 : ptr u64 {.readonly.};
-  ) {.importc.}
-  :ptr u32 {.readonly.}=
-  return 0
+proc inlineFn () {.inline.} :ptr u32 {.readonly.}= return 0
+
+proc multiword *(one :ptr signed char) :mut ptr unsigned long long= return 0
+
+proc cursed (
+    one :mut array[SomeSymbol, ptr signed char {.readonly.}];
+    two :mut slice[ptr unsigned long long {.readonly.}]
+  ) {.import.}
+  :mut array[_, ptr signed long long int {.readonly.}];
 

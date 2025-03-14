@@ -1,1 +1,1 @@
-static void one(void) { return; }
+static void one (void) { return; }

@@ -24,7 +24,7 @@ try it("should generate the correct code for proc return types", struct { fn f()
   var ast = try M.Ast.get2(code, .{}, t.A);
   defer ast.destroy();
   const result = ast.data.types.at(
-    ast.data.nodes.items()[0].Proc.retT
+    ast.data.nodes.items()[0].Proc.ret.type
   ).?.any.name.from(code);
   // Check
   try t.eq_str(result, Expected);
@@ -40,7 +40,7 @@ try it("should generate the correct code for proc return types that have pragmas
   var ast = try M.Ast.get2(code, .{}, t.A);
   defer ast.destroy();
   const result = ast.data.types.at(
-    ast.data.nodes.items()[0].Proc.retT
+    ast.data.nodes.items()[0].Proc.ret.type
   ).?.any.name.from(code);
   // Check
   try t.eq_str(result, Expected);
