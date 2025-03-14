@@ -24,6 +24,14 @@ pub fn name (P:*Par) Ast.Ident {
 
 
 pub const @"type" = struct {
+  pub const qualifier = struct {
+    // FIX: Parse Type Qualifiers separately
+    // array[N,T] array[N,T,S]
+    // slice[T] slice[T,S]
+    // proc name [T](....)
+    // cast[T](....)
+  };
+
   pub const name = struct {
     fn end (P:*Par) bool {
       const multiword = P.tk().id == .wht_space and P.next_at(1).id == Tk.Id.b_ident; // @?maybe? Support for line breaks inside multiword types ??
@@ -55,26 +63,35 @@ pub const @"type" = struct {
   /// @descr
   ///  Starts parsing an Ident.Type.Array object from the current Token, and returns the position of the result.
   ///  Will fail if the next few tokens do not not match the Ident.Type.Array pattern
-  fn array (P:*Par, isPtr :bool) anyerror!Ast.Data.Store.Pos {
+  fn array (P:*Par, is :struct {
+      mut :bool, ptr :bool, opt :bool
+    }) anyerror!Ast.Data.Store.Pos {
+    const isSlice = P.tk().id == .kw_slice;
     P.move(1);
     P.ind();
+    // FIX: Should send to ident.type.qualifier.parse(....)
     // Start:  [
     P.expect(Tk.Id.sp_bracket_L, "Ident.Type.array");
     P.move(1);
     P.ind();
-    // Items Count:  number, ident or _
-    P.expectAny(&.{Tk.Id.b_number, Tk.Id.b_ident}, "Ident.Type.array");
-    const count = P.tk().loc;
-    P.move(1);
-    P.ind();
-    // Count-Type Separator:  ,
-    P.expect(Tk.Id.sp_comma, "Ident.Type.array");
-    P.move(1);
-    P.ind();
-    // Type and Pragma
-    var result = Ast.Type.Array.create(try ident.type.parse(P)); // TODO: Static Typechecking
+    var count :?source.Loc= null;
+    if (!isSlice) {
+      // Items Count:  number, ident or _
+      P.expectAny(&.{Tk.Id.b_number, Tk.Id.b_ident}, "Ident.Type.array");
+      count = P.tk().loc;
+      P.move(1);
+      P.ind();
+      // Count-Type Separator:  ,
+      P.expect(Tk.Id.sp_comma, "Ident.Type.array");
+      P.move(1);
+      P.ind();
+    }
+    // Type and Pragma   // TODO: Static Typechecking
+    var result = Ast.Type.Array.create(try ident.type.parse(P, true));
     result.array.count  = count;
-    result.array.ptr    = isPtr;
+    result.array.mut    = if (isSlice) is.mut else true;
+    result.array.ptr    = is.ptr;
+    result.array.opt    = is.opt;
     result.array.pragma = try pragma.parse(P);
     // Add the result to the Ast.Extras list
     const pos = try P.res.add_type(result);
@@ -89,18 +106,25 @@ pub const @"type" = struct {
   /// @descr
   ///  Starts parsing an Ident.Type object from the current Token, and returns the position of the result.
   ///  Will fail if the next few tokens do not not match the Ident.Type pattern
-  pub fn parse (P:*Par) !Ast.Data.Store.Pos {
-    P.expectAny(&.{Tk.Id.kw_array, Tk.Id.kw_ptr, Tk.Id.b_ident}, "Ident.Type");
+  pub fn parse (P:*Par, isMut :bool) !Ast.Data.Store.Pos {
+    P.expectAny(&.{
+      Tk.Id.kw_array, Tk.Id.kw_slice,
+      Tk.Id.kw_ptr, Tk.Id.sp_question,
+      Tk.Id.b_ident}, "Ident.Type");
+    // ?T
+    const opt = P.tk().id == .sp_question;
+    if (opt) { P.move(1); P.ind(); }
     // ptr T
     const ptr = P.tk().id == .kw_ptr;
     if (ptr) { P.move(1); P.ind(); }
-    // array[N, T]
-    if (P.tk().id == .kw_array) return ident.type.array(P, ptr);
+    // array[N,T] slice[T]
+    if (P.tk().id == .kw_array or P.tk().id == .kw_slice) return ident.type.array(P, .{.mut=isMut, .ptr=ptr, .opt=opt});
     // other cases
     var result = Ast.Type{.any= Ast.Type.Any{ // TODO: Static Typechecking
       .name    = .{},
-      .mut     = false,
+      .mut     = isMut,
       .ptr     = ptr,
+      .opt     = opt,
       .pragma  = .None,
       }};
     result.any.name = ident.type.name.parse(P);
@@ -108,7 +132,8 @@ pub const @"type" = struct {
     result.any.pragma = try pragma.parse(P);
     var dummyPragmas = @import("slate").Pragma.List.create(P.A);
     defer dummyPragmas.destroy();
-    result.any.mut = !(P.res.data.pragmas.at(result.any.pragma) orelse dummyPragmas).has(.readonly);
+    const hasReadonly = (P.res.data.pragmas.at(result.any.pragma) orelse dummyPragmas).has(.readonly);
+    if (ptr) result.any.mut = !hasReadonly;
     return P.res.add_type(result);
   } //:: par/ident.type.parse
 }; //:: par/ident.type
