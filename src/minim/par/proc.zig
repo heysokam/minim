@@ -61,7 +61,7 @@ const args = struct {
     P.ind();
     const mut = proc.args.mutable(P);
     P.ind();
-    const typ = try ident.type.parse(P);
+    const typ = try ident.type.parse(P, mut);
     P.ind();
     return Ast.Proc.Arg{.id= name, .type= typ, .write= mut};
   }
@@ -147,12 +147,35 @@ pub fn parse (P :*Par) !Ast.Proc {
   proc.expect(P, Tk.Id.sp_colon);
   P.move(1);
   P.ind();
-  result.retT = try ident.type.parse(P);
+  const hasError = // FIX: Better hasError detection
+    P.next_at(1).id == .sp_excl or (
+    P.next_at(2).id == .sp_excl and P.next_at(1).id == .wht_space) or (
+    P.next_at(2).id == .sp_excl and P.next_at(1).id == .b_ident);
+  if (hasError) {
+    result.err = ident.name(P);
+    P.move(1);
+    P.ind();
+    proc.expect(P, Tk.Id.sp_excl);
+    P.move(1);
+    P.ind();
+  }
+  result.ret.write = if (P.tk().id == .kw_mut) blk: {
+    P.move(1);
+    P.ind();
+    break :blk true;
+  } else false;
+  result.ret.type = try ident.type.parse(P, true);
   P.ind();
 
   // Return Body
-  proc.expect(P, Tk.Id.sp_eq);
-  result.body = try proc.body(P);
+  const hasBody = P.tk().id == Tk.Id.sp_eq;
+  if (hasBody) {
+    proc.expect(P, Tk.Id.sp_eq);
+    result.body = try proc.body(P);
+  } else {
+    result.body = .None;
+    P.ind();
+  }
 
   return result;
 } //:: Par.proc.parse
