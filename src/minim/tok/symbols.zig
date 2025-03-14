@@ -35,7 +35,7 @@ pub fn paren (T:*Tok) !void {
 /// @descr Processes a Lexeme starting with `:` into its Token representation, and adds it to the {@arg T.res} result.
 pub fn colon (T:*Tok) !void {
   // FIX: :] case
-  if (!T.next_isOperator()) {
+  if (T.next_isSpecial() or !T.next_isOperator()) {
     try T.add(Tk.Id.sp_colon, T.lx().loc);
   // FIX: Colon operator case
   } else { Tok.fail("todo: colon operator case", .{}); }
@@ -69,11 +69,18 @@ pub fn hash (T:*Tok) !void {
 }
 
 //____________________________
-/// @descr Processes a hash Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+/// @descr Processes an excl Lexeme into its Token representation, and adds it to the {@arg T.res} result.
 pub fn excl (T:*Tok) !void {
   // FIX: ! operator case
   try T.add(Tk.Id.sp_excl, T.lx().loc);
 }
+//____________________________
+/// @descr Processes a question Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+pub fn question (T:*Tok) !void {
+  // FIX: ? operator case
+  try T.add(Tk.Id.sp_question, T.lx().loc);
+}
+
 
 
 //____________________________

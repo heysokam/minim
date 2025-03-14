@@ -21,5 +21,7 @@ pub const next = struct {
   pub fn isDot (T:*Tok) bool { return rules.isDot(T.next_at(1)); }
   /// @descr Returns whether or not the next Lexeme in the buffer is a parenthesis, bracket or brace lexeme.
   pub fn isPar (T:*Tok) bool { return rules.isPar(T.next_at(1)); }
+  /// @descr Returns whether or not the next Lexeme in the buffer is considered a special lexeme
+  pub fn isSpecial (T:*Tok) bool { return rules.isSpecial(T.next_at(1)); }
 }; //:: Tok.next
 

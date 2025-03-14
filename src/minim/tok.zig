@@ -83,6 +83,7 @@ pub const next_isOperator   = check.next.isOperator;
 pub const next_isWhitespace = check.next.isWhitespace;
 pub const next_isDot        = check.next.isDot;
 pub const next_isPar        = check.next.isPar;
+pub const next_isSpecial    = check.next.isSpecial;
 
 
 //______________________________________
@@ -108,6 +109,7 @@ pub const dot       = symbols.dot;
 pub const comma     = symbols.comma;
 pub const hash      = symbols.hash;
 pub const excl      = symbols.excl;
+pub const question  = symbols.question;
 pub const brace     = symbols.brace;
 pub const bracket   = symbols.bracket;
 pub const quote     = symbols.quote;
@@ -131,6 +133,7 @@ pub fn process (T:*Tok) !void {
     .newline   => try T.newline(),
     .hash      => try T.hash(),       // #
     .excl      => try T.excl(),       // !
+    .question  => try T.question(),   // ?
     .colon     => try T.colon(),      // :
     .semicolon => try T.semicolon(),  // ;
     .dot       => try T.dot(),        // .
@@ -161,8 +164,6 @@ pub fn process (T:*Tok) !void {
   // .amp,       // &
   // .pcnt,      // %
   // .pipe,      // |
-  // .excl,      // !
-  // .qmark,     // ?
   // .hat,       // ^
   // .bslash,    // \
   // Whitespace
