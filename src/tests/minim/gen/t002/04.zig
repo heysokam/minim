@@ -1,0 +1,2 @@
+pub var forty2 :i32= 42;
+var one :i32= 1;

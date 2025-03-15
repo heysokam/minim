@@ -26,7 +26,7 @@ try it("Const: Public definition", struct { fn f()!void {
   try t.check(cm, c, M.Lang.C);
 }}.f);
 
-try t.todo.it("Let: Private definition", struct { fn f()!void {
+try it("Let: Definitions", struct { fn f()!void {
   const ID = "03";
   const cm = @embedFile(ID++".cm");
   const c  = @embedFile(ID++".c");
@@ -34,7 +34,7 @@ try t.todo.it("Let: Private definition", struct { fn f()!void {
   try t.check(cm, c, M.Lang.C);
 }}.f);
 
-try t.todo.it("Var: Private definition", struct { fn f()!void {
+try it("Var: Definitions", struct { fn f()!void {
   const ID = "04";
   const cm = @embedFile(ID++".cm");
   const c  = @embedFile(ID++".c");

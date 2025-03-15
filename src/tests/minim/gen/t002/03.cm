@@ -1,7 +1,2 @@
-let forty2 :int= 42
-let
-  one   :int= 1
-  two   :int= 2
-  three :int= 3
-  four  :int= 4
-  five  :int= 5
+let forty2 *:int= 42
+let one     :int=  1

@@ -171,6 +171,8 @@ pub fn process (P:*Par) !void {
     switch (P.tk().id) {
     .kw_func,
     .kw_proc     => try toplevel.proc(P),
+    .kw_let,
+    .kw_var,
     .kw_const    => try toplevel.variable(P),
     .wht_space,
     .wht_newline => {}, // TODO: Pass formatting into the AST
