@@ -38,4 +38,6 @@ pub fn next_at (T:*Tok, id :usize) Lx { return T.buf.get(T.pos+id); }
 //____________________________
 /// @descr Returns the Lexeme located in the current position of the buffer
 pub fn lx (T :*Tok) Lx { return T.next_at(0); }
-
+//____________________________
+/// @descr Moves the current position of the {@arg T} Tokenizer by {@arg N} tokens.
+pub fn move (T :*Tok, N :source.Pos) void { T.pos +|= N; }

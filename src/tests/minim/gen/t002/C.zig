@@ -10,7 +10,7 @@ const it = t.it;
 var  Variables = t.title("minim.Gen.C | Variables");
 test Variables { Variables.begin(); defer Variables.end();
 
-try it("Const: Normal definition", struct { fn f()!void {
+try it("Const: Basic definition", struct { fn f()!void {
   const ID = "01";
   const cm = @embedFile(ID++".cm");
   const c  = @embedFile(ID++".c");
@@ -18,7 +18,7 @@ try it("Const: Normal definition", struct { fn f()!void {
   try t.check(cm, c, M.Lang.C);
 }}.f);
 
-try t.todo.it("Const: Private definition", struct { fn f()!void {
+try it("Const: Public definition", struct { fn f()!void {
   const ID = "02";
   const cm = @embedFile(ID++".cm");
   const c  = @embedFile(ID++".c");

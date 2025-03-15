@@ -23,5 +23,7 @@ pub const next = struct {
   pub fn isPar (T:*Tok) bool { return rules.isPar(T.next_at(1)); }
   /// @descr Returns whether or not the next Lexeme in the buffer is considered a special lexeme
   pub fn isSpecial (T:*Tok) bool { return rules.isSpecial(T.next_at(1)); }
+  /// @descr Returns whether or not the next Lexeme in the buffer is considered a context change lexeme
+  pub fn isContextChange (T:*Tok) bool { return rules.isContextChange(T.next_at(1)); }
 }; //:: Tok.next
 

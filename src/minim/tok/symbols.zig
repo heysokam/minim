@@ -13,10 +13,11 @@ const Tk  = Tok.Tk;
 //____________________________
 /// @descr Processes a Lexeme starting with `*` into its Token representation, and adds it to the {@arg T.res} result.
 pub fn star (T:*Tok) !void {
-  const special = true;  // FIX: Special star symbol check
-  if (special and !T.next_isOperator()) {
+  if (T.find_contextChange()) {
     try T.add(Tk.Id.sp_star, T.lx().loc);
-  } else { Tok.fail("todo: multi-star operator case", .{}); }
+  } else if (T.next_isOperator() and !T.next_isSpecial()) {
+    try T.add(Tk.Id.op_star, T.lx().loc);
+  } else { T.report(); Tok.fail("todo: conflicting/special multi-character star operator case", .{}); }
 }
 
 //____________________________
@@ -38,7 +39,7 @@ pub fn colon (T:*Tok) !void {
   if (T.next_isSpecial() or !T.next_isOperator()) {
     try T.add(Tk.Id.sp_colon, T.lx().loc);
   // FIX: Colon operator case
-  } else { Tok.fail("todo: colon operator case", .{}); }
+  } else { T.report(); Tok.fail("todo: colon operator case", .{}); }
 }
 
 //____________________________
@@ -52,7 +53,7 @@ pub fn semicolon (T:*Tok) !void {
 pub fn eq (T:*Tok) !void {
   if (!Tok.next_isOperator(T)) {
     try T.add(Tk.Id.sp_eq, T.lx().loc);
-  } else { Tok.fail("todo: eq operator case", .{}); }
+  } else { T.report(); Tok.fail("todo: eq operator case", .{}); }
 }
 
 //____________________________
@@ -101,7 +102,7 @@ pub fn dot (T:*Tok) !void {
     return;
   }
   // FIX: Dot operator case
-  if (T.next_isOperator()) { Tok.fail("todo: dot operator case", .{}); }
+  if (T.next_isOperator()) { T.report(); Tok.fail("todo: dot operator case", .{}); }
   // Single dot case
   try T.add(Tk.Id.op_dot, T.lx().loc);
 }

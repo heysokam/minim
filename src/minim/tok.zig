@@ -76,14 +76,21 @@ pub const lx         = data.lx;
 pub const next_at    = data.next_at;
 pub const add_toLast = data.add.toLast;
 pub const add        = data.add.one;
+pub const move       = data.move;
 //______________________________________
 // @section State/Data Checks
-pub const check             = @import("./tok/check.zig");
-pub const next_isOperator   = check.next.isOperator;
-pub const next_isWhitespace = check.next.isWhitespace;
-pub const next_isDot        = check.next.isDot;
-pub const next_isPar        = check.next.isPar;
-pub const next_isSpecial    = check.next.isSpecial;
+pub const check                = @import("./tok/check.zig");
+pub const next_isOperator      = check.next.isOperator;
+pub const next_isWhitespace    = check.next.isWhitespace;
+pub const next_isDot           = check.next.isDot;
+pub const next_isPar           = check.next.isPar;
+pub const next_isSpecial       = check.next.isSpecial;
+pub const next_isContextChange = check.next.isContextChange;
+//______________________________________
+// @section State/Data Search
+pub const find               = @import("./tok/find.zig");
+pub const find_ident         = find.first.ident;
+pub const find_contextChange = find.first.contextChange;
 
 
 //______________________________________

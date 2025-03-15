@@ -3,6 +3,7 @@
 //:_______________________________________________________________________
 //! @fileoverview Describes generic rules for the language.
 //__________________________________________________________|
+const rules = @This();
 // @deps std
 const std = @import("std");
 // @deps zstd
@@ -69,37 +70,40 @@ pub const Pattern = struct {
   ///  =   +   -   *   /   <   >
   ///  @   $   ~   &   %   |
   ///  !   ?   ^   .   :   \
-  pub const Op = Map.initComptime(.{
-    // Specials
-    .{ ":",  .op_colon    }, // Except :
-    .{ "=",  .op_eq       }, // Except =
-    .{ "*",  .op_star     }, // Except *:
-    .{ ".",  .op_dot      }, // Except .
-    .{ "!",  .sp_excl     },
-    .{ "?",  .sp_question },
-    // Standard
-    .{ "+",  .op_plus     },
-    .{ "-",  .op_min      },
-    .{ "/",  .op_slash    },
-    .{ "<",  .op_less     },
-    .{ ">",  .op_more     },
-    .{ "@",  .op_at       }, // Except @. Same as casting.  A@B  ->   cast[B](A)
-    .{ "$",  .op_dollar   },
-    .{ "~",  .op_tilde    },
-    .{ "&",  .op_amp      },
-    .{ "%",  .op_pcnt     },
-    .{ "|",  .op_pipe     },
-    .{ "^",  .op_hat      },
-    .{ "\\", .op_bslash   }, // Except inside strings
-    // .{ "!",  .op_excl     },
-    // .{ "?",  .op_question },
+  pub const Op = struct {
+    // Special Operators are treated differently depending on context
+    pub const Specials = Map.initComptime(.{
+      .{ ":",  .op_colon    }, // Except :
+      .{ "=",  .op_eq       }, // Except =
+      .{ "*",  .op_star     }, // Except *:
+      .{ ".",  .op_dot      }, // Except .
+      .{ "!",  .op_excl     },
+      .{ "?",  .op_question },
+    });
+    // Standard Operators are treated normally
+    pub const Standard = Map.initComptime(.{
+      .{ "+",  .op_plus     },
+      .{ "-",  .op_min      },
+      .{ "/",  .op_slash    },
+      .{ "<",  .op_less     },
+      .{ ">",  .op_more     },
+      .{ "@",  .op_at       }, // Except @. Same as casting.  A@B  ->   cast[B](A)
+      .{ "$",  .op_dollar   },
+      .{ "~",  .op_tilde    },
+      .{ "&",  .op_amp      },
+      .{ "%",  .op_pcnt     },
+      .{ "|",  .op_pipe     },
+      .{ "^",  .op_hat      },
+      .{ "\\", .op_bslash   }, // Except inside strings
     }); // Valid Operator character starters
+  };
 
   //______________________________________
   /// @descr List of (key,val) pairs of Whitespace Tokens, mapping their string representation with their Tk.Id
   pub const Ws = Map.initComptime(.{
-    .{ " ",  .wht_space   },      // ` `
-    .{ "\n", .wht_newline },      // \n
+    .{ " ",  .wht_space   }, // ` `
+    .{ "\n", .wht_newline }, // \n
+    // FIX: Tab and CR
     }); // Valid Whitespace characters
 
   //______________________________________
@@ -174,6 +178,8 @@ pub const LxKinds = struct {
 };
 
 
+/// @descr Returns whether or not {@arg L} is an identifier lexeme.
+pub fn isIdentifier (L:Lx) bool { return L.id == .ident; }
 /// @descr Returns whether or not {@arg L} is an operator lexeme.
 pub fn isOperator (L:Lx) bool { return LxKinds.Operator.contains(L.id); }
 /// @descr Returns whether or not {@arg L} is a whitespace lexeme.
@@ -182,9 +188,16 @@ pub fn isWhitespace (L:Lx) bool { return LxKinds.Whitespace.contains(L.id); }
 pub fn isPar (L:Lx) bool { return LxKinds.Paren.contains(L.id); }
 /// @descr Returns whether or not {@arg L} is a dot lexeme.
 pub fn isDot (L:Lx) bool { return L.id == Lx.Id.dot; }
-/// @descr Returns whether or not {@arg L} is a special lexeme.
+/// @descr Returns whether or not {@arg L} is a lexeme that should trigger a context change.
+pub fn isContextChange (L:Lx) bool { return switch (L.id) {
+  .semicolon, => true, else => rules.isWhitespace(L) or rules.isPar(L),
+};}
+//______________________________________
+/// @descr
+/// Returns whether or not {@arg L} is a special lexeme.
+/// Special lexemes will be treated differently depending on the context where they are found.
 pub fn isSpecial (L:Lx) bool { return switch (L.id) {
-  .question, .excl
-  => true, else => false
-}; }
+  .colon, .eq, .star, .dot, .excl, .question,
+  => true, else => rules.isPar(L)
+};}
 
