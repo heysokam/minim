@@ -37,37 +37,58 @@ pub fn Return (P:*Par) !Ast.Stmt {
 pub fn variable (P:*Par) !Ast.Stmt {
   stmt.expectAny(P, &.{Tk.Id.kw_const, Tk.Id.kw_let, Tk.Id.kw_var});
   const mut = switch (P.tk().id) {
-    .kw_const, .kw_let => false,
     .kw_var            => true,
+    .kw_const, .kw_let => false,
+    else => unreachable,
+  };
+  const runtime = switch (P.tk().id) {
+    .kw_var, .kw_let => true,
+    .kw_const,       => false,
     else => unreachable,
   };
   P.move(1);
   P.ind();
 
-  var result = Ast.Stmt.Variable{
-    .id    = ident.name(P),
-    .write = mut,
+  var data = Ast.Stmt.Variable.Data{
+    .id      = ident.name(P),
+    .write   = mut,
+    .runtime = runtime,
     }; //:: result
   P.move(1);
   P.ind();
+  // Public/Private
+  stmt.expectAny(P, &.{Tk.Id.sp_star, Tk.Id.sp_colon});
+  const public = if (P.tk().id == Tk.Id.sp_star) blk: {
+    P.move(1);
+    P.ind();
+    break :blk true;
+  } else false;
   // Variable type
   stmt.expect(P, Tk.Id.sp_colon);
   P.move(1);
   P.ind();
-  result.type = try ident.type.parse(P);
+  data.type = try ident.type.parse(P, mut);
   P.ind();
 
-  stmt.expect(P, Tk.Id.sp_eq);
-  P.move(1);
-  P.ind();
+  stmt.expectAny(P, &.{Tk.Id.sp_eq, Tk.Id.sp_semicolon});
+  // Start without a value
+  data.value = Ast.Expr.Empty;
+  // Assignment case
+  if (P.tk().id == Tk.Id.sp_eq) {
+    P.move(1);
+    P.ind();
 
-  result.value = switch (P.tk().id) {
-    .b_number    => Ast.Expr.Literal.Int.create(P.tk().loc),
-    .wht_newline => Ast.Expr.Empty,
-    else => |id| P.fail("Unexpected Token for Assignment Statement value. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)}),
-  };
-  if (P.tk().id == Tk.Id.b_number) P.move(1);
+    data.value = switch (P.tk().id) {
+      .b_number  => Ast.Expr.Literal.Int.create(P.tk().loc),
+      else => |id| P.fail("Unexpected Token for Assignment Statement value. Expected '{s}', but found:  {d}:'{s}'", .{@tagName(id), P.pos, @tagName(P.tk().id)}),
+    };
+    if (P.tk().id == Tk.Id.b_number) P.move(1);
+  // Declaration case
+  } else {
+    P.move(1);
+    P.ind();
+  }
 
-  return Ast.Stmt{.Var= result};
+  return Ast.Stmt.Variable.create(data, public);
 }
 

@@ -161,7 +161,6 @@ const toplevel = struct {
   }
 
   fn variable (P:*Par) !void {
-    P.fail("Top-Level Variables are not implemented yet", .{});
     _= try P.res.add_node(M.Ast.Node{.Var= try @import("./par/statement.zig").variable(P)}); // TODO: Modules will need this Node.Store.Pos
   }
 };

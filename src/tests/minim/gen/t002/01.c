@@ -1,1 +1,1 @@
-static /*constexpr*/ int const forty2 = 42;
+static constexpr int forty2 = 42;
