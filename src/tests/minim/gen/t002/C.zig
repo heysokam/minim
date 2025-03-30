@@ -42,7 +42,7 @@ try it("Var: Definitions", struct { fn f()!void {
   try t.check(cm, c, M.Lang.C);
 }}.f);
 
-try t.hide.it("Return: Identifier", struct { fn f()!void {
+try t.todo.it("Return: Identifier", struct { fn f()!void {
   const ID = "05";
   const cm = @embedFile(ID++".cm");
   const c  = @embedFile(ID++".c");

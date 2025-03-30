@@ -101,10 +101,11 @@ fn body (P :*Par) !Ast.Proc.BodyStore.Pos {
   P.move(1);
   P.ind();
   var result = try Ast.Proc.Body.create(P.A);
-  switch (P.tk().id) {
-    Tk.Id.kw_return => try result.add(try stmt.Return(P)),
+  while (true) { switch (P.tk().id) {
+    .kw_return                  => try result.add(try stmt.Return(P)),
+    .kw_let, .kw_var, .kw_const => try result.add(try stmt.variable(P)),
     else => |token| P.fail("Unknown First Token for Proc.Body Statement '{s}'", .{@tagName(token)})
-  }
+  } break; }
   return P.res.add_stmts(result);
 }
 
