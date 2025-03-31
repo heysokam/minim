@@ -3,6 +3,7 @@
 #:_______________________________________________________________________
 import confy
 import ./info
+from std/os import `/`
 
 const cfg_verbose = true
 
@@ -14,7 +15,8 @@ const P = package.Info(
   name        : info.name,
   author      : info.author,
   license     : info.license,
-  description : info.description
+  description : info.description,
+  url         : "https://github.com"/info.author/info.name,
   ) #:: package.Info
 
 #______________________________________
