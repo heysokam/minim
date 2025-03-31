@@ -1,6 +1,3 @@
 [submodule "src/runic/lib/arocc"]
 	path = src/runic/lib/arocc
 	url = git@github.com:Vexu/arocc.git
-[submodule "src/lib/confy"]
-	path = src/lib/confy
-	url = git@github.com:heysokam/confy.git
