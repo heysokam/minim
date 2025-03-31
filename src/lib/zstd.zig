@@ -1,4 +1,4 @@
 //:____________________________________________________________________
 //  zstd  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
 //:____________________________________________________________________
-pub usingnamespace @import("./confy/src/lib/zstd/src/zstd.zig");
+pub usingnamespace @import("zstd");
