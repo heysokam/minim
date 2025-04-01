@@ -1,3 +1,4 @@
+- [ ] `mut T` for zig primitives should codegen a pointer type `*T`
 - [ ] Pointer, sentinel and C ptr
     ```ts
     arg06 : array[*, i32];
