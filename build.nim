@@ -13,7 +13,7 @@ const cfg_verbose = true
 const P = package.Info(
   version     : Version.parse(info.version),
   name        : info.name,
-  author      : info.author,
+  author      : Name(short:info.author),
   license     : info.license,
   description : info.description,
   url         : "https://github.com"/info.author/info.name,
@@ -22,32 +22,31 @@ const P = package.Info(
 #______________________________________
 # @section Dependencies
 #____________________________
-const deps_zstd  = Dependency(name: "zstd",  url: "https://github.com/heysokam/zstd" )
-const deps_slate = Dependency(name: "slate", url: "https://github.com/heysokam/slate")
-const deps_ztest = Dependency(name: "ztest", url: "https://github.com/heysokam/ztest")
+const deps_zstd  = Dependency(name: "zstd",     url:"https://github.com/heysokam/zstd" )
+const deps_slate = Dependency(name: "slate",    url:"https://github.com/heysokam/slate")
+const deps_mtest = Dependency(name: "minitest", url:"https://github.com/heysokam/minitest")
 const deps_minim = @[deps_zstd, deps_slate]
-const deps_tests = deps_minim & deps_ztest
+const deps_tests = deps_minim & deps_mtest
 
 #______________________________________
 # @section Build Targets
 #____________________________
-var minim = StaticLib.new(entry= "minim.zig", version= P.version, deps= deps_minim)
-var M     =   Program.new(entry=     "M.zig", version= P.version, deps= deps_minim)
+var lib   = StaticLib.new(entry= "minim.zig", version= P.version, deps= deps_minim)
+var minim =   Program.new(entry=     "M.zig", version= P.version, deps= deps_minim)
 var tests =  UnitTest.new(entry= "tests.zig", version= P.version, deps= deps_tests) # flags = .{.ld= &.{"-lclang"}},
 
 #______________________________________
 # @section Config
 #____________________________
+lib.cfg.verbose   = cfg_verbose
 minim.cfg.verbose = cfg_verbose
-M.cfg.verbose     = cfg_verbose
 tests.cfg.verbose = cfg_verbose
 
 #______________________________________
 # @section Entry Point
 #____________________________
 P.report()
-M.build()
+minim.build()
 tests.build()
-# minim.build()
-# M.run()
+# lib.build()
 
