@@ -7,24 +7,24 @@ const std   = @import("std");
 // @deps zdk
 const zstd  = @import("../../lib/zstd.zig");
 const zstr  = zstd.zstr;
-const ztest = @import("ztest");
+const mtest = @import("minitest");
 // @deps minim
 const M = @import("../../minim.zig");
 
 //______________________________________
 // @section std Aliases
 //____________________________
-pub const ok     = ztest.ok;
-pub const info   = ztest.log.info;
-pub const A      = ztest.A;
-pub const eq     = ztest.eq;
-pub const eq_str = ztest.eq_str;
-pub const not    = ztest.not;
-pub const it     = ztest.it;
-pub const title  = ztest.title;
-pub const skip   = ztest.skip;
-pub const todo   = ztest.todo;
-pub const hide   = ztest.hide;
+pub const ok     = mtest.ok;
+pub const info   = mtest.log.info;
+pub const A      = mtest.A;
+pub const eq     = mtest.eq;
+pub const eq_str = mtest.eq_str;
+pub const not    = mtest.not;
+pub const it     = mtest.it;
+pub const title  = mtest.title;
+pub const skip   = mtest.skip;
+pub const todo   = mtest.todo;
+pub const hide   = mtest.hide;
 
 
 //______________________________________

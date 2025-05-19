@@ -15,14 +15,15 @@ const Tk  = Tok.Tk;
 //____________________________
 /// @descr Triggers an error if {@arg id} isn't the current Token in the {@arg P} Parser.
 pub fn expect (P:*Par, id :Tk.Id, kind :cstr) void {
-  if (P.tk().id != id) P.fail("Unexpected Token for {s}. Expected '{s}', but found:  {d}:'{s}':{s}",
+  if (P.tk().id == id) return;
+  P.fail("Unexpected Token for {s}. Expected '{s}', but found:  {d}:'{s}':{s}",
     .{kind, @tagName(id), P.pos, @tagName(P.tk().id), P.tk().from(P.src)});
 } //:: Par.check.expect
 
 //____________________________
 /// @descr Triggers an error if any of the {@arg ids} are not the current Token in the {@arg P} Parser.
 pub fn expectAny (P:*Par, ids :[]const Tk.Id, kind :cstr) void {
-  for (ids) | id | if (P.tk().id == id) { return; };
+  for (ids) |id| if (P.tk().id == id) { return; };
   P.fail("Unexpected Token for {s}. Expected '{any}', but found:  {d}:'{s}'", .{kind, ids, P.pos, @tagName(P.tk().id)});
 } //:: Par.check.expectAny
 
