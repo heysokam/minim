@@ -1,9 +1,9 @@
 #:_______________________________________________________________________
 #  ᛟ minim  |  Copyright (C) Ivan Mar (sOkam!)  |  GNU LGPLv3 or later  :
 #:_______________________________________________________________________
+from std/os import absolutePath
 import confy
 import ./info
-from std/os import `/`
 
 const cfg_verbose = true
 
@@ -27,13 +27,19 @@ const deps_slate = Dependency(name: "slate",    url:"https://github.com/heysokam
 const deps_mtest = Dependency(name: "minitest", url:"https://github.com/heysokam/minitest")
 const deps_minim = @[deps_zstd, deps_slate]
 const deps_tests = deps_minim & deps_mtest
+const nimgen_dir = "."/"bin"/".nimgen"
+proc nimgen_build=
+  let trg = confy.cfg.dirs.bin/"nimgen"
+  withDir nimgen_dir: sh "confy build nimgen"
+  if not trg.fileExists(): ln os.absolutePath(nimgen_dir/"bin"/"nimgen"), trg
+  doAssert trg.fileExists()
 
 #______________________________________
 # @section Build Targets
 #____________________________
-var lib   = StaticLib.new(entry= "minim.zig", version= P.version, deps= deps_minim)
-var minim =   Program.new(entry=     "M.zig", version= P.version, deps= deps_minim)
-var tests =  UnitTest.new(entry= "tests.zig", version= P.version, deps= deps_tests) # flags = .{.ld= &.{"-lclang"}},
+var lib    = StaticLib.new(entry=  "minim.zig", version= P.version, deps= deps_minim)
+var minim  =   Program.new(entry=      "M.zig", version= P.version, deps= deps_minim)
+var tests  =  UnitTest.new(entry=  "tests.zig", version= P.version, deps= deps_tests) # flags = .{.ld= &.{"-lclang"}},
 
 #______________________________________
 # @section Config
@@ -47,6 +53,7 @@ tests.cfg.verbose = cfg_verbose
 #____________________________
 P.report()
 minim.build()
+nimgen_build()
 tests.build()
 # lib.build()
 
