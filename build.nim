@@ -52,7 +52,7 @@ tests.cfg.verbose = cfg_verbose
 # @section Entry Point
 #____________________________
 P.report()
-minim.build()
+# minim.build()
 nimgen_build()
 tests.build()
 # lib.build()
