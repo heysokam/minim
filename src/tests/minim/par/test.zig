@@ -3,5 +3,10 @@
 //:_______________________________________________________________________
 // @deps std
 const std = @import("std");
-// TODO:
-// test "Parser" { return error.SkipZigTest; }
+
+// test {
+//   std.testing.refAllDecls(@This());
+//   _ = @import("./general.zig"); // General Cases
+//   _ = @import("./random.zig");  // Randomized Cases
+// }
+
