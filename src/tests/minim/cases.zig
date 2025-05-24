@@ -49,6 +49,7 @@ pub const Nim = struct {
   } //:: tests.case.Random.generate
 }; //:: tests.case.Random
 
+
 pub const Hello42 = struct {
   pub const src :slate.source.Code= "proc main *() :int= return 42\n";
   pub const res = struct {
@@ -327,4 +328,30 @@ pub const TypeWithPragma = struct {
     }; //:: tests.case.TypeWithPragma.res.tok
   }; //:: tests.case.TypeWithPragma.res
 }; //:: tests.case.TypeWithPragma
+
+pub const TinyNim = struct {
+  pub const src :slate.source.Code=
+    \\var x :i32  # Toplevel variable declaration
+    \\
+    \\proc main *() :i32=
+    \\  var arr :array[42, int]  # Unbounded array (conceptually)
+    \\  var y :i32 = 0  # Variable declaration with assignment
+    \\  while x < 43:
+    \\    x = x + 2   # Increment
+    \\    x = x - 1   # Decrement
+    \\    arr[x] = y  # Store value
+    \\    y = arr[x]  # Retrieve value
+    \\    if x == 42:
+    \\      break
+    \\    if x != 42: y = y + 1
+    \\  return x
+    ;
+  pub const res = struct {
+    pub const lex = &[_]slate.Lx{
+    }; //:: tests.case.bugs.TinyNim.res.lex
+
+    pub const tok = &[_]M.Tok.Tk{
+    }; //:: tests.case.TinyNim.res.tok
+  }; //:: tests.case.TinyNim.res
+}; //:: tests.case.TinyNim
 
