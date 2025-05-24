@@ -4,13 +4,50 @@
 //! @fileoverview Preset Cases
 //_____________________________|
 pub const case = @This();
+// @deps std
+const std = @import("std");
 // @deps minim
+const t     = @import("./base.zig");
 const M     = @import("../../minim.zig");
 const slate = @import("slate");
+const zstd  = @import("zstd");
 const minim = struct {
   const Tk = M.Tok.Tk;
 };
 
+
+pub const Nim = struct {
+  const Kind = enum { all, variable, proc, };
+  fn random (kind :case.Nim.Kind) !zstd.cstr {
+    // Configuration for nimgen
+    const seed = try std.fmt.allocPrint(t.A, "{x}", .{std.testing.random_seed});
+    defer t.A.free(seed);
+    const file = try std.fmt.allocPrint(t.A, "{s}.nim", .{@tagName(kind)});
+    defer t.A.free(file);
+    const result = try std.fs.path.join(t.A, &.{".","bin",".cache","tests", seed, file});
+    // Create the nimgen Command  (assumes nimgen exists)
+    var cmd = zstd.shell.Cmd.create(t.A);
+    defer cmd.destroy();
+    try cmd.add("./bin/nimgen");
+    try cmd.add(@tagName(kind));
+    try cmd.add(result);
+    try cmd.add(seed);
+    // Run the command and return the path of the resulting file
+    try cmd.exec();
+    try t.eq(cmd.result.?.code.?, 0);
+    return result;
+  }
+
+  pub fn generate (kind : case.Nim.Kind) !slate.source.Code {
+    const file = try Nim.random(kind);
+    defer t.A.free(file);
+    const src = try zstd.files.read(file, t.A, .{});
+    defer t.A.free(src);
+    var result = zstd.str.init(t.A);
+    try result.appendSlice(src);
+    return try result.toOwnedSliceSentinel(0);
+  } //:: tests.case.Random.generate
+}; //:: tests.case.Random
 
 pub const Hello42 = struct {
   pub const src :slate.source.Code= "proc main *() :int= return 42\n";
