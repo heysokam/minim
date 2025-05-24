@@ -57,3 +57,58 @@ try it("should create the expected list of tokens for the HelloIndentation case"
 
 } //:: minim.Tok | General Cases
 
+var  Tokenizer_random = t.title("minim.Tok | Randomized Cases");
+test Tokenizer_random { Tokenizer_random.begin(); defer Tokenizer_random.end();
+try it("should run without errors when tokenizing arbitrary Nim Variables", struct { fn f() !void {
+  // Setup
+  const code = try t.case.Nim.generate(.variable);
+  defer t.A.free(code);
+  // defer t.A.free(code);
+  var L = try slate.Lex.create(t.A, code);
+  defer L.destroy();
+  try L.process();
+  var T = try M.Tok.create(&L);
+  defer T.destroy();
+  // Validate
+  // Run
+  try T.process();
+  // Check
+  try t.ok(T.res.len >= 1);
+}}.f);
+
+try it("should run without errors when tokenizing arbitrary Nim Procs", struct { fn f() !void {
+  // Setup
+  const code = try t.case.Nim.generate(.proc);
+  defer t.A.free(code);
+  // defer t.A.free(code);
+  var L = try slate.Lex.create(t.A, code);
+  defer L.destroy();
+  try L.process();
+  var T = try M.Tok.create(&L);
+  defer T.destroy();
+  // Validate
+  // Run
+  try T.process();
+  // Check
+  try t.ok(T.res.len >= 1);
+}}.f);
+
+try it("should run without errors when tokenizing arbitrary Nim code", struct { fn f() !void {
+  // Setup
+  const code = try t.case.Nim.generate(.all);
+  defer t.A.free(code);
+  // defer t.A.free(code);
+  var L = try slate.Lex.create(t.A, code);
+  defer L.destroy();
+  try L.process();
+  var T = try M.Tok.create(&L);
+  defer T.destroy();
+  // Validate
+  // Run
+  try T.process();
+  // Check
+  try t.ok(T.res.len >= 1);
+}}.f);
+
+} //:: minim.Tok | Randomized Cases
+
