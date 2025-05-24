@@ -80,6 +80,7 @@ pub const move       = data.move;
 //______________________________________
 // @section State/Data Checks
 pub const check                = @import("./tok/check.zig");
+pub const next_isNumber        = check.next.isNumber;
 pub const next_isOperator      = check.next.isOperator;
 pub const next_isWhitespace    = check.next.isWhitespace;
 pub const next_isDot           = check.next.isDot;
@@ -120,6 +121,7 @@ pub const question  = symbols.question;
 pub const brace     = symbols.brace;
 pub const bracket   = symbols.bracket;
 pub const quote     = symbols.quote;
+pub const dash      = symbols.dash;
 //______________________________________
 // @section Process: Literals
 pub const literals = @import("./tok/literals.zig");
@@ -148,6 +150,7 @@ pub fn process (T:*Tok) !void {
     .eq        => try T.eq(),         // =
     .star      => try T.star(),       // *
     .at        => try T.at(),         // @
+    .dash      => try T.dash(),       // -
     .paren_L,                         // (
     .paren_R   => try T.paren(),      // )
     .brace_L,                         // {

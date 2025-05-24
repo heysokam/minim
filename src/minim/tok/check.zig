@@ -13,6 +13,8 @@ const Tok   = @import("../tok.zig");
 const rules = @import("../rules.zig");
 
 pub const next = struct {
+  /// @descr Returns whether or not the next Lexeme in the buffer is a number lexeme.
+  pub fn isNumber (T:*Tok) bool { return rules.isNumber(T.next_at(1)); }
   /// @descr Returns whether or not the next Lexeme in the buffer is an operator lexeme.
   pub fn isOperator (T :*Tok) bool { return rules.isOperator(T.next_at(1)); }
   /// @descr Returns whether or not the next Lexeme in the buffer is a whitespace lexeme.

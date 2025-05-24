@@ -180,6 +180,8 @@ pub const LxKinds = struct {
 
 /// @descr Returns whether or not {@arg L} is an identifier lexeme.
 pub fn isIdentifier (L:Lx) bool { return L.id == .ident; }
+/// @descr Returns whether or not {@arg L} is a number lexeme.
+pub fn isNumber (L:Lx) bool { return L.id == .number; }
 /// @descr Returns whether or not {@arg L} is an operator lexeme.
 pub fn isOperator (L:Lx) bool { return LxKinds.Operator.contains(L.id); }
 /// @descr Returns whether or not {@arg L} is a whitespace lexeme.

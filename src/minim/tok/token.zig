@@ -88,6 +88,8 @@ pub const Id = enum {
   op_dot,       // Operators starting with .
   op_colon,     // Operators starting with :
   op_eq,        // `eq` and Operators starting with =
+  op_pos,       // + prefix
+  op_neg,       // - prefix
   // Operators: Keywords
   op_and,       // and &&
   op_or,        // or  ||
@@ -106,7 +108,7 @@ pub const Id = enum {
   op_from,      // from
   // Operators: Standard
   op_plus,      // Operators starting with +
-  op_min,       // Operators starting with -
+  op_minus,     // Operators starting with -
   op_slash,     // Operators starting with /
   op_less,      // Operators starting with <
   op_more,      // Operators starting with >

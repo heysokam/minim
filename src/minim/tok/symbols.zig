@@ -167,4 +167,13 @@ pub fn quote (T:*Tok) !void {
     else => unreachable,
     }, l.loc);
 }
+//____________________________
+/// @descr Processes a dash Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+pub fn dash (T:*Tok) !void {
+  const l = T.lx();
+  if (T.next_isNumber()) { return try T.add(Tk.Id.op_neg,   l.loc); }
+  // FIX: minus operator case
+  if (T.next_isOperator()) { T.report(); Tok.fail("todo: minus operator case", .{}); }
+  try T.add(Tk.Id.op_minus, l.loc);
+}
 
