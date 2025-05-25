@@ -54,26 +54,27 @@ pub const Hello42 = struct {
   pub const src :slate.source.Code= "proc main *() :int= return 42\n";
   pub const res = struct {
     pub const lex = &[_]slate.Lx{
-      slate.Lx{.id= .ident, .  loc= slate.source.Loc{.start=  0, .end=  3}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start=  4, .end=  4}},
+      slate.Lx{.id= .ident, .  loc= slate.source.Loc{.start=  0, .end=  3}},  // 00: `proc`
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start=  4, .end=  4}},  // 01: ` `
 
-      slate.Lx{.id= .ident, .  loc= slate.source.Loc{.start=  5, .end=  8}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start=  9, .end=  9}},
+      slate.Lx{.id= .ident, .  loc= slate.source.Loc{.start=  5, .end=  8}},  // 02: `main`
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start=  9, .end=  9}},  // 03: ` `
 
-      slate.Lx{.id= .star,    .loc= slate.source.Loc{.start= 10, .end= 10}},
-      slate.Lx{.id= .paren_L, .loc= slate.source.Loc{.start= 11, .end= 11}},
-      slate.Lx{.id= .paren_R, .loc= slate.source.Loc{.start= 12, .end= 12}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 13, .end= 13}},
+      slate.Lx{.id= .star,    .loc= slate.source.Loc{.start= 10, .end= 10}},  // 04: `*`
+      slate.Lx{.id= .paren_L, .loc= slate.source.Loc{.start= 11, .end= 11}},  // 05: `(`
+      slate.Lx{.id= .paren_R, .loc= slate.source.Loc{.start= 12, .end= 12}},  // 06: `)`
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 13, .end= 13}},  // 07: ` `
 
-      slate.Lx{.id= .colon,   .loc= slate.source.Loc{.start= 14, .end= 14}},
-      slate.Lx{.id= .ident,   .loc= slate.source.Loc{.start= 15, .end= 17}},
-      slate.Lx{.id= .eq,      .loc= slate.source.Loc{.start= 18, .end= 18}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 19, .end= 19}},
+      slate.Lx{.id= .colon,   .loc= slate.source.Loc{.start= 14, .end= 14}},  // 08: `:`
+      slate.Lx{.id= .ident,   .loc= slate.source.Loc{.start= 15, .end= 17}},  // 09: `int`
+      slate.Lx{.id= .eq,      .loc= slate.source.Loc{.start= 18, .end= 18}},  // 10: `=`
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 19, .end= 19}},  // 11: ` `
 
-      slate.Lx{.id= .ident,   .loc= slate.source.Loc{.start= 20, .end= 25}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 26, .end= 26}},
+      slate.Lx{.id= .ident,   .loc= slate.source.Loc{.start= 20, .end= 25}},  // 12: `return`
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 26, .end= 26}},  // 13: ` `
 
-      slate.Lx{.id= .number,  .loc= slate.source.Loc{.start= 27, .end= 28}},
+      slate.Lx{.id= .number,  .loc= slate.source.Loc{.start= 27, .end= 28}},  // 14: `42`
+      slate.Lx{.id= .newline, .loc= slate.source.Loc{.start= 29, .end= 29}},  // 15: `\n`
     };
 
     pub const tok = &[_]M.Tok.Tk{
@@ -109,26 +110,28 @@ pub const HelloIndentation = struct {
     ;
   pub const res = struct {
     pub const lex = &[_]slate.Lx{
-      slate.Lx{.id= .ident, .  loc= slate.source.Loc{.start=  0, .end=  3}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start=  4, .end=  4}},
+      slate.Lx{.id= .ident, .  loc= slate.source.Loc{.start=  0, .end=  3}},  // 00: `proc`
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start=  4, .end=  4}},  // 01: ` `
 
-      slate.Lx{.id= .ident, .  loc= slate.source.Loc{.start=  5, .end=  8}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start=  9, .end=  9}},
+      slate.Lx{.id= .ident, .  loc= slate.source.Loc{.start=  5, .end=  8}},  // 02: `main`
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start=  9, .end=  9}},  // 03: ` `
 
-      slate.Lx{.id= .star,    .loc= slate.source.Loc{.start= 10, .end= 10}},
-      slate.Lx{.id= .paren_L, .loc= slate.source.Loc{.start= 11, .end= 11}},
-      slate.Lx{.id= .paren_R, .loc= slate.source.Loc{.start= 12, .end= 12}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 13, .end= 13}},
+      slate.Lx{.id= .star,    .loc= slate.source.Loc{.start= 10, .end= 10}},  // 04: `*`
+      slate.Lx{.id= .paren_L, .loc= slate.source.Loc{.start= 11, .end= 11}},  // 05: `(`
+      slate.Lx{.id= .paren_R, .loc= slate.source.Loc{.start= 12, .end= 12}},  // 06: `)`
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 13, .end= 13}},  // 07: ` `
 
-      slate.Lx{.id= .colon,   .loc= slate.source.Loc{.start= 14, .end= 14}},
-      slate.Lx{.id= .ident,   .loc= slate.source.Loc{.start= 15, .end= 17}},
-      slate.Lx{.id= .eq,      .loc= slate.source.Loc{.start= 18, .end= 18}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 19, .end= 19}},
+      slate.Lx{.id= .colon,   .loc= slate.source.Loc{.start= 14, .end= 14}},  // 08: `:`
+      slate.Lx{.id= .ident,   .loc= slate.source.Loc{.start= 15, .end= 17}},  // 09: `int`
+      slate.Lx{.id= .eq,      .loc= slate.source.Loc{.start= 18, .end= 18}},  // 10: `=`
+      slate.Lx{.id= .newline, .loc= slate.source.Loc{.start= 19, .end= 19}},  // 11: `\n`
 
-      slate.Lx{.id= .ident,   .loc= slate.source.Loc{.start= 20, .end= 25}},
-      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 26, .end= 26}},
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 20, .end= 20}},  // 12: ` `
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 21, .end= 21}},  // 12: ` `
+      slate.Lx{.id= .ident,   .loc= slate.source.Loc{.start= 22, .end= 27}},  // 14: `return`
 
-      slate.Lx{.id= .number,  .loc= slate.source.Loc{.start= 27, .end= 28}},
+      slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 28, .end= 28}},  // 15: ` `
+      slate.Lx{.id= .number,  .loc= slate.source.Loc{.start= 29, .end= 30}},  // 16: `42`
     };
 
     pub const tok = &[_]M.Tok.Tk{
@@ -168,19 +171,19 @@ pub const TypeWithPragma = struct {
     ;
   pub const res = struct {
     pub const lex = &[_]slate.Lx{
-      slate.Lx{.id= .ident,     .loc= slate.source.Loc{.start=   0, .end=   3 }}, //  0: `proc`
-      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=   4, .end=   4 }}, //  1: ` `
+      slate.Lx{.id= .ident,     .loc= slate.source.Loc{.start=   0, .end=   3 }}, // 00: `proc`
+      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=   4, .end=   4 }}, // 01: ` `
 
-      slate.Lx{.id= .ident,     .loc= slate.source.Loc{.start=   5, .end=   9 }}, //  2: `hello`
-      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  10, .end=  10 }}, //  3: ` `
+      slate.Lx{.id= .ident,     .loc= slate.source.Loc{.start=   5, .end=   9 }}, // 02: `hello`
+      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  10, .end=  10 }}, // 03: ` `
 
-      slate.Lx{.id= .paren_L,   .loc= slate.source.Loc{.start=  11, .end=  11 }}, //  4: `(`
-      slate.Lx{.id= .newline,   .loc= slate.source.Loc{.start=  12, .end=  12 }}, //  5: `\n`
+      slate.Lx{.id= .paren_L,   .loc= slate.source.Loc{.start=  11, .end=  11 }}, // 04: `(`
+      slate.Lx{.id= .newline,   .loc= slate.source.Loc{.start=  12, .end=  12 }}, // 05: `\n`
 
-      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  13, .end=  13 }}, //  6: ` `
-      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  14, .end=  14 }}, //  7: ` `
-      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  15, .end=  15 }}, //  8: ` `
-      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  16, .end=  16 }}, //  9: ` `
+      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  13, .end=  13 }}, // 06: ` `
+      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  14, .end=  14 }}, // 07: ` `
+      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  15, .end=  15 }}, // 08: ` `
+      slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  16, .end=  16 }}, // 09: ` `
       slate.Lx{.id= .ident,     .loc= slate.source.Loc{.start=  17, .end=  19 }}, // 10: `one`
       slate.Lx{.id= .space,     .loc= slate.source.Loc{.start=  20, .end=  20 }}, // 11: ` `
 
@@ -255,20 +258,20 @@ pub const TypeWithPragma = struct {
     }; //:: tests.case.bugs.TypeWithPragma.res.lex
 
     pub const tok = &[_]M.Tok.Tk{
-      minim.Tk{.id= .kw_proc,       .loc= slate.source.Loc{.start=   0, .end=   3 }}, //  0: `proc`
-      minim.Tk{.id= .wht_space,     .loc= slate.source.Loc{.start=   4, .end=   4 }}, //  1: ` `
+      minim.Tk{.id= .kw_proc,       .loc= slate.source.Loc{.start=   0, .end=   3 }}, // 00: `proc`
+      minim.Tk{.id= .wht_space,     .loc= slate.source.Loc{.start=   4, .end=   4 }}, // 01: ` `
 
-      minim.Tk{.id= .b_ident,       .loc= slate.source.Loc{.start=   5, .end=   9 }}, //  2: `hello`
-      minim.Tk{.id= .wht_space,     .loc= slate.source.Loc{.start=  10, .end=  10 }}, //  3: ` `
+      minim.Tk{.id= .b_ident,       .loc= slate.source.Loc{.start=   5, .end=   9 }}, // 02: `hello`
+      minim.Tk{.id= .wht_space,     .loc= slate.source.Loc{.start=  10, .end=  10 }}, // 03: ` `
 
-      minim.Tk{.id= .sp_paren_L,    .loc= slate.source.Loc{.start=  11, .end=  11 }}, //  4: `(`
-      minim.Tk{.id= .wht_newline,   .loc= slate.source.Loc{.start=  12, .end=  12 }}, //  5: `\n`
+      minim.Tk{.id= .sp_paren_L,    .loc= slate.source.Loc{.start=  11, .end=  11 }}, // 04: `(`
+      minim.Tk{.id= .wht_newline,   .loc= slate.source.Loc{.start=  12, .end=  12 }}, // 05: `\n`
 
-      minim.Tk{.id= .wht_space,     .loc= slate.source.Loc{.start=  13, .end=  16 }}, //  6: `    `
-      minim.Tk{.id= .b_ident,       .loc= slate.source.Loc{.start=  17, .end=  19 }}, //  7: `one`
-      minim.Tk{.id= .wht_space,     .loc= slate.source.Loc{.start=  20, .end=  20 }}, //  8: ` `
+      minim.Tk{.id= .wht_space,     .loc= slate.source.Loc{.start=  13, .end=  16 }}, // 06: `    `
+      minim.Tk{.id= .b_ident,       .loc= slate.source.Loc{.start=  17, .end=  19 }}, // 07: `one`
+      minim.Tk{.id= .wht_space,     .loc= slate.source.Loc{.start=  20, .end=  20 }}, // 08: ` `
 
-      minim.Tk{.id= .sp_colon,      .loc= slate.source.Loc{.start=  21, .end=  21 }}, //  9: `:`
+      minim.Tk{.id= .sp_colon,      .loc= slate.source.Loc{.start=  21, .end=  21 }}, // 09: `:`
       minim.Tk{.id= .wht_space,     .loc= slate.source.Loc{.start=  22, .end=  22 }}, // 10: ` `
 
       minim.Tk{.id= .kw_ptr,        .loc= slate.source.Loc{.start=  23, .end=  25 }}, // 11: `ptr`
