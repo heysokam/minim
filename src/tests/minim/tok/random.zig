@@ -24,6 +24,7 @@ try it("should tokenize arbitrary Nim Variables without errors", struct { fn f()
   var T = try M.Tok.create(&L);
   defer T.destroy();
   // Validate
+  try t.ok(L.res.len >= 1);
   // Run
   try T.process();
   // Check
@@ -41,6 +42,7 @@ try it("should tokenize arbitrary Nim Procs without errors", struct { fn f() !vo
   var T = try M.Tok.create(&L);
   defer T.destroy();
   // Validate
+  try t.ok(L.res.len >= 1);
   // Run
   try T.process();
   // Check
@@ -58,6 +60,7 @@ try it("should tokenize arbitrary Nim code without errors", struct { fn f() !voi
   var T = try M.Tok.create(&L);
   defer T.destroy();
   // Validate
+  try t.ok(L.res.len >= 1);
   // Run
   try T.process();
   // Check

@@ -22,6 +22,7 @@ try it("should create the expected list of tokens for the Hello42 case", struct 
   var T = try M.Tok.create(&L);
   defer T.destroy();
   // Validate
+  try t.eq(L.res.len, t.case.Hello42.res.lex.len);
   // Run
   try T.process();
   // Check
@@ -43,6 +44,7 @@ try it("should create the expected list of tokens for the HelloIndentation case"
   var T = try M.Tok.create(&L);
   defer T.destroy();
   // Validate
+  try t.eq(L.res.len, t.case.HelloIndentation.res.lex.len);
   // Run
   try T.process();
   // Check
