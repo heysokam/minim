@@ -109,3 +109,17 @@ const get = struct {
 pub const get_proc_arg = Data.get.proc.arg;
 pub const get_type     = Data.get.type;
 
+const compare = struct {
+  fn equal (A :*const Data, B :*const Data) bool {
+    // FIX: Compare the internal data too
+    if (A.nodes.len()   != B.nodes.len())   return false;
+    if (A.types.len()   != B.types.len())   return false;
+    if (A.args.len()    != B.args.len())    return false;
+    if (A.pragmas.len() != B.pragmas.len()) return false;
+    if (A.stmts.len()   != B.stmts.len())   return false;
+    return true;
+  } //:: Data.compare.equal
+}; //:: Data.compare
+
+pub const equal = Data.compare.equal;
+

@@ -37,11 +37,11 @@ pub const Proc    = slate.Proc;
 A     :std.mem.Allocator,
 /// @descr Describes which output language the AST is targeting
 lang  :rules.Lang,
-/// @descr Contains the string that the AST's source code is references from every Node
+/// @descr Contains the string that the AST's source code references from every Node
 /// @note Nodes are created such that the language (or correctness) of the source code contained in this string does not matter.
 src   :source.Code,
-/// @descr Extra data that doesn't fit in the main node list of the AST
-/// @eg Array Types will be an index into the ext.types list
+/// @descr Data of the AST and its nodes.
+/// @eg Array Types will be an index into the data.types list
 data  :Ast.Data,
 
 
@@ -55,6 +55,9 @@ pub inline fn add_args    (ast :*Ast, T :slate.Proc.Args)   !Data.Store.Pos { re
 pub inline fn add_pragmas (ast :*Ast, T :slate.Pragma.List) !Data.Store.Pos { return Ast.Data.Store.add.pragmas( &ast.data, T); }
 pub inline fn add_stmts   (ast :*Ast, T :slate.Stmt.List)   !Data.Store.Pos { return Ast.Data.Store.add.stmts(   &ast.data, T); }
 pub inline fn add_node    (ast :*Ast, T :slate.Node)        !Data.Store.Pos { return Ast.Data.Store.add.node(    &ast.data, T); }
+//__________________
+pub const compare = @import("./ast/compare.zig");
+pub const equal   = compare.equal;
 
 
 //______________________________________
