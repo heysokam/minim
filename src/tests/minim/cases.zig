@@ -75,7 +75,7 @@ pub const Hello42 = struct {
 
       slate.Lx{.id= .number,  .loc= slate.source.Loc{.start= 27, .end= 28}},  // 14: `42`
       slate.Lx{.id= .newline, .loc= slate.source.Loc{.start= 29, .end= 29}},  // 15: `\n`
-    };
+    }; //:: tests.case.Hello42.res.lex
 
     pub const tok = &[_]M.Tok.Tk{
       minim.Tk{.id= .kw_proc,     .loc= slate.source.Loc{.start=  0, .end=  3}},
@@ -99,7 +99,22 @@ pub const Hello42 = struct {
 
       minim.Tk{.id= .b_number,    .loc= slate.source.Loc{.start= 27, .end= 28}},
       minim.Tk{.id= .wht_newline, .loc= slate.source.Loc{.start= 29, .end= 29}},
-    };
+    }; //:: tests.case.Hello42.res.tok
+
+    pub fn ast () !M.Ast {
+      var result = try M.Ast.create.empty(.Zig, case.Hello42.src, t.A);
+      var body   = try M.Ast.Proc.Body.create(t.A);
+      try body.add(M.Ast.Stmt.Return.create(M.Ast.Expr.Literal.Int.create(case.Hello42.res.lex[14].loc)));
+      _= try result.add_node(M.Ast.Node{.Proc= M.Ast.Proc{
+        .name   = M.Ast.Proc.Name{.name= case.Hello42.res.lex[2].loc},
+        .public = true,
+        .ret    = .{.type= try result.add_type(M.Ast.Type{.any= M.Ast.Type.Any{
+          .name = case.Hello42.res.lex[9].loc,
+          }})},
+        .body   = try result.add_stmts(body),
+        }});
+      return result;
+    } //:: tests.case.Hello42.res.ast
   }; //:: tests.case.Hello42.res
 }; //:: tests.case.Hello42
 
@@ -132,7 +147,7 @@ pub const HelloIndentation = struct {
 
       slate.Lx{.id= .space,   .loc= slate.source.Loc{.start= 28, .end= 28}},  // 15: ` `
       slate.Lx{.id= .number,  .loc= slate.source.Loc{.start= 29, .end= 30}},  // 16: `42`
-    };
+    }; //:: tests.case.HelloIndentation.res.lex
 
     pub const tok = &[_]M.Tok.Tk{
       minim.Tk{.id= .kw_proc,     .loc= slate.source.Loc{.start=  0, .end=  3}},
@@ -156,7 +171,22 @@ pub const HelloIndentation = struct {
       minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 28, .end= 28}},
 
       minim.Tk{.id= .b_number,    .loc= slate.source.Loc{.start= 29, .end= 30}},
-    };
+    }; //:: tests.case.HelloIndentation.res.tok
+
+    pub fn ast () !M.Ast {
+      var result = try M.Ast.create.empty(.Zig, case.HelloIndentation.src, t.A);
+      var body   = try M.Ast.Proc.Body.create(t.A);
+      try body.add(M.Ast.Stmt.Return.create(M.Ast.Expr.Literal.Int.create(case.HelloIndentation.res.lex[16].loc)));
+      _= try result.add_node(M.Ast.Node{.Proc= M.Ast.Proc{
+        .name   = M.Ast.Proc.Name{.name= case.HelloIndentation.res.lex[2].loc},
+        .public = true,
+        .ret    = .{.type= try result.add_type(M.Ast.Type{.any= M.Ast.Type.Any{
+          .name = case.HelloIndentation.res.lex[9].loc,
+          }})},
+        .body   = try result.add_stmts(body),
+        }});
+      return result;
+    } //:: tests.case.HelloIndentation.res.ast
   }; //:: tests.case.HelloIndentation.res
 }; //:: tests.case.HelloIndentation
 
