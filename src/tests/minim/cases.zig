@@ -43,9 +43,9 @@ pub const Nim = struct {
     defer t.A.free(file);
     const src = try zstd.files.read(file, t.A, .{});
     defer t.A.free(src);
-    var result = zstd.str.init(t.A);
-    try result.appendSlice(src);
-    return try result.toOwnedSliceSentinel(0);
+    var result = zstd.string.create_empty(t.A);
+    try result.add(src);
+    return try result.zstring();
   } //:: tests.case.Random.generate
 }; //:: tests.case.Random
 

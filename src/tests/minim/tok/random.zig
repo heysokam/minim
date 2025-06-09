@@ -53,7 +53,6 @@ try it("should tokenize arbitrary Nim code without errors", struct { fn f() !voi
   // Setup
   const code = try t.case.Nim.generate(.all);
   defer t.A.free(code);
-  // defer t.A.free(code);
   var L = try slate.Lex.create(t.A, code);
   defer L.destroy();
   try L.process();

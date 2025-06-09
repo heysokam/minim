@@ -38,19 +38,19 @@ const process = struct {
     // FIX: Change to Ast.read()
     const input = try zstd.files.read(cli.cfg.input, cli.A, .{.maxFileSize= cli.cfg.maxFileSize});
     defer cli.A.free(input);
-    var src = zstd.str.init(cli.A);
-    defer src.deinit();
-    try src.appendSlice(input);
-    try src.append(0);
+    var src = zstd.string.create_empty(cli.A);
+    defer src.destroy();
+    try src.add(input);
+    try src.add_one(0);
     //_____________________________
     // Preprocess
     if (cli.cfg.verbose) M.log.prnt("{s}Preprocessing code from file:\n  {s}\n", .{M.log.Prefix, cli.cfg.input});
     var zm = try M.Pre.process(&src);
-    defer zm.deinit();
+    defer zm.destroy();
     //_____________________________
     // Generate AST
     if (cli.cfg.verbose) M.log.info("Parsing AST for the resulting preprocessed code.");
-    var ast = try M.Ast.get(try zm.toOwnedSliceSentinel(0), .C, cli.A); // FIX: Remove hardcoded C
+    var ast = try M.Ast.get(try zm.zstring(), .C, cli.A); // FIX: Remove hardcoded C
     errdefer ast.destroy();
     //_____________________________
     // Generate the target language AST
@@ -64,9 +64,9 @@ const process = struct {
     const tmpFile = try std.fmt.allocPrint(cli.A, "{s}/tmp{s}.c", .{cli.cfg.dir.cache, cli.cfg.fmt.ext});
     defer cli.A.free(tmpFile);
     if (cli.cfg.verbose) M.log.prnt("{s}Generating the target's language source code to file:\n  {s}\n", .{M.log.Prefix, tmpFile});
-    const code = try ast.gen();
-    defer code.deinit();
-    try zstd.files.write(code.items, tmpFile, .{});
+    var code = try ast.gen();
+    defer code.destroy();
+    try zstd.files.write(code.data(), tmpFile, .{});
     //_____________________________
     // Format the code
     // TODO: clangFmtBin clangFmtFile

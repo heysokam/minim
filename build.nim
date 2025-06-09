@@ -23,7 +23,7 @@ const P = package.Info(
 # @section Dependencies
 #____________________________
 const deps_zstd  = Dependency(name: "zstd",     url:"https://github.com/heysokam/zstd" )
-const deps_slate = Dependency(name: "slate",    url:"https://github.com/heysokam/slate")
+const deps_slate = Dependency(name: "slate",    url:"https://github.com/heysokam/slate", deps: @[deps_zstd])
 const deps_mtest = Dependency(name: "minitest", url:"https://github.com/heysokam/minitest")
 const deps_minim = @[deps_zstd, deps_slate]
 const deps_tests = deps_minim & deps_mtest
@@ -52,8 +52,8 @@ tests.cfg.verbose = cfg_verbose
 # @section Entry Point
 #____________________________
 P.report()
-# minim.build()
-nimgen_build()
+minim.build()
+# nimgen_build()
 tests.build()
 # lib.build()
 

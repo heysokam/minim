@@ -44,13 +44,13 @@ pub fn check (src :zstr, trg :zstr, lang :M.Lang) !void {
   var ast = try M.Ast.get2(src, .{.lang=lang, .verbose=verbose}, allocator);
   defer ast.destroy();
   // Codegen
-  const code = try ast.gen();
-  defer code.deinit();
+  var code = try ast.gen();
+  defer code.destroy();
   // Check the result
   if (verbose) zstd.echo(code.items);
   try t.eq(ast.lang, lang);
   try t.eq(ast.empty(), false);
-  try t.eq_str(code.items, trg);
+  try t.eq_str(code.data(), trg);
   try t.eq(gpa.deinit(), .ok);
 }
 //____________________________
@@ -66,7 +66,7 @@ pub fn compile (src :zstr, lang :M.Lang) !zstd.cstr {_=lang;
   defer cmd.destroy();
   try cmd.addList(&.{"./bin/M", "c", srcFile }); // TODO:  , "--trg:"++trg, });
   zstd.prnt("Running Command:\n  ", .{});
-  for (cmd.parts.items) |part| zstd.prnt("{s} ", .{part});
+  for (cmd.parts.data()) |part| zstd.prnt("{s} ", .{part});
   zstd.prnt("\n", .{});
   try cmd.run();
   return trg;

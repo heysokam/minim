@@ -10,7 +10,7 @@ const std = @import("std");
 const zstd = @import("../lib/zstd.zig");
 
 /// TODO: Implement the preprocessor logic
-pub fn process (code :*zstd.str) !zstd.str {
+pub fn process (code :*zstd.string) !zstd.string {
   return try code.clone();
 }
 

@@ -18,8 +18,8 @@ cfg   :Cfg,
 const Error = error { MissingCommandArg, MissingFileArg, TooManyInputFiles };
 const check = struct {
   fn args (cli :*CLI) !void { switch (cli.cfg.cmd) {
-    .compile => if (cli.opts.args.items.len  < 2) return CLI.Error.MissingFileArg else if (cli.opts.args.items.len > 2) return CLI.Error.TooManyInputFiles,
-    .codegen => if (cli.opts.args.items.len != 3) return CLI.Error.MissingFileArg,
+    .compile => if (cli.opts.args.data().len  < 2) return CLI.Error.MissingFileArg else if (cli.opts.args.data().len > 2) return CLI.Error.TooManyInputFiles,
+    .codegen => if (cli.opts.args.data().len != 3) return CLI.Error.MissingFileArg,
     .none    => return CLI.Error.MissingCommandArg,
     } //:: switch (cli.cfg.cmd) { ... }
   }

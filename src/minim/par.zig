@@ -18,7 +18,7 @@ pos     :Par.Pos,
 src     :source.Code,
 buf     :Tk.List,
 res     :M.Ast,
-parsed  :zstd.str,
+parsed  :zstd.string,
 
 pub const Pos = usize;
 
@@ -33,7 +33,7 @@ pub fn create (T:*const M.Tok, lang :M.Lang) !Par {
     .src    = T.src,
     .buf    = try T.res.clone(T.A),
     .res    = try M.Ast.create.empty(lang, T.src, T.A),
-    .parsed = zstd.str.init(T.A),
+    .parsed = zstd.string.create_empty(T.A),
     };
 } //:: M.Par.create
 //__________________
@@ -41,7 +41,7 @@ pub fn create (T:*const M.Tok, lang :M.Lang) !Par {
 pub fn destroy (P:*Par) void {
   P.buf.deinit(P.A);
   P.res.destroy();
-  P.parsed.deinit();
+  P.parsed.destroy();
 } //:: M.Par.destroy
 
 
@@ -52,7 +52,7 @@ pub const report = @import("./par/cli.zig").report;
 pub const prnt   = zstd.prnt;
 /// @descr Triggers a fatal error and prints the contents parsed so far
 pub fn fail (P:*const Par, comptime msg :cstr, args :anytype) noreturn {
-  zstd.echo(P.parsed.items);
+  zstd.echo(P.parsed.data());
   zstd.fail(msg, args);
 } //:: M.Par.fail
 

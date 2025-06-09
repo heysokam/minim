@@ -15,7 +15,7 @@ pub fn report (P :*Par) void {
     Par.prnt("{s} : {any}\n", .{@tagName(id), val});
   }
   Par.prnt("--------------------\n", .{});
-  Par.prnt("{s}\n", .{P.parsed.items});
+  Par.prnt("{s}\n", .{P.parsed.data()});
   Par.prnt("--------------------\n", .{});
 }
 

@@ -26,7 +26,7 @@ pub fn move (P:*Par, N :i64) void {
     return;
   }
   for (0..@intCast(N)) |step| {
-    P.parsed.appendSlice(P.tk().from(P.src)) catch
+    P.parsed.add(P.tk().from(P.src)) catch
       |err| std.debug.panic("Parser {s}: Something went wrong at step `{d}` when advancing the position by `{d}`.\n", .{@errorName(err), step, N});
     P.pos += 1;
   }
