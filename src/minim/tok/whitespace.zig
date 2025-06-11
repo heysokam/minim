@@ -23,12 +23,17 @@ pub fn space (T:*Tok) !void {
     end = T.lx().loc.end;
   }
   try T.add(Tk.Id.wht_space, .{.start= start, .end= end});
+  if (T.depth_change) {
+    T.depth_level  = end-|start + 1;
+    T.depth_change = false;
+  }
   T.pos -= 1;
 }
 
 //____________________________
 /// @descr Processes a newline Lexeme into its Token representation, and adds it to the {@arg T.res} result.
 pub fn newline (T:*Tok) !void {
+  T.depth_change = true;
   try T.add(Tk.Id.wht_newline, T.lx().loc);
 }
 

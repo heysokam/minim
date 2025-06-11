@@ -13,7 +13,7 @@ const it = t.it;
 var  General = t.title("minim.Tok | General Cases");
 test General { General.begin(); defer General.end();
 
-try it("should create the expected list of tokens for the Hello42 case", struct { fn f() !void {
+try it("must create the expected list of tokens for the Hello42 case", struct { fn f() !void {
   // Setup
   const code = t.case.Hello42.src;
   var L = try slate.Lex.create(t.A, code);
@@ -35,7 +35,7 @@ try it("should create the expected list of tokens for the Hello42 case", struct 
   }
 }}.f);
 
-try it("should create the expected list of tokens for the HelloIndentation case", struct { fn f() !void {
+try it("must create the expected list of tokens for the HelloIndentation case", struct { fn f() !void {
   // Setup
   const code = t.case.HelloIndentation.src;
   var L = try slate.Lex.create(t.A, code);
@@ -54,6 +54,29 @@ try it("should create the expected list of tokens for the HelloIndentation case"
     try t.eq(tk,        Expected.id       );
     try t.eq(loc.start, Expected.loc.start);
     try t.eq(loc.end,   Expected.loc.end  );
+  }
+}}.f);
+
+try it("must add the expected depth levels for each token in the HelloIndentation case", struct { fn f() !void {
+  // Setup
+  const code = t.case.HelloIndentation.src;
+  var L = try slate.Lex.create(t.A, code);
+  defer L.destroy();
+  try L.process();
+  var T = try M.Tok.create(&L);
+  defer T.destroy();
+  // Validate
+  try t.eq(L.res.len, t.case.HelloIndentation.res.lex.len);
+  // Run
+  try T.process();
+  // Check
+  try t.eq(T.res.len, t.case.HelloIndentation.res.tok.len);
+  for (T.res.items(.id), T.res.items(.depth), 0..) |tk, depth, id| {
+    std.debug.print("Iteration state : {d} : {s}\n", .{id, @tagName(tk)});
+    const Expected = t.case.HelloIndentation.res.tok[id];
+    try t.eq(tk,           Expected.id          );
+    try t.eq(depth.indent, Expected.depth.indent);
+    try t.eq(depth.scope,  Expected.depth.scope );
   }
 }}.f);
 

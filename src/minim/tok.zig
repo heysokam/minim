@@ -26,6 +26,7 @@ const Ch      = slate.Ch;
 const Lex     = slate.Lex;
 const Lx      = slate.Lx;
 const source  = slate.source;
+const Depth   = slate.Depth;
 pub const Loc = slate.Loc;
 // @deps minim
 const M       = @import("./rules.zig");
@@ -33,11 +34,16 @@ const Pattern = M.Pattern;
 pub const Tk  = @import("./tok/token.zig");
 
 
-A    :std.mem.Allocator,
-pos  :source.Pos,
-src  :source.Code,
-buf  :Lx.List,
-res  :Tk.List,
+A             :std.mem.Allocator,
+/// @descr State tracking the current position of the Tokenizer in the lexemes buffer.
+pos           :source.Pos,
+src           :source.Code,
+buf           :Lx.List,
+res           :Tk.List,
+/// @descr State tracking the current indentation depth level to assign to tokens.
+depth_level   :Depth.Level= 0,
+/// @descr State tracking when to update depth_level (we are in a newline)
+depth_change  :bool= false,
 
 
 //______________________________________

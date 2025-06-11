@@ -57,7 +57,7 @@ pub fn eq (T:*Tok) !void {
 }
 
 //____________________________
-/// @descr Processes a hash Lexeme into its Token representation, and adds it to the {@arg T.res} result.
+/// @descr Processes an at `@` Lexeme into its Token representation, and adds it to the {@arg T.res} result.
 pub fn at (T:*Tok) !void {
   // FIX: @ operator case
   try T.add(Tk.Id.op_at, T.lx().loc);

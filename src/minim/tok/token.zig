@@ -25,7 +25,7 @@ depth  :Tk.Depth= Depth.default(),
 
 
 pub fn create_at (I : Tk.Id, start :source.Pos, end :source.Pos) Tk { return Tk.create(I, source.Loc{.start= start, .end= end}); }
-pub fn create (I : Tk.Id, L :source.Loc) Tk { return Tk{.id= I, .loc= L}; }
+pub fn create (I : Tk.Id, L :source.Loc, D :Depth) Tk { return Tk{.id= I, .loc= L, .depth= D}; }
 
 pub const slice = struct {
   //______________________________________

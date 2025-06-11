@@ -15,10 +15,10 @@ const Par = @import("../par.zig");
 pub fn expect (P :*Par) void { P.expectAny(&.{Tk.Id.wht_newline, Tk.Id.wht_space}, "Indentation"); }
 
 pub fn parse (P:*Par) void {
-  // FIX: Meaningful indentation
-  // TODO: Pass formatting into the AST
   P.skip(Tk.Id.wht_space);
+  const update = P.tk().id == .wht_newline;
   P.skip(Tk.Id.wht_newline);
+  if (update) P.depth.indent = P.tk().loc.len();
   P.skip(Tk.Id.wht_space);
 }
 
