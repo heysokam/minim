@@ -11,13 +11,17 @@ const std = @import("std");
 // @deps zstd
 const zstd = @import("../../lib/zstd.zig");
 // @deps *Slate
-const source = @import("../../lib/slate.zig").source;
+const slate  = @import("../../lib/slate.zig");
+const source = slate.source;
+const Depth  = slate.Depth;
 
 
-/// @field The location of the string value of the Token in the source code.
-loc  :source.Loc,
 /// @field The unique identifier of the Token
-id   :Tk.Id,
+id     :Tk.Id,
+/// @field The location of the string value of the Token in the source code.
+loc    :Tk.source.Loc,
+/// @field The Indentation/Scope level of the token
+depth  :Tk.Depth= Depth.default(),
 
 
 pub fn create_at (I : Tk.Id, start :source.Pos, end :source.Pos) Tk { return Tk.create(I, source.Loc{.start= start, .end= end}); }
@@ -67,61 +71,61 @@ pub const Id = enum {
   sp_bracketCol_L, // [:
   sp_bracketCol_R, // :]
   // Whitespace
-  wht_space,        // ` `
-  wht_newline,      // \n
+  wht_space,       // ` `
+  wht_newline,     // \n \r
   // Keywords
-  kw_proc,      // pr proc
-  kw_func,      // fn func
-  kw_return,    // return
-  kw_cast,      // cast
-  kw_operator,  // op operator
-  kw_void,      // void
-  kw_mut,       // mut
-  kw_var,       // var
-  kw_let,       // let
-  kw_const,     // const
-  kw_array,     // array
-  kw_slice,     // slice
-  kw_ptr,       // ptr
+  kw_proc,         // pr proc
+  kw_func,         // fn func
+  kw_return,       // return
+  kw_cast,         // cast
+  kw_operator,     // op operator
+  kw_void,         // void
+  kw_mut,          // mut
+  kw_var,          // var
+  kw_let,          //    let
+  kw_const,        // const
+  kw_array,        // array
+  kw_slice,        // slice
+  kw_ptr,          // ptr
   // Operators: Specials
-  op_star,      // Operators starting with *
-  op_dot,       // Operators starting with .
-  op_colon,     // Operators starting with :
-  op_eq,        // `eq` and Operators starting with =
-  op_pos,       // + prefix
-  op_neg,       // - prefix
+  op_star,         // Operators starting with *
+  op_dot,          // Operators starting with .
+  op_colon,        //    Operators starting with :
+  op_eq,           // `eq` and Operators starting with =
+  op_pos,          // + prefix
+  op_neg,          // - prefix
   // Operators: Keywords
-  op_and,       // and &&
-  op_or,        // or  ||
-  op_not,       // not !
-  op_xor,       // xor ^
-  op_shl,       // shl <<
-  op_shr,       // shr >>
-  op_div,       // div /
-  op_mod,       // mod %
-  op_in,        // in
-  op_notin,     // notin
-  op_is,        // is
-  op_isnot,     // isnot
-  op_of,        // of
-  op_as,        // as
-  op_from,      // from
+  op_and,          // and &&
+  op_or,           // or  ||
+  op_not,          // not !
+  op_xor,          // xor ^
+  op_shl,          // shl <<
+  op_shr,          // shr >>
+  op_div,          // div /
+  op_mod,          // mod %
+  op_in,           // in
+  op_notin,        // notin
+  op_is,           // is
+  op_isnot,        // isnot
+  op_of,           // of
+  op_as,           // as
+  op_from,         // from
   // Operators: Standard
-  op_plus,      // Operators starting with +
-  op_minus,     // Operators starting with -
-  op_slash,     // Operators starting with /
-  op_less,      // Operators starting with <
-  op_more,      // Operators starting with >
-  op_at,        // Operators starting with @
-  op_dollar,    // Operators starting with $
-  op_tilde,     // Operators starting with ~
-  op_amp,       // Operators starting with &
-  op_pcnt,      // Operators starting with %
-  op_pipe,      // Operators starting with |
-  op_excl,      // Operators starting with !
-  op_question,  // Operators starting with ?
-  op_hat,       // Operators starting with ^
-  op_bslash,    // Operators starting with \
+  op_plus,         // Operators starting with +
+  op_minus,        // Operators starting with -
+  op_slash,        // Operators starting with /
+  op_less,         // Operators starting with <
+  op_more,         // Operators starting with >
+  op_at,           // Operators starting with @
+  op_dollar,       // Operators starting with $
+  op_tilde,        // Operators starting with ~
+  op_amp,          // Operators starting with &
+  op_pcnt,         // Operators starting with %
+  op_pipe,         // Operators starting with |
+  op_excl,         // Operators starting with !
+  op_question,     // Operators starting with ?
+  op_hat,          // Operators starting with ^
+  op_bslash,       // Operators starting with \
 
   pub fn format (tk :Tk.Id, comptime _:zstd.cstr, _:std.fmt.FormatOptions, writer :anytype) !void {
     try writer.print("{s}", .{@tagName(tk)});
