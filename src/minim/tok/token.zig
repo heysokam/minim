@@ -13,19 +13,19 @@ const zstd = @import("../../lib/zstd.zig");
 // @deps *Slate
 const slate  = @import("../../lib/slate.zig");
 const source = slate.source;
-const Depth  = slate.Depth;
+const Indent = slate.Depth.Level;
 
 
 /// @field The unique identifier of the Token
-id     :Tk.Id,
+id      :Tk.Id,
 /// @field The location of the string value of the Token in the source code.
-loc    :Tk.source.Loc,
-/// @field The Indentation/Scope level of the token
-depth  :Tk.Depth= Depth.default(),
+loc     :Tk.source.Loc,
+/// @field The Indentation level of the token
+indent  :Tk.Indent= 0,
 
 
 pub fn create_at (I : Tk.Id, start :source.Pos, end :source.Pos) Tk { return Tk.create(I, source.Loc{.start= start, .end= end}); }
-pub fn create (I : Tk.Id, L :source.Loc, D :Depth) Tk { return Tk{.id= I, .loc= L, .depth= D}; }
+pub fn create (I : Tk.Id, L :source.Loc, D :Indent) Tk { return Tk{.id= I, .loc= L, .indent = D}; }
 
 pub const slice = struct {
   //______________________________________

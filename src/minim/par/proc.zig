@@ -42,7 +42,7 @@ const args = struct {
   /// @descr Returns whether the current argument of the current proc is mutable or not
   /// @note Skips/Moves the parser accordingly
   fn mutable (P :*Par) bool {
-    P.ind();
+    P.ind(.any());
     if (P.tk().id == .kw_var or P.tk().id == .kw_mut) { P.move(1); return true; }
     return false;
   }
@@ -50,19 +50,19 @@ const args = struct {
   /// @descr Returns the current argument of the current proc
   fn current (P:*Par) !Ast.Proc.Arg {
     // Arg name
-    P.ind();
+    P.ind(.any());
     // FIX: Multi-name with single-type (comma separated)
     const name = ident.name(P);
     P.move(1);
-    P.ind();
+    P.ind(.any());
     // Arg type
     proc.expect(P, Tk.Id.sp_colon);
     P.move(1);
-    P.ind();
+    P.ind(.any());
     const mut = proc.args.mutable(P);
-    P.ind();
+    P.ind(.any());
     const typ = try ident.type.parse(P, mut);
-    P.ind();
+    P.ind(.any());
     return Ast.Proc.Arg{.id= name, .type= typ, .write= mut};
   }
 
@@ -72,12 +72,12 @@ const args = struct {
   fn list (P:*Par) !Ast.Proc.ArgStore.Pos {
     proc.expect(P, Tk.Id.sp_paren_L);
     P.move(1);
-    P.ind();
+    P.ind(.any());
     if (P.tk().id == Tk.Id.sp_paren_R) { P.move(1); return .None; } // .None means the proc has no arguments
     // ... parse args
     var result = try Ast.Proc.Args.create(P.A);
     while (true) {
-      P.ind();
+      P.ind(.any());
       if (P.tk().id == Tk.Id.sp_paren_R) { break; }
       try result.add(try proc.args.current(P));
       // Arg separator or end
@@ -99,7 +99,7 @@ const args = struct {
 fn body (P :*Par) !Ast.Proc.BodyStore.Pos {
   proc.expect(P, Tk.Id.sp_eq);
   P.move(1);
-  P.ind();
+  P.ind(.increase());
   var result = try Ast.Proc.Body.create(P.A);
   while (true) { switch (P.tk().id) {
     .kw_return                  => try result.add(try stmt.Return(P)),
@@ -124,30 +124,30 @@ pub fn parse (P :*Par) !Ast.Proc {
     .kw_proc => result.pure = false,
     else => |token| P.fail("Unknown First Token for Proc '{s}'", .{@tagName(token)})
     } P.move(1);
-  P.ind();
+  P.ind(.any());
   // name = Ident
   proc.expect(P, Tk.Id.b_ident);
   result.name = ident.name(P);
   P.move(1);
-  P.ind();
+  P.ind(.any());
 
   // public/private case
   result.public = proc.public(P);
   P.skip(Tk.Id.sp_star);
-  P.ind();
+  P.ind(.any());
 
   // Args
   result.args = try proc.args.list(P);
-  P.ind();
+  P.ind(.any());
 
   // Pragma  (new location after args)
   result.pragmas = try pragma.parse(P);
-  P.ind();
+  P.ind(.any());
 
   // Return Type
   proc.expect(P, Tk.Id.sp_colon);
   P.move(1);
-  P.ind();
+  P.ind(.any());
   const hasError = // FIX: Better hasError detection
     P.next_at(1).id == .sp_excl or (
     P.next_at(2).id == .sp_excl and P.next_at(1).id == .wht_space) or (
@@ -155,18 +155,18 @@ pub fn parse (P :*Par) !Ast.Proc {
   if (hasError) {
     result.err = ident.name(P);
     P.move(1);
-    P.ind();
+    P.ind(.any());
     proc.expect(P, Tk.Id.sp_excl);
     P.move(1);
-    P.ind();
+    P.ind(.any());
   }
   result.ret.write = if (P.tk().id == .kw_mut) blk: {
     P.move(1);
-    P.ind();
+    P.ind(.any());
     break :blk true;
   } else false;
   result.ret.type = try ident.type.parse(P, true);
-  P.ind();
+  P.ind(.any());
 
   // Return Body
   const hasBody = P.tk().id == Tk.Id.sp_eq;
@@ -175,7 +175,7 @@ pub fn parse (P :*Par) !Ast.Proc {
     result.body = try proc.body(P);
   } else {
     result.body = .None;
-    P.ind();
+    P.ind(.any());
   }
 
   return result;

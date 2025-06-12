@@ -11,7 +11,7 @@ const seq  = zstd.seq;
 // @deps slate
 const slate  = @import("../lib/slate.zig");
 const source = slate.source;
-const Depth  = slate.Depth;
+const Scope  = slate.Scope;
 // @deps minim
 const M  = @import("../minim.zig");
 const Tk = M.Tok.Tk;
@@ -26,7 +26,7 @@ res     :M.Ast,
 /// @descr State tracking the code that has already been parsed. Mostly for debugging.
 parsed  :zstd.string,
 /// @descr State tracking Indentation/Scope depth level history
-depth   :Par.Depth=  Par.Depth.default(),
+scope   :Par.Scope,
 
 pub const Pos = usize;
 
@@ -42,6 +42,7 @@ pub fn create (T:*const M.Tok, lang :M.Lang) !Par {
     .buf    = try T.res.clone(T.A),
     .res    = try M.Ast.create.empty(lang, T.src, T.A),
     .parsed = zstd.string.create_empty(T.A),
+    .scope  = Par.Scope.create(T.A),
     };
 } //:: M.Par.create
 //__________________
@@ -50,6 +51,7 @@ pub fn destroy (P:*Par) void {
   P.buf.deinit(P.A);
   P.res.destroy();
   P.parsed.destroy();
+  P.scope.destroy();
 } //:: M.Par.destroy
 
 
@@ -175,6 +177,7 @@ const toplevel = struct {
 //____________________________
 /// @descr Parser Entry Point
 pub fn process (P:*Par) !void {
+  try P.scope.init(0);
   while (P.pos < P.buf.len) : ( P.move(1) ) {
     switch (P.tk().id) {
     .kw_func,

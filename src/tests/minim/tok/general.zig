@@ -71,12 +71,10 @@ try it("must add the expected depth levels for each token in the HelloIndentatio
   try T.process();
   // Check
   try t.eq(T.res.len, t.case.HelloIndentation.res.tok.len);
-  for (T.res.items(.id), T.res.items(.depth), 0..) |tk, depth, id| {
-    std.debug.print("Iteration state : {d} : {s}\n", .{id, @tagName(tk)});
+  for (T.res.items(.id), T.res.items(.indent), 0..) |tk, indent, id| {
     const Expected = t.case.HelloIndentation.res.tok[id];
-    try t.eq(tk,           Expected.id          );
-    try t.eq(depth.indent, Expected.depth.indent);
-    try t.eq(depth.scope,  Expected.depth.scope );
+    try t.eq(tk,     Expected.id    );
+    try t.eq(indent, Expected.indent);
   }
 }}.f);
 

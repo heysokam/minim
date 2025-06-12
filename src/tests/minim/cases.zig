@@ -78,33 +78,34 @@ pub const Hello42 = struct {
     }; //:: tests.case.Hello42.res.lex
 
     pub const tok = &[_]M.Tok.Tk{
-      minim.Tk{.id= .kw_proc,     .loc= slate.source.Loc{.start=  0, .end=  3}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start=  4, .end=  4}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .kw_proc,     .loc= slate.source.Loc{.start=  0, .end=  3}, .indent= 0},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start=  4, .end=  4}, .indent= 0},
 
-      minim.Tk{.id= .b_ident,     .loc= slate.source.Loc{.start=  5, .end=  8}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start=  9, .end=  9}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .b_ident,     .loc= slate.source.Loc{.start=  5, .end=  8}, .indent= 0},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start=  9, .end=  9}, .indent= 0},
 
-      minim.Tk{.id= .sp_star,     .loc= slate.source.Loc{.start= 10, .end= 10}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .sp_paren_L,  .loc= slate.source.Loc{.start= 11, .end= 11}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .sp_paren_R,  .loc= slate.source.Loc{.start= 12, .end= 12}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 13, .end= 13}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .sp_star,     .loc= slate.source.Loc{.start= 10, .end= 10}, .indent= 0},
+      minim.Tk{.id= .sp_paren_L,  .loc= slate.source.Loc{.start= 11, .end= 11}, .indent= 0},
+      minim.Tk{.id= .sp_paren_R,  .loc= slate.source.Loc{.start= 12, .end= 12}, .indent= 0},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 13, .end= 13}, .indent= 0},
 
-      minim.Tk{.id= .sp_colon,    .loc= slate.source.Loc{.start= 14, .end= 14}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .b_ident,     .loc= slate.source.Loc{.start= 15, .end= 17}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .sp_eq,       .loc= slate.source.Loc{.start= 18, .end= 18}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 19, .end= 19}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .sp_colon,    .loc= slate.source.Loc{.start= 14, .end= 14}, .indent= 0},
+      minim.Tk{.id= .b_ident,     .loc= slate.source.Loc{.start= 15, .end= 17}, .indent= 0},
+      minim.Tk{.id= .sp_eq,       .loc= slate.source.Loc{.start= 18, .end= 18}, .indent= 0},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 19, .end= 19}, .indent= 0},
 
-      minim.Tk{.id= .kw_return,   .loc= slate.source.Loc{.start= 20, .end= 25}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 26, .end= 26}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .kw_return,   .loc= slate.source.Loc{.start= 20, .end= 25}, .indent= 0},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 26, .end= 26}, .indent= 0},
 
-      minim.Tk{.id= .b_number,    .loc= slate.source.Loc{.start= 27, .end= 28}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_newline, .loc= slate.source.Loc{.start= 29, .end= 29}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .b_number,    .loc= slate.source.Loc{.start= 27, .end= 28}, .indent= 0},
+      minim.Tk{.id= .wht_newline, .loc= slate.source.Loc{.start= 29, .end= 29}, .indent= 0},
     }; //:: tests.case.Hello42.res.tok
 
     pub fn ast () !M.Ast {
-      var result = try M.Ast.create.empty(.Zig, case.Hello42.src, t.A);
-      var body   = try M.Ast.Proc.Body.create(t.A);
-      try body.add(M.Ast.Stmt.Return.create(M.Ast.Expr.Literal.Int.create(case.Hello42.res.lex[14].loc)));
+      var result  = try M.Ast.create.empty(.Zig, case.Hello42.src, t.A);
+      var body    = try M.Ast.Proc.Body.create(t.A);
+      const scope = slate.Depth{.indent= 0, .scope= .from(1)};
+      try body.add(M.Ast.Stmt.Return.create(M.Ast.Expr.Literal.Int.create(case.Hello42.res.lex[14].loc, scope), scope));
       _= try result.add_node(M.Ast.Node{.Proc= M.Ast.Proc{
         .name   = M.Ast.Proc.Name{.name= case.Hello42.res.lex[2].loc},
         .public = true,
@@ -112,6 +113,7 @@ pub const Hello42 = struct {
           .name = case.Hello42.res.lex[9].loc,
           }})},
         .body   = try result.add_stmts(body),
+        .depth  = slate.Depth{.indent= 0, .scope= .Root},
         }});
       return result;
     } //:: tests.case.Hello42.res.ast
@@ -150,33 +152,34 @@ pub const HelloIndentation = struct {
     }; //:: tests.case.HelloIndentation.res.lex
 
     pub const tok = &[_]M.Tok.Tk{
-      minim.Tk{.id= .kw_proc,     .loc= slate.source.Loc{.start=  0, .end=  3}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start=  4, .end=  4}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .kw_proc,     .loc= slate.source.Loc{.start=  0, .end=  3}, .indent= 0},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start=  4, .end=  4}, .indent= 0},
 
-      minim.Tk{.id= .b_ident,     .loc= slate.source.Loc{.start=  5, .end=  8}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start=  9, .end=  9}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .b_ident,     .loc= slate.source.Loc{.start=  5, .end=  8}, .indent= 0},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start=  9, .end=  9}, .indent= 0},
 
-      minim.Tk{.id= .sp_star,     .loc= slate.source.Loc{.start= 10, .end= 10}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .sp_paren_L,  .loc= slate.source.Loc{.start= 11, .end= 11}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .sp_paren_R,  .loc= slate.source.Loc{.start= 12, .end= 12}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 13, .end= 13}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .sp_star,     .loc= slate.source.Loc{.start= 10, .end= 10}, .indent= 0},
+      minim.Tk{.id= .sp_paren_L,  .loc= slate.source.Loc{.start= 11, .end= 11}, .indent= 0},
+      minim.Tk{.id= .sp_paren_R,  .loc= slate.source.Loc{.start= 12, .end= 12}, .indent= 0},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 13, .end= 13}, .indent= 0},
 
-      minim.Tk{.id= .sp_colon,    .loc= slate.source.Loc{.start= 14, .end= 14}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .b_ident,     .loc= slate.source.Loc{.start= 15, .end= 17}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .sp_eq,       .loc= slate.source.Loc{.start= 18, .end= 18}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_newline, .loc= slate.source.Loc{.start= 19, .end= 19}, .depth= slate.Depth{.indent= 0, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 20, .end= 21}, .depth= slate.Depth{.indent= 0, .scope= .None}},
+      minim.Tk{.id= .sp_colon,    .loc= slate.source.Loc{.start= 14, .end= 14}, .indent= 0},
+      minim.Tk{.id= .b_ident,     .loc= slate.source.Loc{.start= 15, .end= 17}, .indent= 0},
+      minim.Tk{.id= .sp_eq,       .loc= slate.source.Loc{.start= 18, .end= 18}, .indent= 0},
+      minim.Tk{.id= .wht_newline, .loc= slate.source.Loc{.start= 19, .end= 19}, .indent= 0},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 20, .end= 21}, .indent= 0},
 
-      minim.Tk{.id= .kw_return,   .loc= slate.source.Loc{.start= 22, .end= 27}, .depth= slate.Depth{.indent= 2, .scope= .None}},
-      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 28, .end= 28}, .depth= slate.Depth{.indent= 2, .scope= .None}},
+      minim.Tk{.id= .kw_return,   .loc= slate.source.Loc{.start= 22, .end= 27}, .indent= 2},
+      minim.Tk{.id= .wht_space,   .loc= slate.source.Loc{.start= 28, .end= 28}, .indent= 2},
 
-      minim.Tk{.id= .b_number,    .loc= slate.source.Loc{.start= 29, .end= 30}, .depth= slate.Depth{.indent= 2, .scope= .None}},
+      minim.Tk{.id= .b_number,    .loc= slate.source.Loc{.start= 29, .end= 30}, .indent= 2},
     }; //:: tests.case.HelloIndentation.res.tok
 
     pub fn ast () !M.Ast {
-      var result = try M.Ast.create.empty(.Zig, case.HelloIndentation.src, t.A);
-      var body   = try M.Ast.Proc.Body.create(t.A);
-      try body.add(M.Ast.Stmt.Return.create(M.Ast.Expr.Literal.Int.create(case.HelloIndentation.res.lex[16].loc)));
+      var result  = try M.Ast.create.empty(.Zig, case.HelloIndentation.src, t.A);
+      var body    = try M.Ast.Proc.Body.create(t.A);
+      const scope = slate.Depth{.indent= 2, .scope= .from(1)};
+      try body.add(M.Ast.Stmt.Return.create(M.Ast.Expr.Literal.Int.create(case.HelloIndentation.res.lex[16].loc, scope), scope));
       _= try result.add_node(M.Ast.Node{.Proc= M.Ast.Proc{
         .name   = M.Ast.Proc.Name{.name= case.HelloIndentation.res.lex[2].loc},
         .public = true,
@@ -184,6 +187,7 @@ pub const HelloIndentation = struct {
           .name = case.HelloIndentation.res.lex[9].loc,
           }})},
         .body   = try result.add_stmts(body),
+        .depth  = slate.Depth{.indent= 0, .scope= .Root},
         }});
       return result;
     } //:: tests.case.HelloIndentation.res.ast

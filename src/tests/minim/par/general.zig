@@ -36,6 +36,8 @@ try it("should create the expected AST for the Hello42 case", struct { fn f() !v
 }}.f);
 
 try it("should create the expected AST for the HelloIndentation case", struct { fn f() !void {
+  var Expected = try t.case.HelloIndentation.res.ast();
+  defer Expected.destroy();
   // Setup
   const code = t.case.HelloIndentation.src;
   var L = try slate.Lex.create(t.A, code);
@@ -52,8 +54,6 @@ try it("should create the expected AST for the HelloIndentation case", struct { 
   // Run
   try P.process();
   // Check
-  var Expected = try t.case.HelloIndentation.res.ast();
-  defer Expected.destroy();
   try t.ok(P.res.equal(&Expected));
 }}.f);
 

@@ -68,23 +68,23 @@ pub const @"type" = struct {
     }) anyerror!Ast.Data.Store.Pos {
     const isSlice = P.tk().id == .kw_slice;
     P.move(1);
-    P.ind();
+    P.ind(.any());
     // FIX: Should send to ident.type.qualifier.parse(....)
     // Start:  [
     P.expect(Tk.Id.sp_bracket_L, "Ident.Type.array");
     P.move(1);
-    P.ind();
+    P.ind(.any());
     var count :?source.Loc= null;
     if (!isSlice) {
       // Items Count:  number, ident or _
       P.expectAny(&.{Tk.Id.b_number, Tk.Id.b_ident}, "Ident.Type.array");
       count = P.tk().loc;
       P.move(1);
-      P.ind();
+      P.ind(.any());
       // Count-Type Separator:  ,
       P.expect(Tk.Id.sp_comma, "Ident.Type.array");
       P.move(1);
-      P.ind();
+      P.ind(.any());
     }
     // Type and Pragma   // TODO: Static Typechecking
     var result = Ast.Type.Array.create(try ident.type.parse(P, true));
@@ -95,7 +95,7 @@ pub const @"type" = struct {
     result.array.pragma = try pragma.parse(P);
     // Add the result to the Ast.Extras list
     const pos = try P.res.add_type(result);
-    P.ind();
+    P.ind(.any());
     // End:  ]
     P.expect(Tk.Id.sp_bracket_R, "Ident.Type.array");
     P.move(1);
@@ -113,10 +113,10 @@ pub const @"type" = struct {
       Tk.Id.b_ident}, "Ident.Type");
     // ?T
     const opt = P.tk().id == .sp_question;
-    if (opt) { P.move(1); P.ind(); }
+    if (opt) { P.move(1); P.ind(.any()); }
     // ptr T
     const ptr = P.tk().id == .kw_ptr;
-    if (ptr) { P.move(1); P.ind(); }
+    if (ptr) { P.move(1); P.ind(.any()); }
     // array[N,T] slice[T]
     if (P.tk().id == .kw_array or P.tk().id == .kw_slice) return ident.type.array(P, .{.mut=isMut, .ptr=ptr, .opt=opt});
     // other cases
@@ -128,7 +128,7 @@ pub const @"type" = struct {
       .pragma  = .None,
       }};
     result.any.name = ident.type.name.parse(P);
-    P.ind();
+    P.ind(.any());
     result.any.pragma = try pragma.parse(P);
     var dummyPragmas = @import("slate").Pragma.List.create(P.A);
     defer dummyPragmas.destroy();
