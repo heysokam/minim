@@ -13,9 +13,9 @@ const Par = @import("../par.zig");
 
 
 pub const Kind = packed struct {
-  decr    :bool= false, // Must decrement
-  eq      :bool= true,  // Must be equal
-  incr    :bool= false, // Must increment
+  decr    :bool= false, // Can decrement
+  eq      :bool= true,  // Can be equal
+  incr    :bool= false, // Can increment
   scope   :bool= false, // Must update scope when requested
   __reserved_bits_04_07 :u4= 0,
   pub usingnamespace zstd.Flags(@This(), u8);
