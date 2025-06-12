@@ -7,6 +7,7 @@ const std = @import("std");
 // @deps zstd
 const zstd = @import("../lib/zstd.zig");
 const cstr = zstd.cstr;
+const seq  = zstd.seq;
 // @deps slate
 const slate  = @import("../lib/slate.zig");
 const source = slate.source;
@@ -14,6 +15,7 @@ const Depth  = slate.Depth;
 // @deps minim
 const M  = @import("../minim.zig");
 const Tk = M.Tok.Tk;
+
 
 A       :std.mem.Allocator,
 /// @descr State tracking the current position of the parser in the buffer
@@ -23,8 +25,8 @@ buf     :Tk.List,
 res     :M.Ast,
 /// @descr State tracking the code that has already been parsed. Mostly for debugging.
 parsed  :zstd.string,
-/// @descr State tracking the current Indentation/Scope depth level
-depth   :Depth=  Depth.default(),
+/// @descr State tracking Indentation/Scope depth level history
+depth   :Par.Depth=  Par.Depth.default(),
 
 pub const Pos = usize;
 

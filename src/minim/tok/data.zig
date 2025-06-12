@@ -28,7 +28,7 @@ pub const add = struct {
   //____________________________
   /// @descr Adds one token to the {@arg T.res} Tokenizer result.
   pub fn one (T:*Tok, id :Tk.Id, loc :Tok.Loc) !void {
-    try T.res.append(T.A, Tk.create(id, loc, slate.Depth{.indent= T.depth_level, .scope= 0}));
+    try T.res.append(T.A, Tk.create(id, loc, slate.Depth{.indent= T.depth_level, .scope= slate.Scope.Id.None}));
   } //:: Tok.add.one
 };
 
