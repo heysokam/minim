@@ -37,6 +37,10 @@ pub const Pattern = struct {
     .{ "cast",     .kw_cast     },
     .{ "op",       .kw_operator },
     .{ "operator", .kw_operator },
+    .{ "alias",    .kw_alias    },
+    .{ "template", .kw_template },
+    .{ "macro",    .kw_macro    },
+    .{ "method",   .kw_method   },
     .{ "mut",      .kw_mut      },
     .{ "var",      .kw_var      },
     .{ "let",      .kw_let      },
@@ -123,10 +127,10 @@ pub const Pattern = struct {
     .{ ".}", .sp_braceDot_R   }, // .}
     .{ "(.", .sp_parenDot_L   }, // (.
     .{ ".)", .sp_parenDot_R   }, // .)
-    // Dot Colon
+    // Colon Paren
     .{ "[:", .sp_bracketCol_L }, // [:
     .{ ":]", .sp_bracketCol_R }, // :]
-    }); // Valid Whitespace characters
+    }); // Valid Parenthesis Combinations
 };
 
 

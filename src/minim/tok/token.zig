@@ -79,10 +79,14 @@ pub const Id = enum {
   kw_return,       // return
   kw_cast,         // cast
   kw_operator,     // op operator
+  kw_alias,        // alias
+  kw_template,     // template
+  kw_macro,        // macro
+  kw_method,       // method  TODO: Revisit if we want this
   kw_void,         // void
   kw_mut,          // mut
   kw_var,          // var
-  kw_let,          //    let
+  kw_let,          // let
   kw_const,        // const
   kw_array,        // array
   kw_slice,        // slice
